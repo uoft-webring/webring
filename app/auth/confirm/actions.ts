@@ -53,6 +53,7 @@ export const canLoadPage = async (email: string) => {
         console.log(error.message);
     }
     const confirmation_time = data?.at(0)?.updated_at;
+    console.log(confirmation_time);
     if (!confirmation_time) {
         return false;
     }
