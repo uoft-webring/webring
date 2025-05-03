@@ -1,62 +1,44 @@
-'use client';
+"use client";
+import { useState } from "react";
+import { joinAction } from "./actions";
 
-import { useState } from 'react';
+export default function Join() {
+    const [isDisabled, setIsDisabled] = useState(false);
+    const [email, setEmail] = useState("");
 
-// TODO:
-// - make default option to sign in using email authentication code
-
-export default function Signin() {
-    const [isSignUp, setIsSignUp] = useState(true);
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    return isSignUp ? (
+    // TODO: add name field when signing up
+    //action={joinAction}
+    return (
         <div className="">
-            <h1>Sign up form:</h1>
             <div className="w-[32em]">
                 <form className="flex flex-col">
-                    <label>Email:</label>
-                    <input className="border" />
-                    <label>Password:</label>
-                    <input className="border" />
-                    <button className="border my-1" type="submit">
-                        Sign up
+                    <label>UofT Email:</label>
+                    <input
+                        value={email}
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                        }}
+                        name="email"
+                        placeholder="youremail@example.com"
+                        className="border"
+                        required
+                    />
+                    <button
+                        disabled={isDisabled}
+                        className={`border my-1 ${
+                            isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+                        } hover:bg-red-400`}
+                        type="submit"
+                        onClick={() => {
+                            console.log("hi disabled");
+                            setIsDisabled(() => true);
+                            joinAction(email);
+                        }}
+                    >
+                        Continue
                     </button>
                 </form>
             </div>
-            <p>
-                Registered?{' '}
-                <a
-                    onClick={() => setIsSignUp(false)}
-                    className="text-blue-700 underline cursor-pointer"
-                >
-                    Login!
-                </a>
-            </p>
-        </div>
-    ) : (
-        <div className="">
-            <h1>Sign in form:</h1>
-            <div className="w-[32em]">
-                <form className="flex flex-col">
-                    <label>Email:</label>
-                    <input className="border" />
-                    <label>Password:</label>
-                    <input className="border" />
-                    <button className="border my-1" type="submit">
-                        Sign in
-                    </button>
-                </form>
-            </div>
-            <p>
-                Not yet registered?{' '}
-                <a
-                    onClick={() => setIsSignUp(true)}
-                    className="text-blue-700 underline cursor-pointer"
-                >
-                    Create account!
-                </a>
-            </p>
         </div>
     );
 }
