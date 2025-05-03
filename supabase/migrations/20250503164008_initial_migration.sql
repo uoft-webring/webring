@@ -67,6 +67,7 @@ create or replace view "public"."users" as  SELECT users.instance_id,
     users.is_anonymous
    FROM auth.users;
 
+revoke all on public.users from anon, authenticated;
 
 grant delete on table "public"."profile" to "anon";
 
