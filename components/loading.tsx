@@ -1,5 +1,5 @@
 "use client";
-import loadingAnimation from "../assets/loading-animation.json";
+import loadingAnimation from "@/assets/loading-animation.json";
 
 // Importing Lottie, importing directly makes Lottie
 // think SSR is being used which causes errors
