@@ -1,10 +1,10 @@
-'use client';
-import loadingAnimation from '../assets/loading-animation.json';
+"use client";
+import loadingAnimation from "../assets/loading-animation.json";
 
 // Importing Lottie, importing directly makes Lottie
 // think SSR is being used which causes errors
-import dynamic from 'next/dynamic';
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+import dynamic from "next/dynamic";
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
 export default function Loading() {
     return (
