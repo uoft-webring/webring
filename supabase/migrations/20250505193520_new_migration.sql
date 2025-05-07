@@ -1,6 +1,6 @@
 create table "public"."profile" (
-    "user_id" uuid not null,
-    "user_email" text,
+    "id" uuid not null,
+    "email" text,
     "domain" text,
     "domain_txt_record" text,
     "name" text
@@ -9,9 +9,16 @@ create table "public"."profile" (
 
 alter table "public"."profile" enable row level security;
 
-CREATE UNIQUE INDEX profile_pkey ON public.profile USING btree (user_id);
+create policy "Allow user to read access their own profile" on public.profile for select using (auth.uid() = id);
+create policy "Allow user to edit their own profile" on public.profile for insert with check (auth.uid() = id);
+
+CREATE UNIQUE INDEX profile_pkey ON public.profile USING btree (id);
 
 alter table "public"."profile" add constraint "profile_pkey" PRIMARY KEY using index "profile_pkey";
+
+alter table "public"."profile" add constraint "profile_id_fkey" FOREIGN KEY (id) REFERENCES auth.users(id) not valid;
+
+alter table "public"."profile" validate constraint "profile_id_fkey";
 
 set check_function_bodies = off;
 
@@ -19,16 +26,36 @@ CREATE OR REPLACE FUNCTION public.get_confirmation_sent(user_email text)
  RETURNS text
  LANGUAGE plpgsql
 AS $function$
-    DECLARE 
-        confirmation TEXT;
-    BEGIN 
-        SELECT confirmation_sent_at INTO confirmation
-        FROM auth.users
-        WHERE email = user_email;
-        RETURN confirmation;
-    END;
+    declare 
+        confirmation text;
+    begin 
+        select confirmation_sent_at into confirmation
+        from auth.users
+        where email = user_email;
+        return confirmation;
+    end;
 $function$
 ;
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'auth', 'public'
+AS $function$
+
+begin
+    insert into public.profile(id, email, name) 
+    values (new.id, new.email, new.raw_user_meta_data->>'name');
+
+    return new;
+end;
+$function$
+;
+
+create trigger on_auth_new_user 
+    after insert on auth.users 
+    for each row execute function handle_new_user();
 
 create or replace view "public"."users" as  SELECT users.instance_id,
     users.id,
@@ -67,7 +94,6 @@ create or replace view "public"."users" as  SELECT users.instance_id,
     users.is_anonymous
    FROM auth.users;
 
-revoke all on public.users from anon, authenticated;
 
 grant delete on table "public"."profile" to "anon";
 
