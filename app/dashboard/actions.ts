@@ -16,8 +16,21 @@ export const getCurrentUser = async () => {
     }
 };
 
+export const getUserInfo = async () => {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("profile").select("*");
+
+    const name = data?.at(0)?.name;
+    console.log(name);
+    if (!error) {
+        return name;
+    } else {
+        console.log(error.message);
+    }
+};
+
 export const signOutAction = async () => {
     const supabase = await createClient();
     await supabase.auth.signOut();
-    return redirect("/join");
+    return redirect("/");
 };
