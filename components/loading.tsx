@@ -6,6 +6,7 @@ import loadingAnimation from "@/assets/loading-animation.json";
 import dynamic from "next/dynamic";
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 
+//TODO: fix CSS styling, currently unable to see h2 tag because of foreground colours
 export default function Loading() {
     return (
         <div className="h-screen w-screen flex items-center justify-center">
