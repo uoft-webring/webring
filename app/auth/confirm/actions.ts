@@ -1,0 +1,72 @@
+"use server";
+
+import { createClient, createAdminClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import dayjs from "dayjs";
+
+const ms_to_minute = 60 * 1000;
+
+export const verifyToken = async (email: string, token: string) => {
+    // const token = formData.get("token")?.toString();
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: token,
+        type: "email",
+    });
+
+    if (error) {
+        console.error(error.code + " " + error.message);
+    } else {
+        return redirect(`/dashboard`); // return email in auth/confirm link as a search param
+    }
+};
+
+export const resendMagicLink = async (email: string) => {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+            shouldCreateUser: true,
+            // emailRedirectTo: `${origin}/`,
+        },
+    });
+
+    if (error) {
+        console.error(error.code + " " + error.message);
+    }
+};
+
+// TODO: decide on how much time to allow users to be able to enter code for
+export const canLoadPage = async (email: string) => {
+    const supabase = await createAdminClient();
+
+    // todo: use supabase rpc and call get_confirmation_sent postgres function
+    const { data, error } = await supabase
+        .from("users")
+        .select("updated_at")
+        .eq("email", email);
+
+    if (error) {
+        console.log(error.message);
+    }
+    const confirmation_time = data?.at(0)?.updated_at;
+    console.log(confirmation_time);
+    if (!confirmation_time) {
+        return false;
+    }
+
+    console.log("conf time", confirmation_time);
+
+    const m_time = dayjs(confirmation_time);
+    m_time.add(20, "minute"); //  change this to minutes later
+    // console.log(dayjs());
+    console.log("difference", dayjs().diff(m_time));
+    if (dayjs().diff(m_time) < 20 * ms_to_minute) {
+        return true;
+    }
+
+    return false;
+};

@@ -1,25 +1,30 @@
-'use client';
+import { signUpAction } from "./actions";
 
-import { useState } from 'react';
-
-export default function Signup() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
+export default function SignUp() {
     return (
-        <div className="">
-            <h1>Sign up form:</h1>
-            <div className="w-[32em]">
-                <form className="flex flex-col">
-                    <label>Email:</label>
-                    <input className="border" />
-                    <label>Password:</label>
-                    <input className="border" />
-                    <button className="border my-1" type="submit">
-                        Sign up
-                    </button>
-                </form>
-            </div>
+        <div className="flex">
+            <form action={signUpAction} className="flex flex-col">
+                <label>UofT Email:</label>
+                <input
+                    name="email"
+                    placeholder="youremail@example.com"
+                    className="border"
+                    required
+                />
+                <label>Name:</label>
+                <input
+                    name="name"
+                    placeholder="john doe"
+                    className="border"
+                    required
+                />
+                <button
+                    className={`border my-1 cursor-pointer hover:bg-red-400`}
+                    type="submit"
+                >
+                    Continue
+                </button>
+            </form>
         </div>
     );
 }
