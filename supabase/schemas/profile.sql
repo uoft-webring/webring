@@ -5,7 +5,7 @@ create table public.profile (
     domain text, -- user domain
     domain_txt_record text, 
     name text, -- user name
-    ring_id serial, -- (non-editable by user) id to identify user domain on the webring
+    ring_id serial, -- id to identify user domain on the webring
     valid boolean -- check if user domain is "valid"
 );
 comment on table public.profile is 'Table to store user data';
