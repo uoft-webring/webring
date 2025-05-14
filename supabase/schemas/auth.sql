@@ -9,9 +9,10 @@
 --     end;
 -- $$ language plpgsql;
 
--- create view public.users as select * from auth.users;
--- revoke all on public.users from anon, authenticated;
--- grant select on table public.users to service_role;
+-- IMPORTANT: Used for confirmation time
+create view public.users as select * from auth.users;
+revoke all on public.users from anon, authenticated;
+grant select on table public.users to service_role;
 
 -- Create user profile when a new user is created in auth.users
 create function handle_new_user() 
@@ -19,7 +20,7 @@ returns trigger as $$
 
 begin
     insert into public.profile(id, email, name) 
-    values (new.id, new.email, new.raw_user_meta_data->>name);
+    values (new.id, new.email, new.raw_user_meta_data->>'name'); -- remember to have the single quotes this!
 
     return new;
 end;
