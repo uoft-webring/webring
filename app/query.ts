@@ -1,4 +1,4 @@
-import supabase from "./db_client";
+import { createClient } from "@/utils/supabase/server";
 
 export default async function domain_from_id(index: number) {
     // querying db "profile" for "domain" whose row id is "index"

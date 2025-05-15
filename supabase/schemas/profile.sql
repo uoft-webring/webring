@@ -4,7 +4,8 @@ create table public.profile (
     email text,
     domain text,
     domain_txt_record text, -- uuid? 
-    name text
+    name text,
+    id_new text
 );
 comment on table public.profile is 'Table to store user data';
 
