@@ -2,7 +2,7 @@ drop policy "Allow user to edit their own profile" on "public"."profile";
 
 drop function if exists "public"."get_confirmation_sent"(user_email text);
 
-alter table "public"."profile" add column "ring_id" integer;
+alter table "public"."profile" add column "ring_id" serial; -- REMEMBER to change to serial after making migration
 
 alter table "public"."profile" add column "valid" boolean;
 
