@@ -170,18 +170,14 @@ otp_expiry = 3600
 # Use a production-ready SMTP server
 # [auth.email.smtp]
 # enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# host = "smtp.resend.com"
+# port = 465
+# user = "resend"
+# pass = "env(RESEND_API_KEY)"
+# admin_email = "noreply@uoftwebring.com"
+# sender_name = "noreply"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "Welcome to UofT Webring!"
-# content_path = "./supabase/templates/invite.html"
-
+# Use customized email template
 [auth.email.template.confirmation]
 subject = "Welcome to UofT Webring!"
 content_path = "./supabase/templates/confirmation.html"

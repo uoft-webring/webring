@@ -57,42 +57,9 @@ create trigger on_auth_new_user
     after insert on auth.users 
     for each row execute function handle_new_user();
 
-create or replace view "public"."users" as  SELECT users.instance_id,
-    users.id,
-    users.aud,
-    users.role,
-    users.email,
-    users.encrypted_password,
-    users.email_confirmed_at,
-    users.invited_at,
-    users.confirmation_token,
-    users.confirmation_sent_at,
-    users.recovery_token,
-    users.recovery_sent_at,
-    users.email_change_token_new,
-    users.email_change,
-    users.email_change_sent_at,
-    users.last_sign_in_at,
-    users.raw_app_meta_data,
-    users.raw_user_meta_data,
-    users.is_super_admin,
-    users.created_at,
-    users.updated_at,
-    users.phone,
-    users.phone_confirmed_at,
-    users.phone_change,
-    users.phone_change_token,
-    users.phone_change_sent_at,
-    users.confirmed_at,
-    users.email_change_token_current,
-    users.email_change_confirm_status,
-    users.banned_until,
-    users.reauthentication_token,
-    users.reauthentication_sent_at,
-    users.is_sso_user,
-    users.deleted_at,
-    users.is_anonymous
-   FROM auth.users;
+create view public.users as select * from auth.users;
+revoke all on public.users from anon, authenticated;
+grant select on table public.users to service_role;
 
 
 grant delete on table "public"."profile" to "anon";
