@@ -15,7 +15,7 @@ export default async function Dashboard() {
             <Navbar />
             <div className="section">
                 <h1>{`Welcome, ${user.user_metadata.name}.`}</h1>
-                <StatusCard />
+                <StatusCard status="connected" />
             </div>
         </>
     );
