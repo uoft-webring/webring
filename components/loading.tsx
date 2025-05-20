@@ -9,13 +9,12 @@ const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
 //TODO: fix CSS styling, currently unable to see h2 tag because of foreground colours
 export default function Loading() {
     return (
-        <div className="h-screen w-screen flex items-center justify-center">
-            <div className="relative">
-                <Lottie animationData={loadingAnimation} loop={true} />
-                <h2 className="absolute bottom-[30%] left-[50%] translate-x-[-50%] text-4xl text-white">
-                    LOADING
-                </h2>
-            </div>
+        <div className="w-72">
+            <Lottie animationData={loadingAnimation} loop={true} />
         </div>
+        // <div className="h-screen w-screen flex items-center justify-center">
+        //     <div className="relative">
+        //     </div>
+        // </div>
     );
 }
