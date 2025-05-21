@@ -19,7 +19,7 @@ import { AuthApiError } from "@supabase/supabase-js";
 // - add loading state
 export default function Confirm() {
     const searchParams = useSearchParams();
-    const email = searchParams.get("email")?.toString() || "";
+    const email = searchParams?.get("email")?.toString() || "";
     const [token, setToken] = useState("");
     const [loadPage, setLoadPage] = useState(true);
     const [value, setValue] = useState("");

@@ -4,6 +4,7 @@ import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+// TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {
     const supabase = await createClient();
     const origin = (await headers()).get("origin");
@@ -17,7 +18,6 @@ export const signUpAction = async (name: string, email: string) => {
                 //  attach user meta data
                 name: name,
             },
-            // emailRedirectTo: `${origin}/`,
         },
     });
 

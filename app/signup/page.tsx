@@ -25,10 +25,10 @@ export default function SignUp() {
 
         if (emailRef.current && nameRef.current) {
             const email = emailRef.current.value;
-            const emailParseResult = parseEmail(email);
+            const emailParseResult = await parseEmail(email);
 
-            const name = emailRef.current.value;
-            const nameParseResult = parseName(name);
+            const name = nameRef.current.value;
+            const nameParseResult = await parseName(name);
 
             // Parsing success or faliure
             if (emailParseResult.success && nameParseResult.success) {
@@ -37,8 +37,10 @@ export default function SignUp() {
                 console.log("Finished");
             } else {
                 setIsFormDisabled(false);
-                setEmailError(emailParseResult.error!.errors[0].message);
-                setNameError(nameParseResult.error!.errors[0].message);
+                setEmailError(
+                    emailParseResult?.error?.errors[0]?.message || ""
+                );
+                setNameError(nameParseResult?.error?.errors[0]?.message || "");
             }
             setIsFormDisabled(false);
         }
@@ -59,7 +61,6 @@ export default function SignUp() {
                                 name="name"
                                 type="text"
                                 ref={nameRef}
-                                required
                                 placeholder="John Doe"
                                 error={nameError}
                                 disabled={isFormDisabled}
@@ -76,7 +77,6 @@ export default function SignUp() {
                                 name="email"
                                 type="email"
                                 ref={emailRef}
-                                required
                                 placeholder="your.email@mail.utoronto.ca"
                                 error={emailError}
                                 disabled={isFormDisabled}

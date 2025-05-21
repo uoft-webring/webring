@@ -7,6 +7,7 @@ import { signInAction } from "./actions";
 import Link from "next/link";
 import { FormEvent, Ref, RefObject, useRef, useState } from "react";
 import { parseEmail } from "@/utils/zod";
+import { redirect } from "next/navigation";
 
 export default function Signin() {
     const [emailError, setEmailError] = useState<string | undefined>(undefined);
@@ -25,13 +26,17 @@ export default function Signin() {
             // Parsing success or faliure
             if (emailParseResult.success) {
                 console.log("Success");
-                await signInAction(email);
-                console.log("Finished");
+                const { error } = await signInAction(email);
+                if (error) {
+                    setEmailError("Email not registered");
+                } else {
+                    redirect(`/auth/confirm?email=${email}`);
+                }
             } else {
-                setEmailError(emailParseResult.error!.errors[0].message);
+                setEmailError(emailParseResult.error!.errors[0].message || "");
             }
         }
-        setIsFormDisabled((_) => false);
+        setIsFormDisabled(false);
     };
 
     return (
@@ -44,7 +49,6 @@ export default function Signin() {
                             <Input
                                 name="email"
                                 ref={emailRef}
-                                required
                                 type="email"
                                 placeholder="your.email@mail.utoronto.ca"
                                 error={emailError}
@@ -76,22 +80,5 @@ export default function Signin() {
                 </div>
             </form>
         </CardForm>
-        /* <div className="flex">
-            <form action={signInAction} className="flex flex-col">
-                <label>UofT Email:</label>
-                <input
-                    name="email"
-                    placeholder="youremail@example.com"
-                    className="border"
-                    required
-                />
-                <button
-                    className={`border my-1 cursor-pointer hover:bg-red-400`}
-                    type="submit"
-                >
-                    Continue
-                </button>
-            </form>
-        </div> */
     );
 }

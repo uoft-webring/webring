@@ -12,14 +12,11 @@ export const signInAction = async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-            shouldCreateUser: true,
-            // emailRedirectTo: `${origin}/`,
+            shouldCreateUser: false,
         },
     });
 
-    if (error) {
-        console.error(error.code + " " + error.message);
-    } else {
-        return redirect(`/auth/confirm?email=${email}`); // return email in auth/confirm link as a search param
-    }
+    if (error) return { error };
+
+    return {}; // return email in auth/confirm link as a search param
 };
