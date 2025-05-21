@@ -27,6 +27,18 @@ const statusDotVariants: Record<Status, string> = {
     disconnected: "bg-red-500",
 };
 
+const statusButtonColor: Record<Status, string> = {
+    connected: "bg-green-400",
+    unverified: "bg-yellow-400",
+    disconnected: "bg-red-400",
+};
+
+const statusButtonLabel: Record<Status, string> = {
+    connected: "",
+    unverified: "Verify now",
+    disconnected: "Link now",
+};
+
 const statusLabels: Record<Status, string> = {
     connected: "Connected",
     unverified: "Unverified",
@@ -37,7 +49,7 @@ const statusDescriptions: Record<Status, string> = {
     connected:
         "Your profile has been linked and your domain has been verified. No action needed.",
     unverified:
-        "Your profile has been linked, but we could not verify your domain. View your profile to learn more.",
+        "Your profile has been linked, but we could not verify your domain. Click edit to learn more.",
     disconnected:
         "Your profile has not been linked yet, and you are not connected to the ring. Edit your profile to join the ring.",
 };
@@ -56,13 +68,21 @@ export default function StatusCard({ status = "connected" }: StatusCardProps) {
                     <div className="h-1.5 aspect-square rounded-full bg-white absolute" />
                 </div>
                 <h2>{statusLabels[status]}</h2>
-                <Link href="/edit" className="ml-auto">
+                {/* <Link href="/edit" className="ml-auto">
                     <Button variant="ghost" size="sm" className="px-0">
                         Edit
                     </Button>
-                </Link>
+                </Link> */}
             </div>
             <p>{statusDescriptions[status]}</p>
+
+            {status !== "connected" && (
+                <Button className={`w-full mt-4 ${statusButtonColor[status]}`}>
+                    <p className="text-lg font-semibold color-white">
+                        {statusButtonLabel[status]}
+                    </p>
+                </Button>
+            )}
         </div>
     );
 }

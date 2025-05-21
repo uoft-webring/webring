@@ -10,11 +10,13 @@ export const getCurrentUser = async () => {
         error,
     } = await supabase.auth.getUser();
 
-    if (!error) {
-        return user;
-    } else {
-        console.log(error.message);
-    }
+    // if (!error) {
+    //     return user;
+    // } else {
+    //     console.log(error.message);
+    // }
+
+    return { user, error };
 };
 
 export const getUserInfo = async () => {
@@ -30,21 +32,19 @@ export const getUserInfo = async () => {
     } */
 
     // const user = data ? data[0] : data;
-    const user: UserType = data
-        ? {
-              domain: "https://asdasd.com",
-              isVerified: true,
-              image_url:
-                  "https://mohammadanwar.dev/_next/static/media/mohammad.6ef25c26.jpg",
-              tagline:
-                  "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure ratione, placeat voluptatem, modi expedita odio temporibus maiores neque enim nesciunt quod sunt. Quod, dolores reiciendis?",
-              email: "aman.meherally@mail.utoronto.ca",
-              id: "375163b0-886e-474c-85ce-6a197d286ccf",
-              name: "Aman Meherally",
-              github_url: "https://asdasd.com",
-              tags: ["TypeScript", "React", "JavaScript"],
-          }
-        : data;
+    const user: UserType = {
+        domain: "https://asdasd.com",
+        isVerified: true,
+        image_url:
+            "https://mohammadanwar.dev/_next/static/media/mohammad.6ef25c26.jpg",
+        tagline:
+            "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure ratione, placeat voluptatem, modi expedita odio temporibus maiores neque enim nesciunt quod sunt. Quod, dolores reiciendis?",
+        email: "aman.meherally@mail.utoronto.ca",
+        id: "375163b0-886e-474c-85ce-6a197d286ccf",
+        name: "Aman Meherally",
+        github_url: "https://asdasd.com",
+        tags: ["TypeScript", "React", "JavaScript"],
+    };
 
     return { user, error };
 };

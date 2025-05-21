@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
+    --font-mono: monospace;
+
     /* --background: #ffffff;
   --foreground: #171717; */
     --radius: 0.625rem;

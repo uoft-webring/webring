@@ -25,10 +25,10 @@ export default function SignUp() {
 
         if (emailRef.current && nameRef.current) {
             const email = emailRef.current.value;
-            const emailParseResult = await parseEmail(email);
+            const emailParseResult = parseEmail(email);
 
             const name = nameRef.current.value;
-            const nameParseResult = await parseName(name);
+            const nameParseResult = parseName(name);
 
             // Parsing success or faliure
             if (emailParseResult.success && nameParseResult.success) {
