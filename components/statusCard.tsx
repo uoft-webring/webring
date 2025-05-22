@@ -54,11 +54,26 @@ const statusDescriptions: Record<Status, string> = {
         "Your profile has not been linked yet, and you are not connected to the ring. Edit your profile to join the ring.",
 };
 
-type StatusCardProps = {
-    status?: Status;
+const statusDescriptionsWithoutCTA: Record<Status, string> = {
+    connected:
+        "Your profile has been linked and your domain has been verified. No action needed.",
+    unverified:
+        "Your profile has been linked, but we could not verify your domain.",
+    disconnected:
+        "Your profile has not been linked yet, and you are not connected to the ring.",
 };
 
-export default function StatusCard({ status = "connected" }: StatusCardProps) {
+type StatusCardProps = {
+    status?: Status;
+    showButton?: boolean;
+    showCTA?: boolean;
+};
+
+export default function StatusCard({
+    status = "connected",
+    showButton = true,
+    showCTA = true,
+}: StatusCardProps) {
     return (
         <div className={statusCardVariants({ status })}>
             <div className="flex items-center gap-2">
@@ -74,9 +89,13 @@ export default function StatusCard({ status = "connected" }: StatusCardProps) {
                     </Button>
                 </Link> */}
             </div>
-            <p>{statusDescriptions[status]}</p>
+            <p>
+                {showCTA
+                    ? statusDescriptions[status]
+                    : statusDescriptionsWithoutCTA[status]}
+            </p>
 
-            {status !== "connected" && (
+            {status !== "connected" && showButton && (
                 <Button className={`w-full mt-4 ${statusButtonColor[status]}`}>
                     <p className="text-lg font-semibold color-white">
                         {statusButtonLabel[status]}

@@ -14,12 +14,13 @@ import EditJoin from "./components/join";
 import EditProfile from "./components/profile";
 import { UserType } from "@/utils/zod";
 import { redirect } from "next/navigation";
+import EditVerify from "./components/verify";
 
 // Define the NAVIGATION object
 
 export default function EditClient({ data }: { data: UserType }) {
     const [navigationStatus, setNavigationStatus] =
-        useState<NavigationKey>("PROFILE");
+        useState<NavigationKey>("VERIFICATION");
 
     const NAVIGATION = {
         PROFILE: {
@@ -57,7 +58,9 @@ export default function EditClient({ data }: { data: UserType }) {
             index: 3,
             option: "verification",
             text: "Verify your domain",
-            component: <div />,
+            component: (
+                <EditVerify domainTxtRecord="uoft-webring-10d90e07-5a3b-46d7-b449-f1e842be890c" />
+            ),
         },
     } as const;
 
