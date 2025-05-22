@@ -42,7 +42,7 @@ export const getUserInfo = async () => {
         email: "aman.meherally@mail.utoronto.ca",
         id: "375163b0-886e-474c-85ce-6a197d286ccf",
         name: "Aman Meherally",
-        github_url: "https://asdasd.com",
+        github_url: "https://github.com/TheAmanM",
         tags: ["TypeScript", "React", "JavaScript"],
     };
 

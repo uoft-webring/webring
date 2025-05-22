@@ -40,8 +40,6 @@ export default async function Dashboard() {
                         </Link>
                     </div>
                     <StatusCard status="connected" />
-                    <StatusCard status="unverified" />
-                    <StatusCard status="disconnected" />
                 </div>
 
                 {/* <Button variant={"secondary"}>Edit</Button> */}

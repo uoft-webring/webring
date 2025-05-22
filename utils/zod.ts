@@ -25,13 +25,38 @@ export const User = z.object({
             message: 'Please use an "@mail.utoronto.ca" email.',
         }),
     id: z.string(),
-    name: z.string(),
-    tagline: z.string().max(255).nullable(),
-    domain: z.string().url(),
-    image_url: z.string().url().optional(),
+    name: z.string().nonempty({ message: "Please enter a valid name." }),
+    tagline: z
+        .string()
+        .max(255, { message: "Tagline can not be longer than 255 characters." })
+        .nullable(),
+    domain: z
+        .string()
+        .url({ message: "Please enter a valid URL." })
+        .nonempty({ message: "Please enter a valid URL." }),
+    image_url: z
+        .string()
+        .url({ message: "Please enter a valid URL." })
+        .or(z.literal("")),
     isVerified: z.boolean(),
-    github_url: z.string().url().nullable(),
-    tags: z.string().array().max(3).nullable(),
+    github_url: z
+        .string()
+        .refine(
+            (val) => {
+                // Check if the string is empty or starts with "https://github.com"
+                return val === "" || /^https:\/\/github\.com\//.test(val);
+            },
+            {
+                message: 'The URL must start with "https://github.com/".',
+            }
+        )
+        .nullable(),
+    tags: z
+        .string()
+        .nonempty()
+        .array()
+        .max(3, { message: "You can choose up to 3 tags." })
+        .nullable(),
 });
 
 export type UserType = z.infer<typeof User>;

@@ -1,3 +1,4 @@
+import { cva } from "class-variance-authority";
 import React from "react";
 
 const SkillTagColors = [
@@ -30,19 +31,62 @@ function mapSkillToColor(skill: string) {
     return SkillTagColors[index];
 }
 
-export default function SkillTag({
+// Define CVA variants for the SkillTag component (size and fontWeight variants)
+const skillTagVariants = cva(
+    "rounded-full px-3", // Common styles (padding and border-radius)
+    {
+        variants: {
+            size: {
+                default: "border-2 py-1", // Default variant with border 2px and padding 1
+                mini: "border-1 py-0.5", // Mini variant with border 1px and padding 0.5
+            },
+            fontWeight: {
+                default: "font-bold", // Default variant with bold font
+                mini: "font-medium", // Mini variant with medium font
+            },
+        },
+        defaultVariants: {
+            size: "default", // Default to 'default' variant
+            fontWeight: "default", // Default to 'font-bold'
+        },
+    }
+);
+
+// SkillTag component using the variants defined by CVA
+interface SkillTagProps extends React.ComponentProps<"div"> {
+    tagName: string;
+    index: number;
+    size?: "default" | "mini"; // Variant for size (default or mini)
+}
+
+const SkillTag: React.FC<SkillTagProps> = ({
     tagName,
     index,
+    size = "default", // Default to "default" variant
     ...props
-}: { tagName: string; index: number } & React.ComponentProps<"div">) {
+}) => {
+    // Get the styles from the CVA helper for both size and fontWeight
+    const tagContainerStyles = skillTagVariants({
+        size,
+        fontWeight: size === "mini" ? "mini" : "default",
+    });
+
+    // We pass the font weight class directly to the <p> tag since that's where the text is styled
+    const tagTextStyles = size === "mini" ? "font-medium" : "font-bold";
+
     return (
         <div
             key={index}
-            className={`border-2 px-3 py-1 rounded-full ${mapSkillToColor(
-                tagName
-            )}`}
+            className={`${tagContainerStyles} ${mapSkillToColor(tagName)}`} // Apply variant styles and dynamic color
+            {...props}
         >
-            <p className="font-bold text-white">{tagName}</p>
+            <p className={`${tagTextStyles} text-white`}>
+                {" "}
+                {/* Apply font weight directly here */}
+                {tagName}
+            </p>
         </div>
     );
-}
+};
+
+export default SkillTag;
