@@ -22,15 +22,7 @@ const NO_ERRORS = Object.fromEntries(
  * 2) Calls `debounceCallback()` to attempt to validate format of data and either push to DB
  * or show error state accordingly.
  */
-export default function EditProfile({
-    data,
-    prev,
-    next,
-}: {
-    data: UserType;
-    prev: React.MouseEventHandler<HTMLButtonElement>;
-    next: React.MouseEventHandler<HTMLButtonElement>;
-}) {
+export default function EditProfile({ data }: { data: UserType }) {
     const [formData, setFormData] = useState<any>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(
         structuredClone(NO_ERRORS)
@@ -189,18 +181,15 @@ export default function EditProfile({
                                 error={errors.tagline}
                             />
                         </div>
-                        <div className="flex justify-start items-center gap-4">
+                        {/* <div className="flex justify-start items-center gap-4">
                             <Button variant={"secondary"} onClick={prev}>
                                 Back
                             </Button>
-                            {/* <Link href="/dashboard">
-                                <Button variant={"outline"}>Dashboard</Button>
-                            </Link> */}
 
                             <Button className="ml-auto" onClick={next}>
                                 Continue
                             </Button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </form>

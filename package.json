@@ -18,6 +18,7 @@
         "clsx": "^2.1.1",
         "copy-to-clipboard": "^3.3.3",
         "dayjs": "^1.11.13",
+        "highlight.js": "^11.11.1",
         "input-otp": "^1.4.2",
         "lottie-react": "^2.4.1",
         "lucide-react": "^0.511.0",
