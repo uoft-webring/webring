@@ -5,8 +5,26 @@ import StatusCard from "@/components/statusCard";
 import ProfileCard from "@/components/profileCard";
 import { Button } from "@/components/ui/button";
 
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Dot as SeparatorIcon } from "lucide-react";
 import Link from "next/link";
+import EditProfile from "../edit/components/profile";
+import {
+    Breadcrumb,
+    BreadcrumbList,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import EditJoin from "../edit/components/join";
+import EditVerify from "../edit/components/verify";
+import { cn } from "@/lib/utils";
+
+const NAVIGATION_LINKS = [
+    { id: "#preview", name: "Preview" },
+    { id: "#edit", name: "Edit" },
+    { id: "#join", name: "Join" },
+    { id: "#verify", name: "Verify" },
+];
 
 export default async function Dashboard() {
     const { user: authUser, error: authError } = await getCurrentUser();
@@ -23,6 +41,37 @@ export default async function Dashboard() {
     return (
         <>
             <Navbar />
+            <div className="section -my-4">
+                <Breadcrumb>
+                    <BreadcrumbList className="justify-center">
+                        {/* <BreadcrumbItem>
+                            <BreadcrumbLink href="/">Preview</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator>
+                            <SeparatorIcon />
+                        </BreadcrumbSeparator>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink href="/components">
+                                Components
+                            </BreadcrumbLink>
+                        </BreadcrumbItem> */}
+                        {NAVIGATION_LINKS.map((linkItem, index) => (
+                            <>
+                                {index !== 0 && (
+                                    <BreadcrumbSeparator>
+                                        <SeparatorIcon />
+                                    </BreadcrumbSeparator>
+                                )}
+                                <BreadcrumbItem>
+                                    <BreadcrumbLink href={linkItem.id}>
+                                        {linkItem.name}
+                                    </BreadcrumbLink>
+                                </BreadcrumbItem>
+                            </>
+                        ))}
+                    </BreadcrumbList>
+                </Breadcrumb>
+            </div>
             <div className="section flex flex-col gap-2">
                 <h1 className="mb-4">{`Welcome, ${
                     authUser.user_metadata.name ?? userData.user?.name
@@ -32,12 +81,12 @@ export default async function Dashboard() {
                 <div>
                     <div className="flex justify-between items-center">
                         <h2>Status</h2>
-                        <Link href="/edit">
+                        {/* <Link href="/edit">
                             <div className="flex items-center justify-center">
                                 <p className="text-white text-base">Edit</p>
                                 <ChevronRight size={20} className="ml-1" />
                             </div>
-                        </Link>
+                        </Link> */}
                     </div>
                     <StatusCard status="connected" />
                 </div>
@@ -49,6 +98,18 @@ export default async function Dashboard() {
                     <ProfileCard />
                 </div>
             </div>
+
+            <section className="section" id="edit">
+                <EditProfile data={userData.user} />
+            </section>
+
+            <section className="section" id="join">
+                <EditJoin />
+            </section>
+
+            <section className={cn("section", "pt-0")} id="verify">
+                <EditVerify domainTxtRecord={"uoft-webring-" + authUser.id} />
+            </section>
         </>
     );
 

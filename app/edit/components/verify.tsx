@@ -1,8 +1,13 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import CopyButton from "./copyButton";
 import StatusCard from "@/components/statusCard";
 import { toast } from "sonner";
+
+import hljs from "highlight.js/lib/core";
+import yaml from "highlight.js/lib/languages/yaml";
 
 export default function EditVerify({
     domainTxtRecord,
@@ -11,6 +16,11 @@ export default function EditVerify({
 }) {
     const [isFetching, setIsFetching] = useState<boolean>(false);
     const [isVerified, setIsVerified] = useState<boolean>(false);
+
+    hljs.registerLanguage("txt", yaml);
+    const result = hljs.highlight(domainTxtRecord + domainTxtRecord, {
+        language: "txt",
+    }).value;
 
     const handleFetch = async () => {
         setIsFetching(true);
@@ -45,12 +55,21 @@ export default function EditVerify({
                 Now.” We’ll fetch your DNS and verify the domain automatically.
             </p>
 
-            <div className="flex items-center justify-center px-3 py-2 border-white/10 border-2 rounded-lg bg-[#282a36] mb-4">
+            {/* <div className="flex items-center justify-center px-3 py-2 border-white/10 border-2 rounded-lg bg-[#282a36] mb-4">
                 <div className="flex grow mr-2 font-mono">
                     {domainTxtRecord}
                 </div>
                 <CopyButton codeString={domainTxtRecord} className="static" />
-            </div>
+                </div> */}
+            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-4">
+                <code
+                    className="rounded-xl block overflow-scroll"
+                    dangerouslySetInnerHTML={{
+                        __html: result,
+                    }}
+                />
+                <CopyButton codeString={domainTxtRecord} className="static" />
+            </pre>
 
             <StatusCard
                 status={isVerified ? "connected" : "unverified"}

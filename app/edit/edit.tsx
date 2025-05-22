@@ -30,12 +30,12 @@ export default function EditClient({ data }: { data: UserType }) {
             component: (
                 <EditProfile
                     data={data}
-                    prev={() => {
+                    /* prev={() => {
                         redirect("/dashboard");
                     }}
                     next={() => {
                         setNavigationStatus("JOIN");
-                    }}
+                    }} */
                 />
             ),
         },
@@ -43,16 +43,7 @@ export default function EditClient({ data }: { data: UserType }) {
             index: 2,
             option: "join",
             text: "Join the community",
-            component: (
-                <EditJoin
-                    prev={() => {
-                        setNavigationStatus("PROFILE");
-                    }}
-                    next={() => {
-                        setNavigationStatus("VERIFICATION");
-                    }}
-                />
-            ),
+            component: <EditJoin />,
         },
         VERIFICATION: {
             index: 3,
@@ -102,7 +93,7 @@ export default function EditClient({ data }: { data: UserType }) {
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                {NAVIGATION[navigationStatus].component}
+                {/* {NAVIGATION[navigationStatus].component} */}
             </div>
         </>
     );
