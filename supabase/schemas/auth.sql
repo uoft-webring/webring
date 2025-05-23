@@ -31,3 +31,20 @@ create trigger on_auth_new_user
     after insert on auth.users 
     for each row execute function handle_new_user();
 
+-- Create function to check if user inputted email is a uoft email
+create function check_uoft_email()
+returns trigger as $$
+
+begin
+    if right(new.email, position('@' in reverse(new.email))) = '@mail.utoronto.ca' then
+        return new;
+    else
+        return null;
+    end if; -- end if statement
+end;
+$$ language plpgsql security definer set search_path = auth, public;
+
+-- Create trigger that will activate check_uoft_email before new row is added into auth.users
+create trigger on_user_sign_up
+    before insert on auth.users
+    for each row execute function check_uoft_email();
