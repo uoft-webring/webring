@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 
 export const signInAction = async (email: string) => {
     const supabase = await createClient();
-    const origin = (await headers()).get("origin");
-    console.log(origin);
 
     const { error } = await supabase.auth.signInWithOtp({
         email,

@@ -17,6 +17,15 @@ export const parseName = (name: any) => {
     return nameSchema.safeParse(name);
 };
 
+export const parseDomain = (domain: any) => {
+    const domainSchema = z
+        .string()
+        .regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9].[a-zA-Z]{2,}$/, {
+            message: "Please enter a valid domain.",
+        }); // TODO: refine with blacklisted websites
+    return domainSchema.safeParse(domain);
+};
+
 export const User = z.object({
     email: z
         .string()

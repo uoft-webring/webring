@@ -75,7 +75,7 @@ export default function SignUp() {
                             <Label htmlFor="email">Email</Label>
                             <Input
                                 name="email"
-                                type="email"
+                                type="text"
                                 ref={emailRef}
                                 placeholder="your.email@mail.utoronto.ca"
                                 error={emailError}

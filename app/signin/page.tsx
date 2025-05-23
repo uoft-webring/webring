@@ -49,7 +49,7 @@ export default function Signin() {
                             <Input
                                 name="email"
                                 ref={emailRef}
-                                type="email"
+                                type="text"
                                 placeholder="your.email@mail.utoronto.ca"
                                 error={emailError}
                                 disabled={isFormDisabled}

@@ -7,8 +7,6 @@ import { redirect } from "next/navigation";
 // TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {
     const supabase = await createClient();
-    const origin = (await headers()).get("origin");
-    console.log(origin);
 
     const { error } = await supabase.auth.signInWithOtp({
         email,
