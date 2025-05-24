@@ -42,7 +42,20 @@ export const User = z.object({
     domain: z
         .string()
         .url({ message: "Please enter a valid URL." })
-        .nonempty({ message: "Please enter a valid URL." }),
+        .nonempty({ message: "Please enter a valid URL." })
+        .refine(
+            (value) => {
+                try {
+                    const url = new URL(value);
+                    const forbiddenHosts = ["http", "https"];
+                    // If the hostname is one of these forbidden words, reject it
+                    return !forbiddenHosts.includes(url.hostname.toLowerCase());
+                } catch {
+                    return false;
+                }
+            },
+            { message: "Invalid host format in URL." }
+        ),
     image_url: z
         .string()
         .url({ message: "Please enter a valid URL." })
