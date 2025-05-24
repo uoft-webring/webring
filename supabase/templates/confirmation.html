@@ -1,35 +1,118 @@
-<html>
-    <body>
-        <p>
-            Hello fellow UofT Student!
-            <br />
-            <br />
-            Thank you for joining UofT Webring!
-            <br />
-            <br />
-            To complete the authentication process, please use the following
-            6-digit verification code:
-        </p>
-        <div style="display: flex; justify-content: center">
-            <div>
-                <h2
-                    style="
-                        background: rgb(225, 230, 244, 0.5);
-                        border-radius: 0.5em;
-                        padding: 0.5em 5em;
-                        font-size: 2em;
-                        letter-spacing: 0.3em;
-                    "
-                >
-                    {{ .Token}}
-                </h2>
-            </div>
-        </div>
-        <p>
-            Thanks,
-            <br />
-            <br />
-            UofT Webring Team
-        </p>
-    </body>
-</html>
+<div
+    style="
+        background-color: rgb(24, 24, 27);
+        border-radius: 0.75rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        color: rgb(255, 255, 255);
+        font-family: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+            'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        max-width: 32rem;
+        margin-left: auto;
+        margin-right: auto;
+    "
+>
+    <div
+        class="logo"
+        style="width: 12rem; height: 4rem; background-color: rgb(239, 68, 68)"
+    ></div>
+    <h1
+        style="
+            margin-top: 3rem;
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            font-weight: 700;
+        "
+    >
+        Your sign-in OTP
+    </h1>
+    <p
+        class="font-regular"
+        style="
+            color: rgb(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        "
+    >
+        Use the 6-digit code below to sign into UofT Webring in the same window
+        as the window in which you began your sign in.
+    </p>
+    <div
+        style="
+            background-color: rgb(39, 39, 42);
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            border-radius: 0.75rem;
+        "
+    >
+        <h1
+            style="
+                font-size: 3rem;
+                line-height: 1;
+                letter-spacing: 0.1em;
+                color: rgb(255, 255, 255, 0.9);
+                text-align: center;
+                font-weight: 900;
+            "
+        >
+            {{ .Token}}
+        </h1>
+    </div>
+    <p
+        class="font-regular"
+        style="
+            color: rgb(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        "
+    >
+        If you did not request this code, please ignore this email. No action is
+        required.
+    </p>
+    <hr
+        style="
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+            border-color: rgb(255, 255, 255, 0.2);
+        "
+    />
+    <div
+        class="logo"
+        style="
+            width: 9rem;
+            height: 3rem;
+            background-color: rgb(239, 68, 68);
+            margin-top: -1.5rem;
+            margin-left: auto;
+            margin-right: auto;
+        "
+    ></div>
+    <p
+        class="font-regular"
+        style="
+            color: rgb(255, 255, 255, 0.6);
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            margin-top: 1.5rem;
+            text-align: center;
+        "
+    >
+        UofT Webring |<!-- -->
+        <a
+            href="https://uoftwebring.com"
+            style="text-decoration-line: none; color: rgb(255, 255, 255)"
+            >https://uoftwebring.com</a
+        >
+        <!-- -->| Learn why we do what we do<!-- -->
+        <a
+            href="https://uoftwebring.com"
+            style="text-decoration-line: none; color: rgb(255, 255, 255)"
+            >here</a
+        >.
+    </p>
+</div>

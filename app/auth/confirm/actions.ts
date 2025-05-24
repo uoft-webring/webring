@@ -10,14 +10,17 @@ export const verifyToken = async (email: string, token: string) => {
     // const token = formData.get("token")?.toString();
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.verifyOtp({
+    const authResponse = await supabase.auth.verifyOtp({
         email: email,
         token: token,
         type: "email",
     });
 
-    if (error) {
-        console.error(error.code + " " + error.message);
+    if (authResponse.error) {
+        console.error(
+            authResponse.error.code + " " + authResponse.error.message
+        );
+        return authResponse.error;
     } else {
         return redirect(`/dashboard`); // return email in auth/confirm link as a search param
     }
