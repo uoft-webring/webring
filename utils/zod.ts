@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateUrl } from "./zod-fetcher";
 
 export const parseEmail = (email: any) => {
     const emailSchema = z
@@ -55,7 +56,8 @@ export const User = z.object({
                 }
             },
             { message: "Invalid host format in URL." }
-        ),
+        )
+        .refine(validateUrl, { message: "Please enter a live URL." }),
     image_url: z
         .string()
         .url({ message: "Please enter a valid URL." })
