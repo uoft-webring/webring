@@ -30,8 +30,8 @@ export default function EditProfile({ data }: { data: UserType }) {
 
     console.log("Rendering Parent with tags:", formData.tags);
 
-    const debounceCallback = useDebounce((newData: any) => {
-        const parseResult = User.safeParse(newData);
+    const debounceCallback = useDebounce(async (newData: any) => {
+        const parseResult = await User.safeParseAsync(newData);
         console.log(parseResult);
         if (parseResult.success) {
             // Save to DB here through actions.ts
