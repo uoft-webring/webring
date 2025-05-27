@@ -13,7 +13,7 @@ export default async function domain_from_id(index: number) {
 
     // check if count and then check if the user is the final user in the db
     // if yes, we redirect to first domain
-    if (count != null && count == index) {
+    if (count != null && index >= count) {
         const first_domain = query(supabase, 0);
 
         // checks if first_domain is an error or undefined
