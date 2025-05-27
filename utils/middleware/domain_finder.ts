@@ -13,7 +13,7 @@ export default async function domain_from_id(index: number) {
 
     // check if count and then check if the user is the final user in the db
     // if yes, we redirect to first domain
-    if (count != null && count - 1 == index) {
+    if (count != null && count == index) {
         const first_domain = query(supabase, 0);
 
         // checks if first_domain is an error or undefined
@@ -27,6 +27,21 @@ export default async function domain_from_id(index: number) {
         }
 
         return first_domain ?? null;
+    }
+
+    // if index is <0 i.e going back on first user
+    if (count != null && index < 0) {
+        // query last domain
+        const last_domain = query(supabase, count - 1);
+
+        // checks if last _domain is an error or undefined
+        if (last_domain) {
+            console.log("Error fetching first domain in database", last_domain);
+            // if last_domain raises an error, return random domain
+            return random_domain(supabase, count) ?? null;
+        }
+
+        return last_domain ?? null;
     }
 
     // get domain based on index
