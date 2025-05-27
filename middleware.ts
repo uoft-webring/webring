@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import domain_from_id from "./utils/middleware/domain_finder";
 
-// https://ourdomain/redirect?nav=prev?id
+// https://ourdomain.com/redirect?nav=prev?id
 
 export async function middleware(request: NextRequest) {
     // get webring domain
