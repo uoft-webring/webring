@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import domain_from_id from "./utils/middleware/query";
+import domain_from_id from "./utils/middleware/domain_finder";
+
 // https://ourdomain/redirect?nav=prev?id
+
 export async function middleware(request: NextRequest) {
+    // get webring domain
+    const home_domain = process.env.HOME_DOMAIN;
+
     // extracting search params
     const url = request.nextUrl.searchParams;
 
@@ -12,15 +17,20 @@ export async function middleware(request: NextRequest) {
     console.log(direction, idPram);
     // if no id
     if (!idPram) {
-        return NextResponse.next();
-        // keep the request going (we need to catch this i.e if the redirect doesnt go through we maybe redirect to home page of the webring or elsewhere)
+        if (home_domain != null)
+            return NextResponse.redirect(new URL(home_domain));
+        else return NextResponse.next();
+        // redirects to webring home page else continue to redirect page
     }
 
     const id = parseInt(idPram, 10);
 
     // id not valid number
     if (isNaN(id)) {
-        return NextResponse.next(); // same as above
+        if (home_domain != null)
+            return NextResponse.redirect(new URL(home_domain));
+        else return NextResponse.next();
+        // redirects to webring home page
     }
 
     let domain_id;
@@ -35,7 +45,9 @@ export async function middleware(request: NextRequest) {
     const domain = await domain_from_id(domain_id);
 
     if (!domain) {
-        return NextResponse.next(); // same as above
+        if (home_domain != null)
+            return NextResponse.redirect(new URL(home_domain));
+        else return NextResponse.next();
     }
     // redirect to domain from db
     return NextResponse.redirect(new URL(domain));
