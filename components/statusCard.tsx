@@ -4,7 +4,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 
 const statusCardVariants = cva(
-    "my-2 px-6 py-3 rounded-2xl flex flex-col border-2",
+    "my-2 px-6 py-3 rounded-lg flex flex-col border-2",
     {
         variants: {
             status: {

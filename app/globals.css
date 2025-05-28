@@ -41,7 +41,7 @@
     --font-sans: Oxanium, sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0.5rem;
+    --radius: 0rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
@@ -94,7 +94,7 @@
     --font-sans: Oxanium, sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0.5rem;
+    --radius: 0rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),

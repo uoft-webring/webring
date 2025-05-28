@@ -33,7 +33,7 @@ export default function ProfileCard() {
     }, []);
 
     return (
-        <div className="w-full max-w-120 mx-auto mt-2 bg-card rounded-2xl p-6">
+        <div className="w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6">
             {userData ? (
                 <>
                     <div className="flex mb-8 items-center">
