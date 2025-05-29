@@ -13,11 +13,26 @@ import portfolioIcon from "@/icons/portfolio.svg";
 import verifiedIcon from "@/icons/verified.svg";
 import Link from "next/link";
 import FallbackImage from "./fallbackImage";
+import { cn } from "@/lib/utils";
 
-export default function ProfileCard() {
-    const [userData, setUserData] = useState<UserType | undefined>(undefined);
+export default function ProfileCard({
+    userData,
+    className,
+    ...props
+}: {
+    userData: {
+        github_url?: string;
+        domain: string;
+        image_url: string;
+        isVerified: boolean;
+        name: string;
+        tags: string[];
+        tagline: string;
+    };
+} & React.ComponentPropsWithoutRef<"div">) {
+    // const [userData, setUserData] = useState<UserType | undefined>(undefined);
 
-    useEffect(() => {
+    /* useEffect(() => {
         const fetchData = async () => {
             const { user, error } = await getUserInfo();
 
@@ -30,10 +45,16 @@ export default function ProfileCard() {
         };
 
         fetchData();
-    }, []);
+    }, []); */
 
     return (
-        <div className="w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6">
+        <div
+            className={cn(
+                "w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6",
+                className
+            )}
+            {...props}
+        >
             {userData ? (
                 <>
                     <div className="flex mb-8 items-center">
@@ -63,7 +84,7 @@ export default function ProfileCard() {
                         <div className="w-32 aspect-square rounded-full mb-4 relative">
                             <FallbackImage
                                 src={userData.image_url}
-                                className={`rounded-full ${
+                                className={`rounded-full w-32 aspect-square ${
                                     userData.isVerified &&
                                     "border-4 border-card outline-4 outline-white"
                                 }`}

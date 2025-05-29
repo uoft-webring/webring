@@ -95,7 +95,19 @@ export default async function Dashboard() {
                 {/* Preview profile */}
                 <div>
                     <h2>Preview</h2>
-                    <ProfileCard />
+                    <ProfileCard
+                        userData={{
+                            domain: "https://asdasd.com",
+                            isVerified: true,
+                            image_url:
+                                "https://mohammadanwar.dev/_next/static/media/mohammad.6ef25c26.jpg",
+                            tagline:
+                                "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure ratione, placeat voluptatem, modi expedita odio temporibus maiores neque enim nesciunt quod sunt. Quod, dolores reiciendis?",
+                            name: "Aman Meherally",
+                            github_url: "https://github.com/TheAmanM",
+                            tags: ["TypeScript", "React", "JavaScript"],
+                        }}
+                    />
                 </div>
             </div>
 

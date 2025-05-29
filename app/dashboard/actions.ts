@@ -34,6 +34,7 @@ export const getUserInfo = async () => {
     // const user = data ? data[0] : data;
     const user: UserType = {
         domain: "https://asdasd.com",
+        ring_id: 5,
         isVerified: true,
         image_url:
             "https://mohammadanwar.dev/_next/static/media/mohammad.6ef25c26.jpg",
