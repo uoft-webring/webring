@@ -20,15 +20,7 @@ export default function ProfileCard({
     className,
     ...props
 }: {
-    userData: {
-        github_url?: string;
-        domain: string;
-        image_url: string;
-        isVerified: boolean;
-        name: string;
-        tags: string[];
-        tagline: string;
-    };
+    userData: any;
 } & React.ComponentPropsWithoutRef<"div">) {
     // const [userData, setUserData] = useState<UserType | undefined>(undefined);
 
@@ -85,12 +77,12 @@ export default function ProfileCard({
                             <FallbackImage
                                 src={userData.image_url}
                                 className={`rounded-full w-32 aspect-square ${
-                                    userData.isVerified &&
+                                    userData.is_verified &&
                                     "border-4 border-card outline-4 outline-white"
                                 }`}
                                 alt="Profile picture"
                             />
-                            {userData.isVerified && (
+                            {userData.is_verified && (
                                 <Image
                                     src={verifiedIcon}
                                     alt="Verified"
@@ -100,15 +92,17 @@ export default function ProfileCard({
                         </div>
                         <h2 className="text-2xl">{userData.name}</h2>
                         <div className="flex flex-row gap-2 mb-8">
-                            {userData.tags?.map((tagName, index) => {
-                                return (
-                                    <SkillTag
-                                        key={index}
-                                        tagName={tagName}
-                                        index={index}
-                                    />
-                                );
-                            })}
+                            {userData.tags?.map(
+                                (tagName: string, index: number) => {
+                                    return (
+                                        <SkillTag
+                                            key={index}
+                                            tagName={tagName}
+                                            index={index}
+                                        />
+                                    );
+                                }
+                            )}
                         </div>
                     </div>
                     <p>{userData.tagline}</p>

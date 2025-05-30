@@ -14,8 +14,8 @@ export default async function Edit() {
         redirect("/signup");
     }
 
-    if (userData && userData.user) {
-        return <EditClient data={userData.user} />;
+    if (userData && userData.data) {
+        return <EditClient data={userData.data} />;
     } else {
         return <div />;
     }

@@ -34,7 +34,7 @@ export const User = z.object({
         .refine((email) => email.toLowerCase().endsWith("@mail.utoronto.ca"), {
             message: 'Please use an "@mail.utoronto.ca" email.',
         }),
-    ring_id: z.number().int().positive(),
+    ring_id: z.number().int().nonnegative(),
     id: z.string(),
     name: z.string().nonempty({ message: "Please enter a valid name." }),
     tagline: z
@@ -63,7 +63,7 @@ export const User = z.object({
         .string()
         .url({ message: "Please enter a valid URL." })
         .or(z.literal("")),
-    isVerified: z.boolean(),
+    is_verified: z.boolean(),
     github_url: z
         .string()
         .refine(

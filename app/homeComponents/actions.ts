@@ -42,7 +42,7 @@ export async function fetchProfilesForRing() {
                 tagline: profile.tagline,
                 domain: profile.domain,
                 image_url: profile.image_url,
-                isVerified: profile.isVerified,
+                is_verified: profile.is_verified,
                 github_url: profile.github_url,
                 tags: profile.tags,
             };
