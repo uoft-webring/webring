@@ -1,9 +1,6 @@
-import { createAdminClient } from "@/utils/supabase/server";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-export default async function domain_from_id(index: number) {
-    // querying db "profile" for "domain" whose row id is "index"
-    const supabase = await createAdminClient();
-    console.log("incoming num", index);
+export default async function query(supabase: SupabaseClient, index: number) {
     const { data, error } = await supabase
         .from("profile")
         .select("domain")
