@@ -13,8 +13,9 @@ export const signUpAction = async (name: string, email: string) => {
         options: {
             shouldCreateUser: true,
             data: {
-                //  attach user meta data
+                //  attach user metadata
                 name: name,
+                domain: "anwar's big ass",
             },
         },
     });
