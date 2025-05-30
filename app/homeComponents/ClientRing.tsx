@@ -1,10 +1,10 @@
 "use client";
 
-import { Canvas, useFrame, extend } from "@react-three/fiber";
+import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, OrbitControls, Sphere } from "@react-three/drei";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useMemo, useState, useEffect, Ref } from "react";
 import {
     EffectComposer,
     Bloom,
@@ -23,8 +23,10 @@ export function ClientRing() {
 
     return (
         <Canvas
+            resize={{ offsetSize: true }}
             // style={{ width: "100svw", height: "100svh" }}
             gl={{ antialias: true, alpha: true }}
+            className="transition-all h-full w-full [&_canvas]:h-full!"
         >
             <Main groupRef={groupRef} planeRef={planeRef} />
         </Canvas>
@@ -40,8 +42,8 @@ function Main({ groupRef, planeRef }: any) {
     const speed = ROTATION_SPEED;
 
     // Animate plane vertices (like moveNoise in original)
-    useFrame(() => {
-        let animationFrameId: any;
+    /* useFrame(() => {
+        let animationFrameId: number;
 
         const update = (timestamp: any) => {
             if (lastTimeRef.current !== null) {
@@ -53,7 +55,7 @@ function Main({ groupRef, planeRef }: any) {
         };
 
         animationFrameId = requestAnimationFrame(update);
-    });
+    }); */
 
     useEffect(() => {
         if (planeRef.current) {
@@ -123,7 +125,7 @@ function Main({ groupRef, planeRef }: any) {
             </EffectComposer>
 
             <group position={[0, -1, 0]} rotation={[0, value, 0]}>
-                {[...Array(63).keys()]
+                {[...Array(20).keys()]
                     .map((value) => {
                         return { arrayValue: value, secondary: Math.random() };
                     })

@@ -39,7 +39,6 @@ export default function EditProfile({ data }: { data: UserType }) {
             console.log("Saving data!!!");
             // Save to DB here through actions.ts
             const saveResult = await saveData(parseResult.data);
-            console.log(saveResult.status);
             if (saveResult.error) {
                 toast.error("We're sorry! Something went wrong.", {
                     duration: 1000,
