@@ -23,6 +23,9 @@ create policy "Allow user to read access their own profile" on public.profile
 create policy "Allow user to edit their own profile" on public.profile 
     for update using (auth.uid() = id);
 
+-- Start ring_id sequence at 0
+alter sequence profile_ring_id_seq minvalue 0 start 0 restart with 0;
+
 
 
 

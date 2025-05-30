@@ -10,6 +10,9 @@ alter table "public"."profile" alter column "tags" set default ARRAY[]::text[];
 
 alter table "public"."profile" alter column "valid" set default false;
 
+-- Start ring_id sequence at 0
+alter sequence profile_ring_id_seq minvalue 0 start 0 restart with 0;
+
 set check_function_bodies = off;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()

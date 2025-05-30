@@ -16,7 +16,7 @@ export default async function domain_from_id(
     console.log("count", count);
 
     // make sure count is not null and initial_id is in range of ids
-    if (count == null || !(1 <= initial_id && initial_id <= count)) {
+    if (count == null || !(0 <= initial_id && initial_id <= count - 1)) {
         return null;
     }
 
@@ -24,9 +24,10 @@ export default async function domain_from_id(
     const index = direction === "next" ? initial_id + 1 : initial_id - 1;
 
     // get domain based on index
-    const domain = await query(supabase, index % (count + 1));
-    if (domain == null) {
-        return (await random_domain(supabase, count)) ?? null;
+    const domain = await query(supabase, (index + count) % count);
+    // console.log("number", (index + count) % count);
+    if (!domain) {
+        return null;
     }
 
     return domain ?? null;
