@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export default async function query(supabase: SupabaseClient, index: number) {
-    const { data: user_row, error } = await supabase
+    const { data, error } = await supabase
         .from("profile")
         .select("domain")
         .eq("ring_id", index)
@@ -12,5 +12,5 @@ export default async function query(supabase: SupabaseClient, index: number) {
         return null;
     }
 
-    return user_row?.domain ?? error;
+    return data?.domain ?? null;
 }

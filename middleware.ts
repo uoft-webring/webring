@@ -2,52 +2,44 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import domain_from_id from "./utils/middleware/domain_finder";
 
-// https://ourdomain.com/redirect?nav=prev?id
+// e.g: https://ourdomain.com/redirect?nav=prev&id=0
 
 export async function middleware(request: NextRequest) {
     // get webring domain
-    const home_domain = process.env.HOME_DOMAIN;
+    const home_domain = process.env.HOME_DOMAIN!;
 
     // extracting search params
     const url = request.nextUrl.searchParams;
-
     const direction = url.get("nav");
-
     const idPram = url.get("id");
     console.log(direction, idPram);
-    // if no id
-    if (!idPram) {
-        if (home_domain != null)
-            return NextResponse.redirect(new URL(home_domain));
-        else return NextResponse.next();
+
+    // null check and check if direction is next or prev
+    if (!idPram || !direction || !["next", "prev"].includes(direction)) {
         // redirects to webring home page else continue to redirect page
+        return home_domain != null
+            ? NextResponse.redirect(new URL(home_domain))
+            : NextResponse.next();
     }
 
+    // process id in base 10
     const id = parseInt(idPram, 10);
 
     // id not valid number
     if (isNaN(id)) {
-        if (home_domain != null)
-            return NextResponse.redirect(new URL(home_domain));
-        else return NextResponse.next();
-        // redirects to webring home page
+        // redirects to webring home page else continue to redirect page
+        return home_domain != null
+            ? NextResponse.redirect(new URL(home_domain))
+            : NextResponse.next();
     }
 
-    let domain_id;
-    // change id depending on direction
-    if (direction == "next") {
-        domain_id = id + 1;
-    } else {
-        domain_id = id - 1;
-    }
     // call fcn to grab domain based on new id from db
-
-    const domain = await domain_from_id(domain_id);
-
+    const domain = await domain_from_id(id, direction);
+    console.log("domain", domain);
     if (!domain) {
-        if (home_domain != null)
-            return NextResponse.redirect(new URL(home_domain));
-        else return NextResponse.next();
+        return home_domain != null
+            ? NextResponse.redirect(new URL(home_domain))
+            : NextResponse.next();
     }
     // redirect to domain from db
     return NextResponse.redirect(new URL(domain));

@@ -5,10 +5,10 @@ export default async function random_domain(
     length: number
 ) {
     // get a random integer between 0 and (length - 1)
-    const random_index = Math.floor(Math.random() * (length - 1));
+    const random_index = Math.floor(Math.random() * (length - 1)) + 1;
 
     // get domain based on random index
-    const { data: user_row, error } = await supabase
+    const { data, error } = await supabase
         .from("profile")
         .select("domain")
         .eq("ring_id", random_index)
@@ -19,5 +19,5 @@ export default async function random_domain(
         return null;
     }
 
-    return user_row?.domain ?? null;
+    return data?.domain ?? null;
 }
