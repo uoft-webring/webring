@@ -19,8 +19,8 @@ create function handle_new_user()
 returns trigger as $$
 
 begin
-    insert into public.profile(id, email, name) 
-    values (new.id, new.email, new.raw_user_meta_data->>'name'); -- remember to have the single quotes this!
+    insert into public.profile(id, email, name, domain) 
+    values (new.id, new.email, new.raw_user_meta_data->>'name', new.raw_user_meta_data->>'domain'); -- remember to have the single quotes this!
 
     return new;
 end;
