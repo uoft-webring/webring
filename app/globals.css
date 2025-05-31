@@ -56,12 +56,18 @@
         0 8px 10px -1px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
     --tracking-normal: 0.05em;
+
+    --color-transparent-input: color-mix(
+        in oklab,
+        var(--input) 30%,
+        transparent
+    );
 }
 
 .dark {
     --background: oklch(0.1149 0.0413 264.1192);
     --foreground: oklch(0.9074 0.0328 262.6918);
-    --card: oklch(0.1988 0.0406 273.6117);
+    --card: oklch(0.1488 0.0396 273.6117);
     --card-foreground: oklch(0.9074 0.0328 262.6918);
     --popover: oklch(0.2571 0.0406 263.4776);
     --popover-foreground: oklch(0.9074 0.0328 262.6918);
@@ -108,6 +114,12 @@
     --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
         0 8px 10px -1px hsl(0 0% 0% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+    --color-transparent-input: color-mix(
+        in oklab,
+        var(--input) 30%,
+        transparent
+    );
 }
 
 @theme inline {
@@ -168,6 +180,8 @@
     --tracking-wide: calc(var(--tracking-normal) + 0.025em);
     --tracking-wider: calc(var(--tracking-normal) + 0.05em);
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+    --color-transparent-input: var(--color-transparent-input);
 }
 
 body {
