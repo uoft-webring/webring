@@ -1,20 +1,16 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import Ring from "./homeComponents/Ring";
-import Loading from "@/components/loading";
+import { useEffect, useState } from "react";
 import { fetchProfilesForRing } from "./homeComponents/actions";
 import { ClientRing } from "./homeComponents/ClientRing";
 
-import useEmblaCarousel from "embla-carousel-react";
-import ProfileCard from "@/components/profileCard";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ProfileCarousel from "./homeComponents/Carousel";
 
 export default function Home() {
-    const [emblaRef] = useEmblaCarousel({ loop: true });
     const [data, setData] = useState<any[]>([]);
     const [fullSize, setFullSize] = useState<boolean>(false);
 
@@ -22,7 +18,8 @@ export default function Home() {
         const fetcher = async () => {
             const { data, error } = await fetchProfilesForRing();
             if (data) {
-                setData([...data, ...data, ...data]);
+                console.log(data);
+                setData(data);
             }
         };
 
@@ -51,7 +48,7 @@ export default function Home() {
                         { "h-[calc(100svh-36rem)]": !fullSize }
                     )}
                 >
-                    <ClientRing />
+                    <ClientRing data={data} />
                     <div className="absolute bottom-0 left-[50%] translate-x-[-50%] translate-y-[50%] max-w-[85rem] w-full p-4">
                         <Button
                             size={"icon"}
@@ -68,23 +65,11 @@ export default function Home() {
                 </div>
                 <div className="px-4">
                     <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
-                    <div
-                        className="embla max-w-[85rem] mx-auto overflow-clip"
-                        ref={emblaRef}
-                    >
+                    <div className="max-w-[85rem] mx-auto overflow-clip">
                         {data ? (
-                            <div className="embla__container flex">
-                                {data.map((item) => {
-                                    return (
-                                        <ProfileCard
-                                            userData={item}
-                                            className="min-w-[24rem] mx-4"
-                                        />
-                                    );
-                                })}
-                            </div>
+                            <ProfileCarousel data={data} />
                         ) : (
-                            <></>
+                            <p>No data</p>
                         )}
                     </div>
                 </div>

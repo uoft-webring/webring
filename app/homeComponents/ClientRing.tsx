@@ -4,7 +4,7 @@ import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
 import { PerspectiveCamera, OrbitControls, Sphere } from "@react-three/drei";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
-import { useRef, useMemo, useState, useEffect, Ref } from "react";
+import { useRef, useMemo, useState, useEffect, Ref, RefObject } from "react";
 import {
     EffectComposer,
     Bloom,
@@ -15,9 +15,11 @@ import {
     PLANE_SIZE,
     ROTATION_SPEED,
     PLANE_NOISE_AMPLITUDE,
+    getSpherePosition,
 } from "./ringUtils";
+import { UserType } from "@/utils/zod";
 
-export function ClientRing() {
+export function ClientRing({ data }: { data: UserType[] }) {
     const planeRef = useRef<any>(undefined);
     const groupRef = useRef<any>(undefined);
 
@@ -28,12 +30,20 @@ export function ClientRing() {
             gl={{ antialias: true, alpha: true }}
             className="transition-all h-full w-full [&_canvas]:h-full!"
         >
-            <Main groupRef={groupRef} planeRef={planeRef} />
+            <Main groupRef={groupRef} planeRef={planeRef} data={data} />
         </Canvas>
     );
 }
 
-function Main({ groupRef, planeRef }: any) {
+function Main({
+    groupRef,
+    planeRef,
+    data,
+}: {
+    groupRef: RefObject<any>;
+    planeRef: RefObject<any>;
+    data: UserType[];
+}) {
     const simplex = useMemo(() => new SimplexNoise(), []);
     const lastTimeRef = useRef(null);
     const [value, setValue] = useState(0);
@@ -42,7 +52,7 @@ function Main({ groupRef, planeRef }: any) {
     const speed = ROTATION_SPEED;
 
     // Animate plane vertices (like moveNoise in original)
-    /* useFrame(() => {
+    useFrame(() => {
         let animationFrameId: number;
 
         const update = (timestamp: any) => {
@@ -55,7 +65,7 @@ function Main({ groupRef, planeRef }: any) {
         };
 
         animationFrameId = requestAnimationFrame(update);
-    }); */
+    });
 
     useEffect(() => {
         if (planeRef.current) {
@@ -124,54 +134,44 @@ function Main({ groupRef, planeRef }: any) {
                 <ToneMapping />
             </EffectComposer>
 
-            <group position={[0, -1, 0]} rotation={[0, value, 0]}>
-                {[...Array(20).keys()]
-                    .map((value) => {
-                        return { arrayValue: value, secondary: Math.random() };
-                    })
-                    .map((data, index: number) => {
-                        return (
-                            <group
-                                position={[
-                                    14 * Math.cos(data.arrayValue / 10),
-                                    // 0.5 * Math.sin(80 * value),
-                                    0,
-                                    14 * Math.sin(data.arrayValue / 10),
-                                    // 0,
-                                ]}
-                                rotation={[
-                                    (1 + (index % 5)) * value * 6,
-                                    (1 + (index % 3)) * value * 3,
-                                    (1 + (index % 2)) * value * 9,
-                                ]}
+            <group position={[0, -2, 0]} rotation={[0, value, 0]}>
+                {data.map((userItem: UserType, index: number) => {
+                    return (
+                        <group
+                            position={getSpherePosition(index, data.length)}
+                            rotation={[
+                                (1 + (index % 5)) * value * 6,
+                                (1 + (index % 3)) * value * 3,
+                                (1 + (index % 2)) * value * 9,
+                            ]}
+                        >
+                            <Sphere
+                                key={index}
+                                args={[1, 8, 8]}
+                                scale={0.8}
+                                // onPointerOver={() => {
+                                //   setCurrentHover(index);
+                                // }}
+                                // onPointerOut={() => {
+                                //   setCurrentHover(null);
+                                // }}
                             >
-                                <Sphere
-                                    key={data.arrayValue}
-                                    args={[1, 8, 8]}
-                                    scale={0.35}
-                                    // onPointerOver={() => {
-                                    //   setCurrentHover(index);
-                                    // }}
-                                    // onPointerOut={() => {
-                                    //   setCurrentHover(null);
-                                    // }}
-                                >
-                                    <meshBasicMaterial
-                                        color={"#fff"}
-                                        wireframe={true}
-                                    />
-                                </Sphere>
-                                {/* <Billboard>
-                <Text
-                  position={[0, 0.75 * (2 * (index % 2) - 1), 0]}
-                  fontSize={0.2}
-                >
-                  randomdomain.com
-                </Text>
-              </Billboard> */}
-                            </group>
-                        );
-                    })}
+                                <meshBasicMaterial
+                                    color={"#fff"}
+                                    wireframe={true}
+                                />
+                            </Sphere>
+                            {/* <Billboard>
+            <Text
+              position={[0, 0.75 * (2 * (index % 2) - 1), 0]}
+              fontSize={0.2}
+            >
+              randomdomain.com
+            </Text>
+          </Billboard> */}
+                        </group>
+                    );
+                })}
             </group>
 
             <OrbitControls

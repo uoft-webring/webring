@@ -3,7 +3,9 @@
 import React from "react";
 import dynamic from "next/dynamic";
 
-const Loading = dynamic(() => import("@/components/loading"), { ssr: false });
+const Loading = dynamic(() => import("@/components/loadingComponent"), {
+    ssr: false,
+});
 
 export default async function LoadingPage() {
     return (

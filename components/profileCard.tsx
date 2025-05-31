@@ -1,7 +1,7 @@
 "use client";
 import { getUserInfo } from "@/app/dashboard/actions";
 import React, { useEffect, useState } from "react";
-import Loading from "./loading";
+import Loading from "./loadingComponent";
 import Image from "next/image";
 import { UserType } from "@/utils/zod";
 import { Button } from "./ui/button";
@@ -42,7 +42,7 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6",
+                "w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6 min-h-115",
                 className
             )}
             {...props}
@@ -108,7 +108,7 @@ export default function ProfileCard({
                     <p>{userData.tagline}</p>
                 </>
             ) : (
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center">
                     <Loading />
                 </div>
             )}
