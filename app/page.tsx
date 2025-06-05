@@ -34,7 +34,7 @@ export default function Home() {
 
     return (
         <>
-            <nav className="absolute top-0 left-[50%] translate-x-[-50%] max-w-[85rem] w-full border-4 px-6 py-4 flex justify-between items-center z-999">
+            <nav className="absolute top-0 left-[50%] translate-x-[-50%] max-w-[85rem] w-full px-6 py-4 flex justify-between items-center z-999">
                 Logo
                 <Link href={"/signup"}>
                     <Button>Sign up</Button>

@@ -51,7 +51,7 @@ export default function ProfileCard({
                 <>
                     <div className="flex mb-8 items-center">
                         {userData.github_url && (
-                            <Link href={userData.github_url}>
+                            <Link href={userData.github_url} target="_blank">
                                 <Image
                                     src={gitHubIcon}
                                     alt="GitHub"
@@ -59,7 +59,7 @@ export default function ProfileCard({
                                 />
                             </Link>
                         )}
-                        <Link href={userData.domain}>
+                        <Link href={userData.domain} target="_blank">
                             <Image
                                 src={portfolioIcon}
                                 alt="GitHub"

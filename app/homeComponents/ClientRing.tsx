@@ -103,7 +103,19 @@ function Scene({ data }: { data: UserType[] }) {
                     ];
                     return (
                         <group key={index} position={pos} rotation={rot}>
-                            <Sphere args={[1, 8, 8]} scale={0.8}>
+                            <Sphere
+                                args={[1, 8, 8]}
+                                scale={0.8}
+                                onPointerOver={() =>
+                                    (document.body.style.cursor = "pointer")
+                                }
+                                onPointerOut={() =>
+                                    (document.body.style.cursor = "default")
+                                }
+                                onClick={() =>
+                                    window.open(user.domain, "_blank")
+                                }
+                            >
                                 <meshBasicMaterial color="#fff" wireframe />
                             </Sphere>
                             <Suspense fallback={<></>}>
