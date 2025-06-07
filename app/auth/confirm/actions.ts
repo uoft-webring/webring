@@ -32,7 +32,7 @@ export const resendMagicLink = async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-            shouldCreateUser: true,
+            shouldCreateUser: true, // TODO: fix this for sign in and sign up pages
             // emailRedirectTo: `${origin}/`,
         },
     });
@@ -40,6 +40,7 @@ export const resendMagicLink = async (email: string) => {
     if (error) {
         console.error(error.code + " " + error.message);
     }
+    return error;
 };
 
 // TODO: decide on how much time to allow users to be able to enter code for

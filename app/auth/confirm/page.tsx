@@ -103,8 +103,13 @@ export default function Confirm() {
                     <div className="flex-1">
                         <Button
                             className="w-full"
-                            onClick={() => {
-                                resendMagicLink(email);
+                            onClick={async () => {
+                                const error = await resendMagicLink(email);
+                                setError(
+                                    error?.code === AuthApiError.name
+                                        ? "Rate limit reached"
+                                        : error?.message
+                                );
                             }}
                         >
                             Resend
