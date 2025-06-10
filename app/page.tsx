@@ -9,6 +9,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProfileCarousel from "./homeComponents/Carousel";
+import { ScrollText } from "./homeComponents/scrollText";
 
 export default function Home() {
     const [data, setData] = useState<any[]>([]);
@@ -74,6 +75,16 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+
+            <section>
+                <ScrollText
+                    content={[
+                        "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
+                        "Qui, pariatur repudiandae temporibus dolorum beatae distinctio at provident nostrum!",
+                        "Dolor repudiandae quae veniam corrupti aut voluptate adipisci inventore ex, harum vero. Voluptas excepturi doloremque consequatur beatae repudiandae!",
+                    ]}
+                />
+            </section>
         </>
     );
 }
