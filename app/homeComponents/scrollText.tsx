@@ -44,7 +44,7 @@ export const ScrollText = ({ content }: { content: string[] }) => {
     return (
         <div className="px-8 py-16">
             <div className="[&_h2]:inline">
-                <h2 className="text-white/20 text-center">
+                <h2 className="text-white/20 text-center font-thin">
                     {content.map((item) => (
                         <ContentLine key={item} content={item} />
                     ))}
