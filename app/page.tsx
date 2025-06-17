@@ -9,6 +9,8 @@ import Link from "next/link";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ProfileCarousel from "./homeComponents/Carousel";
+import About from "./homeComponents/about";
+import JoinUs from "./homeComponents/joinUs";
 
 export default function Home() {
     const [data, setData] = useState<any[]>([]);
@@ -72,8 +74,13 @@ export default function Home() {
                             <p>No data</p>
                         )}
                     </div>
+                    <About></About>
+                    <div className="flex justify-center">
+                        <JoinUs></JoinUs>
+                    </div>
                 </div>
             </div>
+            <div className="h-[80rem]"></div>
         </>
     );
 }
