@@ -1,11 +1,5 @@
 import { useRef } from "react";
-import {
-    motion,
-    useScroll,
-    useTransform,
-    useMotionTemplate,
-    MotionValue,
-} from "framer-motion";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 
 /*
  * Read the blog post here:
@@ -86,16 +80,12 @@ const ContentWord = ({
     end: number;
     progress: MotionValue<number>;
 }) => {
-    const scrollValue = useTransform(progress, [start, end], ["100%", "0%"]);
-    const clipPathVal = useMotionTemplate`inset(0% ${scrollValue} 0% 0%)`;
+    const opacity = useTransform(progress, [start, end], ["10%", "100%"]);
+    // const clipPathVal = useMotionTemplate`inset(0% ${scrollValue} 0% 0%)`;
     return (
         <span className="ml-2">
-            <span className="relative">
-                <span className="absolute opacity-10">{word}</span>
-                <motion.span style={{ clipPath: clipPathVal }} className="">
-                    {word}
-                </motion.span>
-            </span>
+            {/* <span className="absolute opacity-10">{word}</span> */}
+            <motion.span style={{ opacity: opacity }}>{word}</motion.span>
         </span>
     );
 };
