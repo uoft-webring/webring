@@ -15,14 +15,10 @@ const ContentLine = ({ content }: { content: string }) => {
 
     const { scrollYProgress } = useScroll({
         target: contentRef,
-        offset: ["end end", "start start"],
+        offset: ["start 0.9", "start 0.1"],
     });
 
-    const scrollValue = useTransform(
-        scrollYProgress,
-        [0.25, 0.75],
-        ["100%", "0%"]
-    );
+    const scrollValue = useTransform(scrollYProgress, [0, 1], ["100%", "0%"]);
     const clipPathVal = useMotionTemplate`inset(0% ${scrollValue} 0% 0%)`;
 
     return (
