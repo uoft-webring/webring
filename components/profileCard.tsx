@@ -1,7 +1,7 @@
 "use client";
 import { getUserInfo } from "@/app/dashboard/actions";
 import React, { useEffect, useState } from "react";
-import Loading from "./loading";
+import Loading from "./loadingComponent";
 import Image from "next/image";
 import { UserType } from "@/utils/zod";
 import { Button } from "./ui/button";
@@ -13,11 +13,18 @@ import portfolioIcon from "@/icons/portfolio.svg";
 import verifiedIcon from "@/icons/verified.svg";
 import Link from "next/link";
 import FallbackImage from "./fallbackImage";
+import { cn } from "@/lib/utils";
 
-export default function ProfileCard() {
-    const [userData, setUserData] = useState<UserType | undefined>(undefined);
+export default function ProfileCard({
+    userData,
+    className,
+    ...props
+}: {
+    userData: any;
+} & React.ComponentPropsWithoutRef<"div">) {
+    // const [userData, setUserData] = useState<UserType | undefined>(undefined);
 
-    useEffect(() => {
+    /* useEffect(() => {
         const fetchData = async () => {
             const { user, error } = await getUserInfo();
 
@@ -30,15 +37,21 @@ export default function ProfileCard() {
         };
 
         fetchData();
-    }, []);
+    }, []); */
 
     return (
-        <div className="w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6">
+        <div
+            className={cn(
+                "w-full max-w-120 mx-auto mt-2 bg-card rounded-xl p-6 min-h-115",
+                className
+            )}
+            {...props}
+        >
             {userData ? (
                 <>
                     <div className="flex mb-8 items-center">
                         {userData.github_url && (
-                            <Link href={userData.github_url}>
+                            <Link href={userData.github_url} target="_blank">
                                 <Image
                                     src={gitHubIcon}
                                     alt="GitHub"
@@ -46,7 +59,7 @@ export default function ProfileCard() {
                                 />
                             </Link>
                         )}
-                        <Link href={userData.domain}>
+                        <Link href={userData.domain} target="_blank">
                             <Image
                                 src={portfolioIcon}
                                 alt="GitHub"
@@ -63,13 +76,13 @@ export default function ProfileCard() {
                         <div className="w-32 aspect-square rounded-full mb-4 relative">
                             <FallbackImage
                                 src={userData.image_url}
-                                className={`rounded-full ${
-                                    userData.isVerified &&
+                                className={`rounded-full w-32 aspect-square ${
+                                    userData.is_verified &&
                                     "border-4 border-card outline-4 outline-white"
                                 }`}
                                 alt="Profile picture"
                             />
-                            {userData.isVerified && (
+                            {userData.is_verified && (
                                 <Image
                                     src={verifiedIcon}
                                     alt="Verified"
@@ -79,21 +92,23 @@ export default function ProfileCard() {
                         </div>
                         <h2 className="text-2xl">{userData.name}</h2>
                         <div className="flex flex-row gap-2 mb-8">
-                            {userData.tags?.map((tagName, index) => {
-                                return (
-                                    <SkillTag
-                                        key={index}
-                                        tagName={tagName}
-                                        index={index}
-                                    />
-                                );
-                            })}
+                            {userData.tags?.map(
+                                (tagName: string, index: number) => {
+                                    return (
+                                        <SkillTag
+                                            key={index}
+                                            tagName={tagName}
+                                            index={index}
+                                        />
+                                    );
+                                }
+                            )}
                         </div>
                     </div>
                     <p>{userData.tagline}</p>
                 </>
             ) : (
-                <div className="flex justify-center">
+                <div className="flex justify-center items-center">
                     <Loading />
                 </div>
             )}

@@ -2,6 +2,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { UserType } from "@/utils/zod";
+import { User } from "@supabase/supabase-js";
 
 export const getCurrentUser = async () => {
     const supabase = await createClient();
@@ -10,43 +11,24 @@ export const getCurrentUser = async () => {
         error,
     } = await supabase.auth.getUser();
 
-    // if (!error) {
-    //     return user;
-    // } else {
-    //     console.log(error.message);
-    // }
-
     return { user, error };
 };
 
 export const getUserInfo = async () => {
     const supabase = await createClient();
-    const { data, error } = await supabase.from("profile").select("*");
+    const { user: authUser, error } = await getCurrentUser();
+    if (!authUser) {
+        redirect("/signup");
+    }
 
-    /* const name = data?.at(0)?.name;
-    console.log(name);
-    if (!error) {
-        return name;
-    } else {
-        console.log(error.message);
-    } */
-
-    // const user = data ? data[0] : data;
-    const user: UserType = {
-        domain: "https://asdasd.com",
-        isVerified: true,
-        image_url:
-            "https://mohammadanwar.dev/_next/static/media/mohammad.6ef25c26.jpg",
-        tagline:
-            "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Iure ratione, placeat voluptatem, modi expedita odio temporibus maiores neque enim nesciunt quod sunt. Quod, dolores reiciendis?",
-        email: "aman.meherally@mail.utoronto.ca",
-        id: "375163b0-886e-474c-85ce-6a197d286ccf",
-        name: "Aman Meherally",
-        github_url: "https://github.com/TheAmanM",
-        tags: ["TypeScript", "React", "JavaScript"],
+    const { data: userData, error: dataError } = await supabase
+        .from("profile")
+        .select("*")
+        .eq("id", authUser.id);
+    return {
+        data: userData?.at(0) as UserType,
+        error: dataError,
     };
-
-    return { user, error };
 };
 
 export const signOutAction = async () => {

@@ -9,6 +9,8 @@ import { UserType, User } from "@/utils/zod";
 import { Label } from "@radix-ui/react-label";
 import React, { MouseEventHandler, useState } from "react";
 import { z } from "zod";
+import { saveData } from "./actions";
+import { toast } from "sonner";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(
@@ -34,7 +36,18 @@ export default function EditProfile({ data }: { data: UserType }) {
         const parseResult = await User.safeParseAsync(newData);
         console.log(parseResult);
         if (parseResult.success) {
+            console.log("Saving data!!!");
             // Save to DB here through actions.ts
+            const saveResult = await saveData(parseResult.data);
+            if (saveResult.error) {
+                toast.error("We're sorry! Something went wrong.", {
+                    duration: 1000,
+                });
+            } else {
+                toast.success("Your profile has been updated successfully!", {
+                    duration: 1000,
+                });
+            }
             setErrors(NO_ERRORS);
         } else {
             // structuredClone produces a deep copy of No_ERRORS, otherwise
@@ -50,8 +63,8 @@ export default function EditProfile({ data }: { data: UserType }) {
         }
     }, 500);
 
-    const saveToForm = (key: UserKeys, value: string | string[]) => {
-        const newData = { ...formData, [key]: value };
+    const saveToForm = (data: Record<string, any>) => {
+        const newData = { ...formData, ...data };
         setFormData(newData);
         debounceCallback(newData);
     };
@@ -84,7 +97,7 @@ export default function EditProfile({ data }: { data: UserType }) {
                                 required
                                 defaultValue={formData.name}
                                 onChange={(e) => {
-                                    saveToForm("name", e.target.value);
+                                    saveToForm({ name: e.target.value });
                                 }}
                                 error={errors.name}
                             />
@@ -116,7 +129,10 @@ export default function EditProfile({ data }: { data: UserType }) {
                                 required
                                 defaultValue={formData.domain}
                                 onChange={(e) => {
-                                    saveToForm("domain", e.target.value);
+                                    saveToForm({
+                                        domain: e.target.value,
+                                        is_verified: false,
+                                    });
                                 }}
                                 error={errors.domain}
                             />
@@ -128,7 +144,7 @@ export default function EditProfile({ data }: { data: UserType }) {
                                 required
                                 defaultValue={formData.github_url}
                                 onChange={(e) => {
-                                    saveToForm("github_url", e.target.value);
+                                    saveToForm({ github_url: e.target.value });
                                 }}
                                 error={errors.github_url}
                             />
@@ -142,7 +158,7 @@ export default function EditProfile({ data }: { data: UserType }) {
                                 required
                                 defaultValue={formData.image_url ?? ""}
                                 onChange={(e) => {
-                                    saveToForm("image_url", e.target.value);
+                                    saveToForm({ image_url: e.target.value });
                                 }}
                                 error={errors.image_url}
                             />
@@ -163,8 +179,8 @@ export default function EditProfile({ data }: { data: UserType }) {
                             <TagInputComponent
                                 tags={formData.tags}
                                 onTagsChange={(tags: string[]) => {
-                                    console.log("Saving", tags);
-                                    saveToForm("tags", tags);
+                                    // console.log("Saving", tags);
+                                    saveToForm({ tags: tags });
                                 }}
                                 error={errors.tags}
                             />
@@ -176,7 +192,7 @@ export default function EditProfile({ data }: { data: UserType }) {
                                 remaining={255 - formData.tagline.length}
                                 defaultValue={formData.tagline ?? ""}
                                 onChange={(e) => {
-                                    saveToForm("tagline", e.target.value);
+                                    saveToForm({ tagline: e.target.value });
                                 }}
                                 error={errors.tagline}
                             />

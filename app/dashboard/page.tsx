@@ -28,15 +28,16 @@ const NAVIGATION_LINKS = [
 
 export default async function Dashboard() {
     const { user: authUser, error: authError } = await getCurrentUser();
-    const userData = await getUserInfo();
 
     if (!authUser) {
-        console.log(authError);
+        // console.log(authError);
         redirect("/signup");
     }
 
-    console.log(authUser);
-    console.log(userData);
+    const { data: userData, error: userError } = await getUserInfo();
+
+    // console.log(authUser);
+    // console.log(userData);
 
     return (
         <>
@@ -74,7 +75,7 @@ export default async function Dashboard() {
             </div>
             <div className="section flex flex-col gap-2">
                 <h1 className="mb-4">{`Welcome, ${
-                    authUser.user_metadata.name ?? userData.user?.name
+                    authUser.user_metadata.name ?? userData
                 }.`}</h1>
                 {/* Status card */}
 
@@ -95,12 +96,12 @@ export default async function Dashboard() {
                 {/* Preview profile */}
                 <div>
                     <h2>Preview</h2>
-                    <ProfileCard />
+                    <ProfileCard userData={userData} />
                 </div>
             </div>
 
             <section className="section" id="edit">
-                <EditProfile data={userData.user} />
+                <EditProfile data={userData} />
             </section>
 
             <section className="section" id="join">
