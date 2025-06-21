@@ -21,11 +21,18 @@ const NO_ERRORS = Object.fromEntries(
  * The flow of the component lifecycle is as follows:
  *
  * 1) On a text field update, calls `saveToForm()` to update `formData` immediately.
- * 2) Calls `debounceCallback()` to attempt to validate format of data and either push to DB
+ * 2) State is managed by parent component so preview shows the updated data immediately.
+ * 3) Calls `debounceCallback()` to attempt to validate format of data and either push to DB
  * or show error state accordingly.
  */
-export default function EditForm({ data }: { data: UserType }) {
-    const [formData, setFormData] = useState<any>(data);
+export default function EditForm({
+    formData,
+    setFormData,
+}: {
+    formData: UserType;
+    setFormData: React.Dispatch<React.SetStateAction<UserType | null>>;
+}) {
+    // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(
         structuredClone(NO_ERRORS)
     );
@@ -58,7 +65,6 @@ export default function EditForm({ data }: { data: UserType }) {
                 newErrors[issue.path[0] as UserKeys] = issue.message;
             });
 
-            console.log(newErrors);
             setErrors(newErrors);
         }
     }, 500);
@@ -72,10 +78,6 @@ export default function EditForm({ data }: { data: UserType }) {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {};
     return (
         <>
-            <h2>Edit your profile</h2>
-            <p className="mb-6">
-                Complete the information below to complete your profile.
-            </p>
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -142,7 +144,7 @@ export default function EditForm({ data }: { data: UserType }) {
                                 type="url"
                                 placeholder="https://github.com/your-username"
                                 required
-                                defaultValue={formData.github_url}
+                                defaultValue={formData.github_url ?? ""}
                                 onChange={(e) => {
                                     saveToForm({ github_url: e.target.value });
                                 }}
@@ -158,7 +160,12 @@ export default function EditForm({ data }: { data: UserType }) {
                                 required
                                 defaultValue={formData.image_url ?? ""}
                                 onChange={(e) => {
-                                    saveToForm({ image_url: e.target.value });
+                                    saveToForm({
+                                        image_url:
+                                            e.target.value === ""
+                                                ? null
+                                                : e.target.value,
+                                    });
                                 }}
                                 error={errors.image_url}
                             />
@@ -177,10 +184,16 @@ export default function EditForm({ data }: { data: UserType }) {
                                 error={errors.tags}
                             /> */}
                             <TagInputComponent
-                                tags={formData.tags}
+                                tags={formData.tags ?? []}
                                 onTagsChange={(tags: string[]) => {
                                     // console.log("Saving", tags);
-                                    saveToForm({ tags: tags });
+                                    saveToForm({
+                                        tags:
+                                            JSON.stringify(tags) ===
+                                            JSON.stringify([])
+                                                ? null
+                                                : tags,
+                                    });
                                 }}
                                 error={errors.tags}
                             />
@@ -189,7 +202,11 @@ export default function EditForm({ data }: { data: UserType }) {
                                 name="tagline"
                                 placeholder="John Doe is a full stack..."
                                 required
-                                remaining={255 - formData.tagline.length}
+                                remaining={
+                                    formData.tagline === null
+                                        ? 255
+                                        : 255 - formData.tagline.length
+                                }
                                 defaultValue={formData.tagline ?? ""}
                                 onChange={(e) => {
                                     saveToForm({ tagline: e.target.value });

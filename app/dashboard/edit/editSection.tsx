@@ -33,9 +33,17 @@ export default function EditSection() {
                 <TabsTrigger value="preview">Preview</TabsTrigger>
             </TabsList>
             <TabsContent value="edit">
-                <EditForm data={data} />
+                <h2>Edit your profile</h2>
+                <p className="mb-6">
+                    Complete the information below to complete your profile.
+                </p>
+                <EditForm formData={data} setFormData={setData} />
             </TabsContent>
             <TabsContent value="preview">
+                <h2>Preview</h2>
+                <p className="mb-6">
+                    Preview your profile live, as you make changes.
+                </p>
                 <ProfileCard userData={data} />
             </TabsContent>
         </Tabs>
