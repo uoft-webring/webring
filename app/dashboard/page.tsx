@@ -6,7 +6,7 @@ import ToastTrigger from "./displayToast";
 import { cn } from "@/lib/utils";
 
 import EditSection from "./editSection";
-import JoinSection from "./joinSection";
+import JoinSection from "./join/joinSection";
 import VerifySection from "./verification/verifySection";
 import Link from "next/link";
 
@@ -25,7 +25,7 @@ export default async function Dashboard(props: {
 
     const linkMap = {
         edit: <EditSection />,
-        join: <JoinSection />,
+        join: <JoinSection id={userData.ring_id} />,
         verify: <VerifySection user={userData} />,
     };
 

@@ -1,14 +1,15 @@
 import React from "react";
 import StatusCard from "@/components/statusCard";
-import CopyButton from "./copyButton";
-import RecheckButton from "./recheckButton";
+import CopyButton from "../copyButton";
+import RecheckButton from "../recheckButton";
 
 import { UserType } from "@/utils/zod";
 
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
 
-import { getDomainStatus } from "../actions";
+import { checkDomainRecords, getDomainStatus } from "../actions";
+import { ExternalToast, toast } from "sonner";
 
 export default async function VerifySection({ user }: { user: UserType }) {
     const domainTxtRecord = "uoft-webring-" + user.id;
@@ -19,6 +20,23 @@ export default async function VerifySection({ user }: { user: UserType }) {
     }).value;
 
     const isVerified = await getDomainStatus();
+
+    const action = async () => {
+        "use server";
+        const result = await checkDomainRecords();
+        const options: ExternalToast = {
+            position: "top-center",
+        };
+
+        if (result) {
+            toast.success("Domain verified successfully!", options);
+        } else {
+            toast.error(
+                "Domain verification failed. Please try again.",
+                options
+            );
+        }
+    };
 
     return (
         <>
@@ -44,7 +62,11 @@ export default async function VerifySection({ user }: { user: UserType }) {
                 showCTA={false}
             />
 
-            {!isVerified && <RecheckButton />}
+            {!isVerified && (
+                <form action={action}>
+                    <RecheckButton />
+                </form>
+            )}
         </>
     );
 }
