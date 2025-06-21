@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "./ui/button";
-import { signOutAction } from "@/app/dashboard/actions";
+import { signOutAction } from "@/app/dashboard-2/actions";
 
 export default function Navbar() {
     return (

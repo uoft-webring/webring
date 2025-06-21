@@ -1,7 +1,7 @@
 "use server";
 
 import React from "react";
-import { getCurrentUser, getUserInfo } from "../dashboard/actions";
+import { getCurrentUser, getUserInfo } from "../dashboard-2/actions";
 import { redirect } from "next/navigation";
 import EditClient from "./edit";
 import { UserType } from "@/utils/zod";

@@ -1,130 +1,84 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser, getUserInfo, signOutAction } from "./actions";
 import Navbar from "@/components/navbar";
-import StatusCard from "@/components/statusCard";
-import ProfileCard from "@/components/profileCard";
-import { Button } from "@/components/ui/button";
-
-import { ChevronRight, Dot as SeparatorIcon } from "lucide-react";
-import Link from "next/link";
-import EditProfile from "../edit/components/profile";
-import {
-    Breadcrumb,
-    BreadcrumbList,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import EditJoin from "../edit/components/join";
-import EditVerify from "../edit/components/verify";
+import React from "react";
+import { getCurrentUser } from "@/app/dashboard-2/actions";
+import { redirect } from "next/navigation";
+import ToastTrigger from "./displayToast";
 import { cn } from "@/lib/utils";
 
-const NAVIGATION_LINKS = [
-    { id: "#preview", name: "Preview" },
-    { id: "#edit", name: "Edit" },
-    { id: "#join", name: "Join" },
-    { id: "#verify", name: "Verify" },
-];
+import EditSection from "./editSection";
+import JoinSection from "./joinSection";
+import VerifySection from "./verifySection";
+import Link from "next/link";
 
-export default async function Dashboard() {
+type UppercaseGeneric<T extends object> = Uppercase<keyof T & string>;
+
+export default async function Dashboard(props: {
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+    // First, check if the user is authenticated
     const { user: authUser, error: authError } = await getCurrentUser();
-
     if (!authUser) {
-        // console.log(authError);
         redirect("/signup");
     }
 
-    const { data: userData, error: userError } = await getUserInfo();
+    const linkMap = {
+        Edit: <EditSection />,
+        Join: <JoinSection />,
+        Verify: <VerifySection />,
+    };
 
-    // console.log(authUser);
-    // console.log(userData);
+    // Next, check the current active tab
+    const searchParams = await props.searchParams;
+    type TabTypes = UppercaseGeneric<typeof linkMap>;
+    const activeTab = searchParams?.tab;
+    console.log(activeTab);
+
+    let targetTab: TabTypes = "EDIT";
+    if (typeof activeTab === "string") {
+        if (activeTab === "join") {
+            targetTab = "JOIN";
+        } else if (activeTab === "verify") {
+            targetTab = "VERIFY";
+        } else if (activeTab === "edit") {
+            targetTab = "EDIT";
+        }
+    }
 
     return (
         <>
             <Navbar />
-            <div className="section -my-4">
-                <Breadcrumb>
-                    <BreadcrumbList className="justify-center">
-                        {/* <BreadcrumbItem>
-                            <BreadcrumbLink href="/">Preview</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator>
-                            <SeparatorIcon />
-                        </BreadcrumbSeparator>
-                        <BreadcrumbItem>
-                            <BreadcrumbLink href="/components">
-                                Components
-                            </BreadcrumbLink>
-                        </BreadcrumbItem> */}
-                        {NAVIGATION_LINKS.map((linkItem, index) => (
-                            <>
-                                {index !== 0 && (
-                                    <BreadcrumbSeparator>
-                                        <SeparatorIcon />
-                                    </BreadcrumbSeparator>
-                                )}
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink href={linkItem.id}>
-                                        {linkItem.name}
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                            </>
-                        ))}
-                    </BreadcrumbList>
-                </Breadcrumb>
+            {/* <ToastTrigger message="This is a message" messageType="error" /> */}
+            <section className="max-w-[85rem] mx-auto w-full px-6 mt-8">
+                <h1 className="mb-4">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
+            </section>
+            <div className="max-w-[85rem] mx-auto w-full px-12">
+                <ol className="max-w-[85rem] mx-auto flex justify-between relative text-sm text-inactive after:content-[''] after:block after:w-full after:h-[3px] after:bg-inactive after:absolute after:top-1/2 after:left-0 after:-translate-y-1/2 after:-z-10">
+                    {Object.keys(linkMap).map((expansion) => {
+                        const isActive = expansion.toLowerCase() === activeTab;
+                        return (
+                            <Link
+                                href={`/dashboard?tab=${expansion.toLowerCase()}`}
+                            >
+                                <li
+                                    key={expansion}
+                                    className={cn(
+                                        "relative list-none cursor-pointer after:content-[''] after:block after:w-3 after:h-3 after:rounded-full after:transition-colors after:duration-200 after:ease-in-out",
+                                        "hover:after:bg-inactive",
+                                        {
+                                            "after:bg-white": isActive,
+                                            "after:bg-inactive": !isActive,
+                                        }
+                                    )}
+                                >
+                                    <span className="absolute top-full left-1/2 -translate-x-1/2 inline-block text-center w-[100px]">
+                                        {expansion}
+                                    </span>
+                                </li>
+                            </Link>
+                        );
+                    })}
+                </ol>
             </div>
-            <div className="section flex flex-col gap-2">
-                <h1 className="mb-4">{`Welcome, ${
-                    authUser.user_metadata.name ?? userData
-                }.`}</h1>
-                {/* Status card */}
-
-                <div>
-                    <div className="flex justify-between items-center">
-                        <h2>Status</h2>
-                        {/* <Link href="/edit">
-                            <div className="flex items-center justify-center">
-                                <p className="text-white text-base">Edit</p>
-                                <ChevronRight size={20} className="ml-1" />
-                            </div>
-                        </Link> */}
-                    </div>
-                    <StatusCard status="connected" />
-                </div>
-
-                {/* <Button variant={"secondary"}>Edit</Button> */}
-                {/* Preview profile */}
-                <div>
-                    <h2>Preview</h2>
-                    <ProfileCard userData={userData} />
-                </div>
-            </div>
-
-            <section className="section" id="edit">
-                <EditProfile data={userData} />
-            </section>
-
-            <section className="section" id="join">
-                <EditJoin />
-            </section>
-
-            <section className={cn("section", "pt-0")} id="verify">
-                <EditVerify domainTxtRecord={"uoft-webring-" + authUser.id} />
-            </section>
         </>
     );
-
-    // return (
-    //     <div>
-    //         <h1>Welcome {name}</h1>
-    //         <pre className="bg-gray-700 border rounded text-xs max-h-32 max-w-64 overflow-auto">
-    //             {JSON.stringify(user, null, 2)}
-    //         </pre>
-    //         <form action={signOutAction}>
-    //             <button className="border cursor-pointer" type="submit">
-    //                 sign out
-    //             </button>
-    //         </form>
-    //     </div>
-    // );
 }

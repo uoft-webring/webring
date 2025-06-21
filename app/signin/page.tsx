@@ -2,7 +2,7 @@
 
 import CardForm from "@/components/cardForm";
 import SigninForm from "./form";
-import { getCurrentUser } from "../dashboard/actions";
+import { getCurrentUser } from "../dashboard-2/actions";
 import { redirect } from "next/navigation";
 
 export default async function Signin() {
