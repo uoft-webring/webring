@@ -65,13 +65,19 @@ const statusDescriptionsWithoutCTA: Record<Status, string> = {
 
 const statusIcons: Record<Status, React.JSX.Element> = {
     connected: (
-        <Success className="size-5 mb-1" color="var(--color-green-400)" />
+        <Success
+            className="size-5 mb-1 md:size-8"
+            color="var(--color-green-400)"
+        />
     ),
     unverified: (
-        <Warning className="size-5 mb-1" color="var(--color-yellow-400)" />
+        <Warning
+            className="size-5 mb-1 md:size-8"
+            color="var(--color-yellow-400)"
+        />
     ),
     disconnected: (
-        <Error className="size-5 mb-1" color="var(--color-red-400)" />
+        <Error className="size-5 mb-1 md:size-8" color="var(--color-red-400)" />
     ),
 };
 
