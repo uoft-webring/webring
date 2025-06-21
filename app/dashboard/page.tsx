@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import ToastTrigger from "./displayToast";
 import { cn } from "@/lib/utils";
 
-import EditSection from "./editSection";
+import EditSection from "./edit/editSection";
 import JoinSection from "./join/joinSection";
 import VerifySection from "./verification/verifySection";
 import Link from "next/link";

@@ -54,7 +54,7 @@ export default async function JoinSection({ id }: { id: number }) {
                 Copy the HTML code and paste it into your portfolio to join the
                 community.
             </p>
-            <div className="relative mb-4">
+            <div className="relative mb-6">
                 <pre>
                     <code
                         className="hljs language-handlebars rounded-xl"

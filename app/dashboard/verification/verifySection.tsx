@@ -46,7 +46,7 @@ export default async function VerifySection({ user }: { user: UserType }) {
                 shown below to your DNS records. When you're done, click “Verify
                 Now.” We’ll fetch your DNS and verify the domain automatically.
             </p>
-            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-4">
+            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6">
                 <code
                     className="rounded-xl block overflow-scroll"
                     dangerouslySetInnerHTML={{

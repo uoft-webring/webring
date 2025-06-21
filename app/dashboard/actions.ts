@@ -130,3 +130,20 @@ export const getValidPortfolio = async (): Promise<boolean> => {
     }
     return userObject.valid as boolean;
 };
+
+export const getCurrentUserDataForClient =
+    async (): Promise<UserType | null> => {
+        const { data: userData, error: dataError } = await getUserInfo();
+
+        if (dataError) {
+            console.error("Error fetching user data:", dataError);
+            return null;
+        }
+
+        if (!userData) {
+            return null;
+        }
+
+        // Return the user data
+        return userData as UserType;
+    };
