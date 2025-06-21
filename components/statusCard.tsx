@@ -3,14 +3,20 @@ import Link from "next/link";
 import { cva, VariantProps } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 
+import {
+    CheckCircle as Success,
+    CircleAlert as Warning,
+    Info as Error,
+} from "lucide-react";
+
 const statusCardVariants = cva(
     "my-2 px-6 py-3 rounded-lg flex flex-col border-2",
     {
         variants: {
             status: {
-                connected: "bg-green-300/30 border-green-400",
-                unverified: "bg-yellow-300/30 border-yellow-400",
-                disconnected: "bg-red-300/30 border-red-400",
+                connected: "bg-green-300/20 border-green-400",
+                unverified: "bg-yellow-300/20 border-yellow-400",
+                disconnected: "bg-red-300/20 border-red-400",
             },
         },
         defaultVariants: {
@@ -20,12 +26,6 @@ const statusCardVariants = cva(
 );
 
 type Status = NonNullable<VariantProps<typeof statusCardVariants>["status"]>;
-
-const statusDotVariants: Record<Status, string> = {
-    connected: "bg-green-500",
-    unverified: "bg-yellow-500",
-    disconnected: "bg-red-500",
-};
 
 const statusButtonColor: Record<Status, string> = {
     connected: "bg-green-400",
@@ -63,6 +63,18 @@ const statusDescriptionsWithoutCTA: Record<Status, string> = {
         "Your profile has not been linked yet, and you are not connected to the ring.",
 };
 
+const statusIcons: Record<Status, React.JSX.Element> = {
+    connected: (
+        <Success className="size-5 mb-1" color="var(--color-green-400)" />
+    ),
+    unverified: (
+        <Warning className="size-5 mb-1" color="var(--color-yellow-400)" />
+    ),
+    disconnected: (
+        <Error className="size-5 mb-1" color="var(--color-red-400)" />
+    ),
+};
+
 type StatusCardProps = {
     status?: Status;
     showButton?: boolean;
@@ -77,17 +89,8 @@ export default function StatusCard({
     return (
         <div className={statusCardVariants({ status })}>
             <div className="flex items-center gap-2">
-                <div
-                    className={`h-4 aspect-square rounded-full relative flex items-center justify-center ${statusDotVariants[status]}`}
-                >
-                    <div className="h-1.5 aspect-square rounded-full bg-white absolute" />
-                </div>
+                {statusIcons[status]}
                 <h2>{statusLabels[status]}</h2>
-                {/* <Link href="/edit" className="ml-auto">
-                    <Button variant="ghost" size="sm" className="px-0">
-                        Edit
-                    </Button>
-                </Link> */}
             </div>
             <p>
                 {showCTA
