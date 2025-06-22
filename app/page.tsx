@@ -79,11 +79,9 @@ export default function Home() {
             <section className="py-12 max-w-[85rem] mx-auto">
                 <ScrollText
                     content={[
-                        "Join the UofT webring community!",
-                        "Built by UofT for UofT!",
-                        "Make yourself visible to the internet!",
-                        "Showcase your experience, projects, hobbies!",
-                        "Meet your peers and alumni!",
+                        "We're bringing our digital portfolios together into a single, connected ecosystem.",
+                        "Our purpose is to build a more connected and visible UofT CS community. We believe that by showcasing our work collectively, we create more opportunities for everyone.",
+                        "This is our chance to strengthen our network, celebrate our skills, and build a lasting platform that elevates all of us, together.",
                     ]}
                 />
             </section>

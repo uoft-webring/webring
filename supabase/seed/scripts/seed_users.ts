@@ -12,16 +12,17 @@ dotenv.config({ path: __dirname + "/../../../.env.local" });
 
 // const supabase = getSupabase();
 
-async function seed_users_random(index, supabase) {
-    const supabase = await createAdminClient();
+const supabase = createAdminClient();
+
+async function seed_users_random(index) {
     const name = `user${index}`; // generate random
     const email = `${name}@mail.utoronto.ca`;
     const domain = `https://${name}.com`;
 
-    await supabase.auth.signInWithOtp({
+    await supabase.auth.signUp({
         email,
+        password: name,
         options: {
-            shouldCreateUser: true,
             data: {
                 //  attach user metadata
                 name: name,
@@ -31,6 +32,10 @@ async function seed_users_random(index, supabase) {
     });
 }
 
-for (let i = 0; i < parseInt(process.argv[2]); i++) {
-    seed_users_random(i, supabase);
+async function seed() {
+    for (let i = 0; i < parseInt(process.argv[2]); i++) {
+        await seed_users_random(i); // remember to await
+    }
 }
+
+seed();
