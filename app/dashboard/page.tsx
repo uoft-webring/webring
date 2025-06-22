@@ -1,130 +1,152 @@
-import { redirect } from "next/navigation";
-import { getCurrentUser, getUserInfo, signOutAction } from "./actions";
 import Navbar from "@/components/navbar";
-import StatusCard from "@/components/statusCard";
-import ProfileCard from "@/components/profileCard";
-import { Button } from "@/components/ui/button";
-
-import { ChevronRight, Dot as SeparatorIcon } from "lucide-react";
-import Link from "next/link";
-import EditProfile from "../edit/components/profile";
-import {
-    Breadcrumb,
-    BreadcrumbList,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import EditJoin from "../edit/components/join";
-import EditVerify from "../edit/components/verify";
+import React from "react";
+import { getCurrentUser, getUserInfo } from "@/app/dashboard-2/actions";
+import { redirect } from "next/navigation";
+import ToastTrigger from "./displayToast";
 import { cn } from "@/lib/utils";
 
-const NAVIGATION_LINKS = [
-    { id: "#preview", name: "Preview" },
-    { id: "#edit", name: "Edit" },
-    { id: "#join", name: "Join" },
-    { id: "#verify", name: "Verify" },
-];
+import EditSection from "./edit/editSection";
+import JoinSection from "./join/joinSection";
+import VerifySection from "./verification/verifySection";
+import Link from "next/link";
 
-export default async function Dashboard() {
+type LowercaseGeneric<T extends object> = Lowercase<keyof T & string>;
+
+export default async function Dashboard(props: {
+    searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
+    // First, check if the user is authenticated
     const { user: authUser, error: authError } = await getCurrentUser();
-
     if (!authUser) {
-        // console.log(authError);
         redirect("/signup");
     }
 
     const { data: userData, error: userError } = await getUserInfo();
 
-    // console.log(authUser);
-    // console.log(userData);
+    const linkMap = {
+        edit: <EditSection />,
+        join: <JoinSection id={userData.ring_id} />,
+        verify: <VerifySection user={userData} />,
+    };
+
+    // Next, check the current active tab
+    const searchParams = await props.searchParams;
+    type TabTypes = LowercaseGeneric<typeof linkMap>;
+    const activeTab = searchParams?.tab;
+    console.log(activeTab);
+
+    let targetTab: TabTypes = "edit";
+    if (typeof activeTab === "string") {
+        if (activeTab === "join") {
+            targetTab = "join";
+        } else if (activeTab === "verify") {
+            targetTab = "verify";
+        } else if (activeTab === "edit") {
+            targetTab = "edit";
+        }
+    }
 
     return (
         <>
             <Navbar />
-            <div className="section -my-4">
-                <Breadcrumb>
-                    <BreadcrumbList className="justify-center">
-                        {/* <BreadcrumbItem>
-                            <BreadcrumbLink href="/">Preview</BreadcrumbLink>
-                        </BreadcrumbItem>
-                        <BreadcrumbSeparator>
-                            <SeparatorIcon />
-                        </BreadcrumbSeparator>
-                        <BreadcrumbItem>
-                            <BreadcrumbLink href="/components">
-                                Components
-                            </BreadcrumbLink>
-                        </BreadcrumbItem> */}
-                        {NAVIGATION_LINKS.map((linkItem, index) => (
-                            <>
-                                {index !== 0 && (
-                                    <BreadcrumbSeparator>
-                                        <SeparatorIcon />
-                                    </BreadcrumbSeparator>
-                                )}
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink href={linkItem.id}>
-                                        {linkItem.name}
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                            </>
-                        ))}
-                    </BreadcrumbList>
-                </Breadcrumb>
+            {/* <ToastTrigger message="This is a message" messageType="error" /> */}
+            <section className="max-w-[70rem] mx-auto w-full px-6 mt-8">
+                <h1 className="mb-4">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
+            </section>
+
+            <div
+                className={cn(
+                    "xl:hidden",
+                    "max-w-[70rem] mx-auto w-full px-12 mt-6"
+                )}
+            >
+                <ol className="max-w-[70rem] mx-auto flex justify-between relative text-sm text-inactive after:content-[''] after:block after:w-full after:h-[3px] after:bg-inactive after:absolute after:top-1/2 after:left-0 after:-translate-y-1/2 after:-z-10">
+                    {Object.keys(linkMap).map((expansion) => {
+                        const isActive = expansion.toLowerCase() === targetTab;
+                        return (
+                            <Link
+                                href={`/dashboard?tab=${expansion.toLowerCase()}`}
+                                key={expansion}
+                            >
+                                <li
+                                    key={expansion}
+                                    className={cn(
+                                        "relative list-none cursor-pointer after:content-[''] after:block after:w-3 after:h-3 after:rounded-full after:transition-colors after:duration-200 after:ease-in-out",
+                                        "hover:after:bg-inactive",
+                                        {
+                                            "after:bg-white": isActive,
+                                            "after:bg-inactive": !isActive,
+                                        }
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "absolute top-full left-1/2 -translate-x-1/2 mt-1 inline-block text-center w-[100px]",
+                                            "transition-colors duration-200 ease-in-out",
+                                            { "text-white": isActive }
+                                        )}
+                                    >
+                                        {expansion.toUpperCase()}
+                                    </span>
+                                </li>
+                            </Link>
+                        );
+                    })}
+                </ol>
             </div>
-            <div className="section flex flex-col gap-2">
-                <h1 className="mb-4">{`Welcome, ${
-                    authUser.user_metadata.name ?? userData
-                }.`}</h1>
-                {/* Status card */}
-
-                <div>
-                    <div className="flex justify-between items-center">
-                        <h2>Status</h2>
-                        {/* <Link href="/edit">
-                            <div className="flex items-center justify-center">
-                                <p className="text-white text-base">Edit</p>
-                                <ChevronRight size={20} className="ml-1" />
-                            </div>
-                        </Link> */}
-                    </div>
-                    <StatusCard status="connected" />
-                </div>
-
-                {/* <Button variant={"secondary"}>Edit</Button> */}
-                {/* Preview profile */}
-                <div>
-                    <h2>Preview</h2>
-                    <ProfileCard userData={userData} />
-                </div>
+            <div
+                className={cn(
+                    "hidden xl:block",
+                    "lg:relative lg:max-w-[70rem] lg:mx-auto lg:w-full lg:px-6"
+                )}
+            >
+                <ol
+                    className={cn(
+                        "flex lg:flex-col lg:justify-between lg:items-center relative text-sm text-inactive",
+                        "after:content-[''] after:block after:h-[3px] after:bg-inactive after:absolute after:top-0 after:left-1/2 after:-z-10",
+                        "lg:absolute lg:top-0 lg:left-0 -translate-x-[300%]",
+                        "lg:h-[70vh]",
+                        "border-r-3 border-r-inactive"
+                    )}
+                >
+                    {Object.keys(linkMap).map((expansion) => {
+                        const isActive = expansion.toLowerCase() === targetTab;
+                        return (
+                            <Link
+                                href={`/dashboard?tab=${expansion.toLowerCase()}`}
+                                key={expansion}
+                                className="lg:inline w-2.25"
+                            >
+                                <li
+                                    key={expansion}
+                                    className={cn(
+                                        "relative list-none cursor-pointer after:content-[''] after:block after:w-3 after:h-3 lg:after:h-5 lg:after:w-5",
+                                        "after:rounded-full after:transition-colors after:duration-200 after:ease-in-out",
+                                        {
+                                            "after:bg-white": isActive,
+                                            "after:bg-inactive": !isActive,
+                                        }
+                                    )}
+                                >
+                                    <span
+                                        className={cn(
+                                            "absolute top-0 -translate-y-1/4 right-[200%] mt-1 inline-block text-right w-[100px]",
+                                            "transition-colors duration-200 ease-in-out",
+                                            { "text-white": isActive },
+                                            "lg:text-xl lg:font-semibold"
+                                        )}
+                                    >
+                                        {expansion.toUpperCase()}
+                                    </span>
+                                </li>
+                            </Link>
+                        );
+                    })}
+                </ol>
             </div>
-
-            <section className="section" id="edit">
-                <EditProfile data={userData} />
-            </section>
-
-            <section className="section" id="join">
-                <EditJoin />
-            </section>
-
-            <section className={cn("section", "pt-0")} id="verify">
-                <EditVerify domainTxtRecord={"uoft-webring-" + authUser.id} />
-            </section>
+            <div className="max-w-[70rem] mx-auto w-full px-6 mt-12">
+                {linkMap[targetTab]}
+            </div>
         </>
     );
-
-    // return (
-    //     <div>
-    //         <h1>Welcome {name}</h1>
-    //         <pre className="bg-gray-700 border rounded text-xs max-h-32 max-w-64 overflow-auto">
-    //             {JSON.stringify(user, null, 2)}
-    //         </pre>
-    //         <form action={signOutAction}>
-    //             <button className="border cursor-pointer" type="submit">
-    //                 sign out
-    //             </button>
-    //         </form>
-    //     </div>
-    // );
 }

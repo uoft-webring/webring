@@ -62,6 +62,8 @@
         var(--input) 30%,
         transparent
     );
+
+    --color-inactive: oklch(0.5386 0.0202 277.97);
 }
 
 .dark {
@@ -120,6 +122,7 @@
         var(--input) 30%,
         transparent
     );
+    --color-inactive: oklch(0.5386 0.0202 277.97);
 }
 
 @theme inline {
@@ -182,6 +185,7 @@
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 
     --color-transparent-input: var(--color-transparent-input);
+    --color-inactive: var(--color-inactive);
 }
 
 body {
