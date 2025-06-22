@@ -11,6 +11,7 @@ const getSphereSize = (total: number) => {
 
 export const getSpherePosition = (currentIndex: number, total: number) => {
     // Used a regression model, y_1 ~ a x_1 ^ b
+    // const scalingFactor = 6.86054 * Math.pow(total, 0.17297);
     const scalingFactor = total;
     const result: [x: number, y: number, z: number] = [
         scalingFactor * Math.cos((2 * Math.PI * currentIndex) / total),
