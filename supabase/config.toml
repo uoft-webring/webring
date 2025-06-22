@@ -53,6 +53,10 @@ schema_paths = [
     "./schemas/*.sql"
 ]
 
+[db.seed]
+enabled = true
+sql_paths = ["seed/users.sql"]
+
 [realtime]
 enabled = true
 # Bind realtime via either IPv4 or IPv6. (default: IPv4)

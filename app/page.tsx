@@ -79,9 +79,11 @@ export default function Home() {
             <section className="py-12 max-w-[85rem] mx-auto">
                 <ScrollText
                     content={[
-                        "Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-                        "Qui, pariatur repudiandae temporibus dolorum beatae distinctio at provident nostrum!",
-                        "Dolor repudiandae quae veniam corrupti aut voluptate adipisci inventore ex, harum vero. Voluptas excepturi doloremque consequatur beatae repudiandae!",
+                        "Join the UofT webring community!",
+                        "Built by UofT for UofT!",
+                        "Make yourself visible to the internet!",
+                        "Showcase your experience, projects, hobbies!",
+                        "Meet your peers and alumni!",
                     ]}
                 />
             </section>
@@ -91,13 +93,12 @@ export default function Home() {
                         guess what
                     </p>
                     <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                        Lorem ipsum dolor, sit amet consectetur adipisicing
-                        elit.
+                        Getting yourself RING-ed up has never been easier!
                     </h1>
                     <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Quod, voluptatum quas laboriosam doloremque aspernatur
-                        modi nobis totam libero aut quaerat!
+                        Get RING-ed up by signing up with your UofT email,
+                        entering your domain, and adding the custom UofT Webring
+                        navigation component to your portfolio website!
                     </p>
                     <Link href="/signup">
                         <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
