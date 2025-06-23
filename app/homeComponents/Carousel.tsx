@@ -1,3 +1,5 @@
+"use client";
+
 import ProfileCard from "@/components/profileCard";
 import React from "react";
 import AliceCarousel, { Responsive } from "react-alice-carousel";
