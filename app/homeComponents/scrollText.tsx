@@ -17,7 +17,7 @@ export const ScrollText = ({ content }: { content: string[] }) => {
     return (
         <div className="px-8 py-16">
             <div className="[&_h2]:inline">
-                <h2 ref={contentRef} className=" text-white/80 font-thin">
+                <h2 ref={contentRef} className=" text-white/80">
                     {content.map((item, index) => {
                         const start = index / content.length;
                         const end = start + 1 / content.length;
@@ -51,7 +51,7 @@ const ContentLine = ({
     const words = content.split(" ");
     const lineLength = end - start;
     return (
-        <span className="flex flex-wrap justify-center">
+        <span className="flex flex-wrap justify-center font-light not-last:mb-10">
             {words.map((word, index) => {
                 const w_start = start + lineLength * (index / words.length);
                 const w_end = w_start + lineLength * (1 / words.length);

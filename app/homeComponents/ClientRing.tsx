@@ -22,6 +22,7 @@ import {
     ROTATION_SPEED,
     PLANE_NOISE_AMPLITUDE,
     getSpherePosition,
+    getXPosition,
 } from "./ringUtils";
 import { UserType } from "@/utils/zod";
 
@@ -62,7 +63,11 @@ function Scene({ data }: { data: UserType[] }) {
 
     return (
         <>
-            <PerspectiveCamera makeDefault fov={60} position={[0, 0, 20]} />
+            <PerspectiveCamera
+                makeDefault
+                fov={40}
+                position={[getXPosition(data.length), 0, 20]}
+            />
             <ambientLight />
             <OrbitControls makeDefault enablePan={false} rotateSpeed={0.3} />
 
@@ -105,7 +110,7 @@ function Scene({ data }: { data: UserType[] }) {
                         <group key={index} position={pos} rotation={rot}>
                             <Sphere
                                 args={[1, 8, 8]}
-                                scale={0.8}
+                                scale={1}
                                 onPointerOver={() =>
                                     (document.body.style.cursor = "pointer")
                                 }

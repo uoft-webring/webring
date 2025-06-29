@@ -24,6 +24,7 @@
         "clsx": "^2.1.1",
         "copy-to-clipboard": "^3.3.3",
         "dayjs": "^1.11.13",
+        "dotenv": "^16.5.0",
         "framer-motion": "^12.16.0",
         "highlight.js": "^11.11.1",
         "input-otp": "^1.4.2",
@@ -39,6 +40,7 @@
         "sonner": "^2.0.3",
         "tailwind-merge": "^3.3.0",
         "three": "^0.176.0",
+        "tsx": "^4.20.3",
         "zod": "^3.24.4"
     },
     "devDependencies": {

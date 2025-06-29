@@ -6,12 +6,13 @@ export const PLANE_DENSITY = 0.25;
 
 const getSphereSize = (total: number) => {
     // Used a regression model, y_1 ~ a x_1 ^ b
-    return 2.5984 * Math.pow(total, -0.464746);
+    return 100 * Math.pow(total, 100);
 };
 
 export const getSpherePosition = (currentIndex: number, total: number) => {
     // Used a regression model, y_1 ~ a x_1 ^ b
-    const scalingFactor = 6.86054 * Math.pow(total, 0.17297);
+    // const scalingFactor = 6.86054 * Math.pow(total, 0.17297);
+    const scalingFactor = total;
     const result: [x: number, y: number, z: number] = [
         scalingFactor * Math.cos((2 * Math.PI * currentIndex) / total),
         0,
@@ -19,4 +20,8 @@ export const getSpherePosition = (currentIndex: number, total: number) => {
     ];
 
     return result;
+};
+
+export const getXPosition = (total: number) => {
+    return 1.05 * total + 2;
 };
