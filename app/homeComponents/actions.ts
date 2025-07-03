@@ -1,10 +1,21 @@
 "use server";
 
 import { createAdminClient } from "@/utils/supabase/server";
-import { UserType } from "@/utils/zod";
+import { SafeUserType } from "@/utils/zod";
 import { PostgrestError } from "@supabase/supabase-js";
 
-export async function fetchProfilesForRing() {
+type FetchProfilesForRingResponse =
+    | {
+          data: SafeUserType[];
+          error: null;
+      }
+    | {
+          data: null;
+          error: string;
+      };
+
+export async function fetchProfilesForRing(): Promise<FetchProfilesForRingResponse> {
+    console.log("FETCHING PROFILES FOR RING");
     // First, we get the client and fetch everything
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -29,7 +40,7 @@ export async function fetchProfilesForRing() {
 
     let newData;
     try {
-        newData = data as UserType[];
+        newData = data as SafeUserType[];
     } catch {
         return { data: null, error: "Error: Parse failed." };
     }
