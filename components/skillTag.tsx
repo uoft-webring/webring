@@ -55,7 +55,7 @@ const skillTagVariants = cva(
 // SkillTag component using the variants defined by CVA
 interface SkillTagProps extends React.ComponentProps<"div"> {
     tagName: string;
-    index: number;
+    index?: number;
     size?: "default" | "mini"; // Variant for size (default or mini)
 }
 
