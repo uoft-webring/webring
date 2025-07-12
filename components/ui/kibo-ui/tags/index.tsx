@@ -20,7 +20,7 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-} from "@/command";
+} from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/popover";
 import { cn } from "@/lib/utils";
 
