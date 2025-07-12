@@ -46,7 +46,7 @@ const Example = ({
 
     return (
         <>
-            <Tags className="max-w-[300px]">
+            <Tags>
                 <TagsTrigger>
                     {tags.map((tag) => (
                         /* {/* <TagsValue key={tag} onRemove={() => handleRemove(tag)}>
