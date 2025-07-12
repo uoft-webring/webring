@@ -56,6 +56,7 @@ const Example = ({
                             tagName={tag}
                             size="mini"
                             onClick={() => handleRemove(tag)}
+                            deleteButton
                         />
                     ))}
                 </TagsTrigger>
