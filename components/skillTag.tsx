@@ -1,6 +1,9 @@
 import { cva } from "class-variance-authority";
 import React from "react";
 
+import { X as Delete } from "lucide-react";
+import { cn } from "@/lib/utils";
+
 const SkillTagColors = [
     "border-red-400/80 bg-red-400/40",
     "border-orange-400/80 bg-orange-400/40",
@@ -55,14 +58,16 @@ const skillTagVariants = cva(
 // SkillTag component using the variants defined by CVA
 interface SkillTagProps extends React.ComponentProps<"div"> {
     tagName: string;
-    index: number;
+    index?: number;
     size?: "default" | "mini"; // Variant for size (default or mini)
+    deleteButton?: boolean;
 }
 
 const SkillTag: React.FC<SkillTagProps> = ({
     tagName,
     index,
     size = "default", // Default to "default" variant
+    deleteButton = false,
     ...props
 }) => {
     // Get the styles from the CVA helper for both size and fontWeight
@@ -77,14 +82,28 @@ const SkillTag: React.FC<SkillTagProps> = ({
     return (
         <div
             key={index}
-            className={`${tagContainerStyles} ${mapSkillToColor(tagName)}`} // Apply variant styles and dynamic color
+            className={cn(
+                { "flex items-center justify-center": deleteButton },
+                tagContainerStyles,
+                mapSkillToColor(tagName)
+            )} // Apply variant styles and dynamic color
             {...props}
         >
-            <p className={`${tagTextStyles} text-white`}>
-                {" "}
+            <p className={cn(tagTextStyles, "text-white")}>
                 {/* Apply font weight directly here */}
                 {tagName}
             </p>
+            {deleteButton && (
+                <button
+                    className="ml-2 text-white hover:text-red-500"
+                    onClick={() => {
+                        // Handle delete action here
+                        console.log(`Delete tag: ${tagName}`);
+                    }}
+                >
+                    <Delete className="-ml-1 w-4 h-4" />
+                </button>
+            )}
         </div>
     );
 };
