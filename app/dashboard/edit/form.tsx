@@ -9,7 +9,7 @@ import { UserType, User } from "@/utils/zod";
 import { Label } from "@/components/ui/label";
 import React, { useState } from "react";
 import { z } from "zod";
-import { saveData } from "@/app/edit/components/actions";
+import { saveData } from "./actions";
 import { toast } from "sonner";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
@@ -160,11 +160,9 @@ export default function EditForm({
                                 required
                                 defaultValue={formData.image_url ?? ""}
                                 onChange={(e) => {
+                                    // just do fetch, if fetch doesnt give 200
                                     saveToForm({
-                                        image_url:
-                                            e.target.value === ""
-                                                ? null
-                                                : e.target.value,
+                                        image_url: e.target.value,
                                     });
                                 }}
                                 error={errors.image_url}

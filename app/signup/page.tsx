@@ -1,7 +1,7 @@
 "use server";
 import CardForm from "@/components/cardForm";
 import SignupForm from "./form";
-import { getCurrentUser } from "../dashboard-2/actions";
+import { getCurrentUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
 
 export default async function SignUp() {

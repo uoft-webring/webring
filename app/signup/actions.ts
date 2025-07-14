@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 // TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {
     const supabase = await createClient();
+    
+    // TODO: check DB for if user already exists, if so dont let them "sign up"
 
     const { error } = await supabase.auth.signInWithOtp({
         email,
@@ -14,8 +16,7 @@ export const signUpAction = async (name: string, email: string) => {
             shouldCreateUser: true,
             data: {
                 //  attach user metadata
-                name: name,
-                domain: "anwar's big ass",
+                name: name
             },
         },
     });
