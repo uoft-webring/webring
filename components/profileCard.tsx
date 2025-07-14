@@ -1,5 +1,5 @@
 "use client";
-import { getUserInfo } from "@/app/dashboard-2/actions";
+import { getUserInfo } from "@/app/dashboard/actions";
 import React, { useEffect, useState } from "react";
 import Loading from "./loadingComponent";
 import Image from "next/image";

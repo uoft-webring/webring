@@ -1,6 +1,6 @@
 import Navbar from "@/components/navbar";
 import React from "react";
-import { getCurrentUser, getUserInfo } from "@/app/dashboard-2/actions";
+import { getCurrentUser, getUserInfo } from "@/app/dashboard/actions";
 import { redirect } from "next/navigation";
 import ToastTrigger from "./displayToast";
 import { cn } from "@/lib/utils";

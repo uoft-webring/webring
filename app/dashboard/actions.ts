@@ -1,9 +1,13 @@
 "use server";
 import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
-import { getUserInfo } from "../dashboard-2/actions";
 
 import { createAdminClient } from "@/utils/supabase/server";
+
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
+import { UserType } from "@/utils/zod";
+import { User } from "@supabase/supabase-js";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
@@ -147,3 +151,37 @@ export const getCurrentUserDataForClient =
         // Return the user data
         return userData as UserType;
     };
+
+export const getCurrentUser = async () => {
+    const supabase = await createClient();
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
+
+    return { user, error };
+};
+
+export const getUserInfo = async () => {
+    const supabase = await createClient();
+    const { user: authUser, error } = await getCurrentUser();
+    if (!authUser) {
+        redirect("/signup");
+    }
+
+    const { data: userData, error: dataError } = await supabase
+        .from("profile")
+        .select("*")
+        .eq("id", authUser.id);
+    return {
+        data: userData?.at(0) as UserType,
+        error: dataError,
+    };
+};
+
+export const signOutAction = async () => {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    return redirect("/");
+};
+
