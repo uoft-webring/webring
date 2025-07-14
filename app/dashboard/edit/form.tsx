@@ -158,14 +158,11 @@ export default function EditForm({
                                 type="url"
                                 placeholder="https://yourdomain.com/profile.jpg"
                                 required
-                                defaultValue={formData.image_url ?? null}
+                                defaultValue={formData.image_url ?? ""}
                                 onChange={(e) => {
                                     // just do fetch, if fetch doesnt give 200
                                     saveToForm({
-                                        image_url:
-                                            e.target.value === ""
-                                                ? null
-                                                : e.target.value,
+                                        image_url: e.target.value,
                                     });
                                 }}
                                 error={errors.image_url}

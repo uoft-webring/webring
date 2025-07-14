@@ -76,6 +76,7 @@ export default function ProfileCard({
                         <div className="w-32 aspect-square rounded-full mb-4 relative">
                             <FallbackImage
                                 src={userData.image_url}
+                                ringId={userData.ring_id}
                                 className={`rounded-full w-32 aspect-square ${
                                     userData.is_verified &&
                                     "border-4 border-card outline-4 outline-white"
