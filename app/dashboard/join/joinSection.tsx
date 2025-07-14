@@ -17,7 +17,7 @@ export default async function JoinSection({ id }: { id: number }) {
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
     <img
-        src='https://uoftwebring.com/assets/favicon.ico'
+        src='https://uoftwebring.com/favicon.ico'
         alt='UofT Webring'
         style="width: '24px'; height: 'auto'"
     />
