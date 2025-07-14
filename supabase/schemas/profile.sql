@@ -2,7 +2,7 @@
 create table public.profile (
     id uuid references auth.users not null primary key, -- auth.users uuid, will be used to build txt_record
     email text, -- user email
-    domain text, -- user domain
+    domain text default '', -- user domain
     name text, -- user name
     ring_id serial, -- id to identify user domain on the webring
     valid boolean default false, -- check if user domain is "valid"

@@ -14,15 +14,15 @@ import { isValid } from "zod";
 export default async function JoinSection({ id }: { id: number }) {
     const isValidPortfolio = await getValidPortfolio();
     const codeString = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
-    <a href='https://uoftwebring.vercel.app/prev?id=${id}'>←</a>
-    <a href='https://uoftwebring.vercel.app/' target='_blank'>
+    <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
+    <a href='https://uoftwebring.com' target='_blank'>
     <img
-        src='https://uoftwebring.vercel.app/assets/favicon.ico'
+        src='https://uoftwebring.com/assets/favicon.ico'
         alt='UofT Webring'
         style="width: '24px'; height: 'auto'"
     />
     </a>
-    <a href='https://uoftwebring.vercel.app/next?id=${id}'>→</a>
+    <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
 </div>`;
 
     const action = async () => {
