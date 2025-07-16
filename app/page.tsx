@@ -8,9 +8,28 @@ import ProfileCarousel from "./homeComponents/Carousel";
 import RingSection from "./homeComponents/RingSection";
 import { ScrollText } from "./homeComponents/scrollText";
 import Logo from "@/components/logo";
+import { createClient } from "@/utils/supabase/server";
+import FallbackImage from "@/components/fallbackImage";
+import Image from "next/image";
+import verifiedIcon from "@/icons/verified.svg";
+import { UserType } from "@/utils/zod";
 
 export default async function Home() {
     const { data, error } = await fetchProfilesForRing();
+
+    const supabase = await createClient();
+    const {
+        data: { user },
+        error: authError,
+    } = await supabase.auth.getUser();
+
+    const { data: image_data, error: fetchError } = await supabase
+        .from("profile")
+        .select("*")
+        .eq("id", user?.id);
+
+    const userData = image_data?.at(0);
+    const fallbackSrc = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${userData?.ring_id}&radius=50`;
 
     if (!data) {
         console.error("Error fetching profiles:", error);
@@ -21,9 +40,25 @@ export default async function Home() {
         <>
             <nav className="absolute top-0 left-[50%] translate-x-[-50%] max-w-[85rem] w-full px-6 py-4 flex justify-between items-center z-999">
                 <Logo />
-                <Link href={"/signup"}>
-                    <Button>Sign up</Button>
-                </Link>
+                {user ? (
+                    <Link href="/dashboard">
+                        <img
+                            src={
+                                !userData?.image_url
+                                    ? fallbackSrc
+                                    : userData?.image_url
+                            }
+                            className={`rounded-full w-14 aspect-square
+                                "border-4 border-card outline-4 outline-white"
+                            }`}
+                            alt="Profile picture"
+                        />
+                    </Link>
+                ) : (
+                    <Link href={"/signup"}>
+                        <Button>Sign up</Button>
+                    </Link>
+                )}
             </nav>
             <div className="overflow-clip">
                 <RingSection data={data} />

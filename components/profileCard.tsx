@@ -106,7 +106,9 @@ export default function ProfileCard({
                             )}
                         </div>
                     </div>
-                    <p>{userData.tagline}</p>
+                    <p className="text-wrap break-all text-center">
+                        {userData.tagline}
+                    </p>
                 </>
             ) : (
                 <div className="flex justify-center items-center">

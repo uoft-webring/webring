@@ -7,6 +7,7 @@ import React, { FormEvent, useRef, useState } from "react";
 import { signUpAction } from "./actions";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function SignupForm() {
     const [nameError, setNameError] = useState<string | undefined>(undefined);
@@ -31,7 +32,12 @@ export default function SignupForm() {
             // Parsing success or faliure
             if (emailParseResult.success && nameParseResult.success) {
                 console.log("Success");
-                await signUpAction(name, email);
+                const { error } = await signUpAction(name, email);
+                if (error) {
+                    setEmailError("Email registered");
+                } else {
+                    redirect(`/auth/confirm?email=${email}`);
+                }
                 console.log("Finished");
             } else {
                 setIsFormDisabled(false);
@@ -65,7 +71,7 @@ export default function SignupForm() {
                             }}
                         />
                     </div>
-                    <div className="grname gap-2">
+                    <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
                             name="email"
