@@ -9,10 +9,6 @@ import RingSection from "./homeComponents/RingSection";
 import { ScrollText } from "./homeComponents/scrollText";
 import Logo from "@/components/logo";
 import { createClient } from "@/utils/supabase/server";
-import FallbackImage from "@/components/fallbackImage";
-import Image from "next/image";
-import verifiedIcon from "@/icons/verified.svg";
-import { UserType } from "@/utils/zod";
 
 export default async function Home() {
     const { data, error } = await fetchProfilesForRing();
