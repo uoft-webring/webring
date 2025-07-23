@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { UserType } from "@/utils/zod";
 import { User } from "@supabase/supabase-js";
 import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
+import { createHmac } from "crypto";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
@@ -51,16 +52,24 @@ export const checkDomainRecords = async (): Promise<boolean> => {
         return false;
     }
 
-    // TODO: Replace this with actual domain verification logic.
-
     let result: boolean = false;
     const txtRecords = await getDnsRecords(userData.domain as string, "TXT");
+
+    // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
+    // Increases security by preventing spoofing through ensuring only we can generate valid values
+    const expectedTxtValue = createHmac(
+        "sha256",
+        process.env.NEXT_DOMAIN_VALIDATION_SECRET_KEY as string
+    )
+        .update(userData.id) // based on user ID
+        .digest("base64url"); // safe for URL's
+
     for (const record of txtRecords) {
         if (
             record.name === "uoft-webring-" + userData.id &&
-            record.data.includes("VALUE")
+            record.data.includes(expectedTxtValue)
         ) {
-            console.log("TXT record found:", record);
+            console.log("[CheckDomainRecords]: Domain Verified");
             result = true;
         }
     }
@@ -92,11 +101,7 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
     }
 
     // TODO: Replace this with actual domain verification logic.
-    const result = await new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(true);
-        }, 50);
-    });
+    const result = await checkDomainRecords();
 
     if (result) {
         const { error } = await client
