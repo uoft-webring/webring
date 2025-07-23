@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { UserType } from "@/utils/zod";
 import { User } from "@supabase/supabase-js";
+import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
@@ -51,11 +52,18 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 
     // TODO: Replace this with actual domain verification logic.
-    const result = await new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(true);
-        }, 50);
-    });
+
+    let result: boolean = false;
+    const txtRecords = await getDnsRecords(userData.domain as string, "TXT");
+    for (const record of txtRecords) {
+        if (
+            record.name === "uoft-webring-" + userData.id &&
+            record.data.includes("VALUE")
+        ) {
+            console.log("TXT record found:", record);
+            result = true;
+        }
+    }
 
     if (result) {
         const { error } = await client
@@ -184,4 +192,3 @@ export const signOutAction = async () => {
     await supabase.auth.signOut();
     return redirect("/");
 };
-
