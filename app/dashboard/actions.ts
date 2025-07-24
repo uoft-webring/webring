@@ -169,11 +169,10 @@ export const getCurrentUserDataForClient =
     };
 
 export const getCurrentUser = async () => {
-    const supabase = await createClient();
-    const {
-        data: { user },
-        error,
-    } = await supabase.auth.getUser();
+    const supabase = await createClient(); // Get the Supabase client instance
+
+    const { data, error } = await supabase.auth.getUser();
+    const user = data?.user || null; // Safely access user, default to null if data is null/undefined
 
     return { user, error };
 };
