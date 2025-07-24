@@ -43,7 +43,7 @@ export const getTXTRecordValue = async (userId: string): Promise<string> => {
     // Increases security by preventing spoofing through ensuring only we can generate valid values
     return createHmac(
         "sha256",
-        process.env.NEXT_DOMAIN_VALIDATION_SECRET_KEY as string
+        process.env.DOMAIN_VALIDATION_SECRET_KEY as string
     )
         .update(userId) // based on user ID
         .digest("base64url"); // safe for URL's
