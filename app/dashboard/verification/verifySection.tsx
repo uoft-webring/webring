@@ -8,17 +8,24 @@ import { UserType } from "@/utils/zod";
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
 
-import { checkDomainRecords, getDomainStatus } from "../actions";
+import {
+    checkDomainRecords,
+    getDomainStatus,
+    getTXTRecordValue,
+} from "../actions";
 import { ExternalToast, toast } from "sonner";
 
 export default async function VerifySection({ user }: { user: UserType }) {
-    const domainTxtRecord = "uoft-webring-" + user.id;
+    const domainTXTKey = "uoft-webring-" + user.id;
+    const domainTXTValue = await getTXTRecordValue(user.id);
 
     hljs.registerLanguage("txt", yaml);
-    const result = hljs.highlight(domainTxtRecord + domainTxtRecord, {
+    const keyResult = hljs.highlight(domainTXTKey, {
         language: "txt",
     }).value;
-
+    const valueResult = hljs.highlight(domainTXTValue, {
+        language: "txt",
+    }).value;
     const isVerified = await getDomainStatus();
 
     const action = async () => {
@@ -44,18 +51,28 @@ export default async function VerifySection({ user }: { user: UserType }) {
             <p className="mb-4">
                 To confirm that this domain belongs to you, add the TXT record
                 shown below to your DNS records. When you're done, click “Verify
-                Now.” We’ll fetch your DNS and verify the domain automatically.
+                Now.” We'll fetch your DNS and verify the domain automatically.
             </p>
-            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6">
+            <h3>Key: </h3>
+            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6 justify-between w-full">
                 <code
                     className="rounded-xl block overflow-scroll"
                     dangerouslySetInnerHTML={{
-                        __html: result,
+                        __html: keyResult,
                     }}
                 />
-                <CopyButton codeString={domainTxtRecord} className="static" />
+                <CopyButton codeString={domainTXTKey} className="static" />
             </pre>
-
+            <h3>Value: </h3>
+            <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6 justify-between w-full">
+                <code
+                    className="rounded-xl block overflow-scroll"
+                    dangerouslySetInnerHTML={{
+                        __html: valueResult,
+                    }}
+                />
+                <CopyButton codeString={domainTXTKey} className="static" />
+            </pre>
             <StatusCard
                 status={isVerified ? "connected" : "unverified"}
                 showButton={false}

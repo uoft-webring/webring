@@ -1,13 +1,10 @@
 "use server";
-import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
-
 import { createAdminClient } from "@/utils/supabase/server";
-
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { UserType } from "@/utils/zod";
-import { User } from "@supabase/supabase-js";
+import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
+import { createHmac } from "crypto";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
@@ -41,6 +38,17 @@ export const getDomainStatus = async (): Promise<boolean> => {
     return userObject.is_verified as boolean;
 };
 
+export const getTXTRecordValue = async (userId: string): Promise<string> => {
+    // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
+    // Increases security by preventing spoofing through ensuring only we can generate valid values
+    return createHmac(
+        "sha256",
+        process.env.DOMAIN_VALIDATION_SECRET_KEY as string
+    )
+        .update(userId) // based on user ID
+        .digest("base64url"); // safe for URL's
+};
+
 // Here we check whether the user has verified their domain or not from supabase.
 export const checkDomainRecords = async (): Promise<boolean> => {
     const { data: userData, error: dataError } = await getUserInfo();
@@ -50,12 +58,23 @@ export const checkDomainRecords = async (): Promise<boolean> => {
         return false;
     }
 
-    // TODO: Replace this with actual domain verification logic.
-    const result = await new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(true);
-        }, 50);
-    });
+    let result: boolean = false;
+    let domainURL: URL = new URL(userData.domain);
+    const txtRecords = await getDnsRecords(domainURL.hostname, "TXT");
+    const expectedTxtValue = await getTXTRecordValue(userData.id);
+
+    console.log("Expected Username: " + "uoft-webring-" + userData.id);
+    console.log("Expected Value: " + expectedTxtValue);
+    for (const record of txtRecords) {
+        if (
+            record.name === "uoft-webring-" + userData.id &&
+            record.data.includes(expectedTxtValue)
+        ) {
+            console.log("[CheckDomainRecords]: Domain Verified");
+            result = true;
+        }
+        console.log(record);
+    }
 
     if (result) {
         const { error } = await client
@@ -84,11 +103,7 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
     }
 
     // TODO: Replace this with actual domain verification logic.
-    const result = await new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(true);
-        }, 50);
-    });
+    const result: boolean = true;
 
     if (result) {
         const { error } = await client
