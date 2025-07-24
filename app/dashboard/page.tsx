@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Navbar from "@/components/navbar";
 import React from "react";
 import { getCurrentUser, getUserInfo } from "@/app/dashboard/actions";

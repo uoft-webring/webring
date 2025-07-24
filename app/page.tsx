@@ -1,4 +1,5 @@
-"use server";
+export const dynamic = "force-dynamic";
+
 import { fetchProfilesForRing } from "./homeComponents/actions";
 
 import Link from "next/link";
