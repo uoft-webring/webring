@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
 import { createHmac } from "crypto";
+import { UserType } from "@/utils/zod";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
