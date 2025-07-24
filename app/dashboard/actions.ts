@@ -53,7 +53,8 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 
     let result: boolean = false;
-    const txtRecords = await getDnsRecords(userData.domain as string, "TXT");
+    let domainURL: URL = new URL(userData.domain);
+    const txtRecords = await getDnsRecords(domainURL.hostname, "TXT");
 
     // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
     // Increases security by preventing spoofing through ensuring only we can generate valid values
@@ -64,6 +65,8 @@ export const checkDomainRecords = async (): Promise<boolean> => {
         .update(userData.id) // based on user ID
         .digest("base64url"); // safe for URL's
 
+    console.log("Expected Username: " + "uoft-webring-" + userData.id);
+    console.log("Expected Value: " + expectedTxtValue);
     for (const record of txtRecords) {
         if (
             record.name === "uoft-webring-" + userData.id &&
@@ -72,6 +75,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
             console.log("[CheckDomainRecords]: Domain Verified");
             result = true;
         }
+        console.log(record);
     }
 
     if (result) {
@@ -101,7 +105,7 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
     }
 
     // TODO: Replace this with actual domain verification logic.
-    const result = await checkDomainRecords();
+    const result: boolean = false;
 
     if (result) {
         const { error } = await client
