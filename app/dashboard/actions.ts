@@ -6,8 +6,6 @@ import { createAdminClient } from "@/utils/supabase/server";
 
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { UserType } from "@/utils/zod";
-import { User } from "@supabase/supabase-js";
 import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
 import { createHmac } from "crypto";
 
