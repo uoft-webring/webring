@@ -1,9 +1,6 @@
 "use server";
-import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
-
 import { createAdminClient } from "@/utils/supabase/server";
-
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
@@ -41,6 +38,17 @@ export const getDomainStatus = async (): Promise<boolean> => {
     return userObject.is_verified as boolean;
 };
 
+export const getTXTRecordValue = async (userId: string): Promise<string> => {
+    // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
+    // Increases security by preventing spoofing through ensuring only we can generate valid values
+    return createHmac(
+        "sha256",
+        process.env.NEXT_DOMAIN_VALIDATION_SECRET_KEY as string
+    )
+        .update(userId) // based on user ID
+        .digest("base64url"); // safe for URL's
+};
+
 // Here we check whether the user has verified their domain or not from supabase.
 export const checkDomainRecords = async (): Promise<boolean> => {
     const { data: userData, error: dataError } = await getUserInfo();
@@ -53,15 +61,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     let result: boolean = false;
     let domainURL: URL = new URL(userData.domain);
     const txtRecords = await getDnsRecords(domainURL.hostname, "TXT");
-
-    // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
-    // Increases security by preventing spoofing through ensuring only we can generate valid values
-    const expectedTxtValue = createHmac(
-        "sha256",
-        process.env.NEXT_DOMAIN_VALIDATION_SECRET_KEY as string
-    )
-        .update(userData.id) // based on user ID
-        .digest("base64url"); // safe for URL's
+    const expectedTxtValue = await getTXTRecordValue(userData.id);
 
     console.log("Expected Username: " + "uoft-webring-" + userData.id);
     console.log("Expected Value: " + expectedTxtValue);
@@ -103,7 +103,7 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
     }
 
     // TODO: Replace this with actual domain verification logic.
-    const result: boolean = false;
+    const result: boolean = true;
 
     if (result) {
         const { error } = await client
