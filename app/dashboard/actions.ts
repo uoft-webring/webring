@@ -182,6 +182,6 @@ export const getUserInfo = async () => {
 export const signOutAction = async () => {
     const supabase = await createClient();
     await supabase.auth.signOut();
+    revalidatePath("/");
     return redirect("/");
 };
-

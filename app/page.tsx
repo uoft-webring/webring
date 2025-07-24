@@ -8,6 +8,8 @@ import ProfileCarousel from "./homeComponents/Carousel";
 import RingSection from "./homeComponents/RingSection";
 import { ScrollText } from "./homeComponents/scrollText";
 import Logo from "@/components/logo";
+import { Suspense } from "react";
+import AuthButton from "./homeComponents/authButton";
 
 export default async function Home() {
     const { data, error } = await fetchProfilesForRing();
@@ -21,9 +23,9 @@ export default async function Home() {
         <>
             <nav className="absolute top-0 left-[50%] translate-x-[-50%] max-w-[85rem] w-full px-6 py-4 flex justify-between items-center z-999">
                 <Logo />
-                <Link href={"/signup"}>
-                    <Button>Sign up</Button>
-                </Link>
+                <Suspense fallback={<div>Loading...</div>}>
+                    <AuthButton />
+                </Suspense>
             </nav>
             <div className="overflow-clip">
                 <RingSection data={data} />
