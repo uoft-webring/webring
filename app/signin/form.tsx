@@ -43,7 +43,7 @@ export default function SigninForm() {
         <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
                 <div className="grid gap-6">
-                    <div className="grname gap-2">
+                    <div className="grid gap-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
                             name="email"
