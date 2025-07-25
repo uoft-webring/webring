@@ -48,8 +48,8 @@ export default async function Dashboard(props: {
     }
 
     return (
-        <>
-            <Navbar />
+        <div className="min-h-screen bg-background flex flex-col">
+            <Navbar user={authUser} imageData={userData.image_url} />
             {/* <ToastTrigger message="This is a message" messageType="error" /> */}
             <section className="max-w-[70rem] mx-auto w-full px-6 mt-8">
                 <h1 className="mb-4">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
@@ -148,6 +148,6 @@ export default async function Dashboard(props: {
             <div className="max-w-[70rem] mx-auto w-full px-6 mt-12">
                 {linkMap[targetTab]}
             </div>
-        </>
+        </div>
     );
 }
