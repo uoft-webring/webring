@@ -24,9 +24,11 @@ import {
     getSpherePosition,
     getXPosition,
 } from "./ringUtils";
-import { UserType } from "@/utils/zod";
+import { SafeUserType } from "@/utils/zod";
 
-export function ClientRing({ data }: { data: UserType[] }) {
+export function ClientRing({ data }: { data?: SafeUserType[] }) {
+    console.log("ClientRing", data);
+    if (!data) return <div></div>;
     return (
         <Canvas gl={{ antialias: true, alpha: true }} className="h-full w-full">
             <Scene data={data} />
@@ -34,7 +36,7 @@ export function ClientRing({ data }: { data: UserType[] }) {
     );
 }
 
-function Scene({ data }: { data: UserType[] }) {
+function Scene({ data }: { data: SafeUserType[] }) {
     const planeRef = useRef<THREE.Mesh>(null);
     const groupRef = useRef<THREE.Group>(null);
     const simplex = useMemo(() => new SimplexNoise(), []);
