@@ -123,16 +123,13 @@ function Scene({ data }: { data: UserType[] }) {
                             >
                                 <meshBasicMaterial color="#fff" wireframe />
                             </Sphere>
-                            <Suspense fallback={<></>}>
-                                <Billboard>
-                                    <Text
-                                        fontSize={0.4}
-                                        position={[0, -1.2, 0]}
-                                    >
-                                        {user.domain}
-                                    </Text>
-                                </Billboard>
-                            </Suspense>
+                            {/*  <Suspense fallback={<></>}> */}
+                            <Billboard>
+                                <Text fontSize={0.4} position={[0, -1.2, 0]}>
+                                    {user.domain}
+                                </Text>
+                            </Billboard>
+                            {/*   </Suspense> */}
                         </group>
                     );
                 })}
