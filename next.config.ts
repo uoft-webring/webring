@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
     /* config options here */
     productionBrowserSourceMaps: true,
 
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "api.dicebear.com",
+                pathname: "/**",
+            },
+        ],
+    },
     eslint: {
         ignoreDuringBuilds: true,
     },
