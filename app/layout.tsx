@@ -20,11 +20,9 @@ const oxanium = Oxanium({
 });
 
 export const metadata: Metadata = {
-    metadataBase: new URL("https://uoftwebring.com"),
     title: "UofT Webring",
     description:
         "Join the UofT Webring to connect with other University of Toronto students and showcase your personal website.",
-
     openGraph: {
         title: "UofT Webring",
         description:
