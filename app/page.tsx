@@ -1,14 +1,14 @@
 export const dynamic = "force-dynamic";
 
-import { fetchProfilesForRing } from "./homeComponents/actions";
+import { fetchProfilesForRing } from "../components/homeComponents/actions";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-import ProfileCarousel from "./homeComponents/Carousel";
-import RingSection from "./homeComponents/RingSection";
-import { ScrollText } from "./homeComponents/scrollText";
-import Logo from "@/components/logo";
+import ProfileCarousel from "../components/homeComponents/Carousel";
+import RingSection from "../components/homeComponents/RingSection";
+import { ScrollText } from "../components/homeComponents/ScrollText";
+import Logo from "@/components/Logo";
 import { createClient } from "@/utils/supabase/server";
 // import { Suspense } from "react";
 // import AuthButton from "./homeComponents/authButton";

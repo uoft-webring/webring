@@ -1,14 +1,14 @@
 export const dynamic = "force-dynamic";
 
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/Navbar";
 import React from "react";
 import { getCurrentUser, getUserInfo } from "@/app/dashboard/actions";
 import { redirect } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-import EditSection from "./edit/editSection";
-import JoinSection from "./join/joinSection";
-import VerifySection from "./verification/verifySection";
+import EditSection from "./edit/EditSection";
+import JoinSection from "./join/JoinSection";
+import VerifySection from "./verification/VerifySection";
 import Link from "next/link";
 
 type LowercaseGeneric<T extends object> = Lowercase<keyof T & string>;

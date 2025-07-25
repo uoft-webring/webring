@@ -1,13 +1,13 @@
 import React from "react";
-import CopyButton from "../copyButton";
+import CopyButton from "../CopyButton";
 
 import hljs from "highlight.js/lib/core";
 import xml from "highlight.js/lib/languages/xml";
 import "highlight.js/styles/github-dark.css";
 
 import { checkAddedCodeToPortfolio, getValidPortfolio } from "../actions";
-import StatusCard from "@/components/statusCard";
-import RecheckButton from "../recheckButton";
+import StatusCard from "@/components/StatusCard";
+import RecheckButton from "../RecheckButton";
 import { ExternalToast, toast } from "sonner";
 
 export default async function JoinSection({ id }: { id: number }) {

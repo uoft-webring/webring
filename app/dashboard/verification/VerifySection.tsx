@@ -1,7 +1,7 @@
 import React from "react";
-import StatusCard from "@/components/statusCard";
-import CopyButton from "../copyButton";
-import RecheckButton from "../recheckButton";
+import StatusCard from "@/components/StatusCard";
+import CopyButton from "../CopyButton";
+import RecheckButton from "../RecheckButton";
 
 import { UserType } from "@/utils/zod";
 

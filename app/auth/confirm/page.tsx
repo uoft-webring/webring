@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { verifyToken, resendMagicLink, canLoadPage } from "./actions";
-import CardForm from "@/components/cardForm";
+import CardForm from "@/components/CardForm";
 import {
     InputOTP,
     InputOTPGroup,

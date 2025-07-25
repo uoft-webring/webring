@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/kibo-ui/tags";
 import { CheckIcon } from "lucide-react";
 import { TAGS } from "@/utils/tags";
-import SkillTag from "../skillTag";
+import SkillTag from "../SkillTag";
 
 const Example = ({
     tags,

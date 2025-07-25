@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import CardForm from "@/components/cardForm";
-import SignupForm from "./form";
+import CardForm from "@/components/CardForm";
+import SignupForm from "./Form";
 import { getCurrentUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
 
