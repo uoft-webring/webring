@@ -58,9 +58,9 @@ export default async function Home() {
                         <Button>Sign up</Button>
                     </Link>
                 )}
-<!--                 <Suspense fallback={<div>Loading...</div>}>
+                {/* <Suspense fallback={<div>Loading...</div>}>
                     <AuthButton />
-                </Suspense> -->
+                </Suspense> */}
             </nav>
             <div className="overflow-clip">
                 <RingSection data={data} />
