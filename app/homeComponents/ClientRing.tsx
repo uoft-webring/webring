@@ -8,7 +8,7 @@ import {
     Billboard,
     Text,
 } from "@react-three/drei";
-import { useRef, useMemo, useState, useEffect } from "react";
+import { useRef, useMemo, useState, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
 import {
@@ -123,13 +123,16 @@ function Scene({ data }: { data: UserType[] }) {
                             >
                                 <meshBasicMaterial color="#fff" wireframe />
                             </Sphere>
-                            {/*  <Suspense fallback={<></>}> */}
-                            <Billboard>
-                                <Text fontSize={0.4} position={[0, -1.2, 0]}>
-                                    {user.domain}
-                                </Text>
-                            </Billboard>
-                            {/*   </Suspense> */}
+                            <Suspense fallback={<></>}>
+                                <Billboard>
+                                    <Text
+                                        fontSize={0.4}
+                                        position={[0, -1.2, 0]}
+                                    >
+                                        {user.domain}
+                                    </Text>
+                                </Billboard>
+                            </Suspense>
                         </group>
                     );
                 })}
