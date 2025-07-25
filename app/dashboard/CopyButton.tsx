@@ -2,10 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import copyIcon from "@/icons/copy.svg";
 import { CheckIcon } from "lucide-react";
-import copy from "copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 export default function CopyButton({
@@ -13,17 +12,19 @@ export default function CopyButton({
     className,
     ...props
 }: { codeString: string } & React.ComponentPropsWithoutRef<"button">) {
-    const [renderCheck, setRenderCheck] = useState(false);
+    const [copied, setCopied] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    const copyText = async () => {
+    const handleCopy = () => {
         if ("clipboard" in navigator) {
-            await navigator.clipboard.writeText(codeString);
-        } else {
-            copy(codeString);
+            // In _every_ modern browser this will not fail
+            navigator.clipboard.writeText(codeString);
         }
-        setRenderCheck(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setRenderCheck(false);
+        // TODO error handle
+
+        setCopied(true);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => setCopied(false), 1000);
     };
 
     return (
@@ -32,9 +33,9 @@ export default function CopyButton({
             className={cn("absolute top-2 right-2", className)}
             size={"icon"}
             variant={"outline"}
-            onClick={copyText}
+            onClick={handleCopy}
         >
-            {renderCheck ? (
+            {copied ? (
                 <CheckIcon />
             ) : (
                 <Image src={copyIcon} alt="Copy" className="size-4"></Image>
