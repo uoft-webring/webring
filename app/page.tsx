@@ -1,11 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import { fetchRingProfiles } from "./actions";
-import { createClient } from "@/utils/supabase/server";
 
 import Link from "next/link";
 import ProfileCarousel from "../components/homeComponents/Carousel";
-import RingSection from "../components/homeComponents/RingSection";
+import RingSection from "../components/Ring/RingSection";
 import Navbar from "@/components/Navbar";
 
 import { ScrollText } from "../components/homeComponents/ScrollText";
