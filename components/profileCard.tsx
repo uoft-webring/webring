@@ -1,13 +1,9 @@
 "use client";
-import { getUserInfo } from "@/app/dashboard/actions";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Loading from "./loadingComponent";
 import Image from "next/image";
-import { UserType } from "@/utils/zod";
-import { Button } from "./ui/button";
 import SkillTag from "./skillTag";
 
-import closeIcon from "@/icons/close.svg";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
 import verifiedIcon from "@/icons/verified.svg";

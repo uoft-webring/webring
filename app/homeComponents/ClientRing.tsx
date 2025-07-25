@@ -8,7 +8,7 @@ import {
     Billboard,
     Text,
 } from "@react-three/drei";
-import { useRef, useMemo, useState, useEffect, Suspense } from "react";
+import { useRef, useMemo, useState, useEffect } from "react";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
 import {

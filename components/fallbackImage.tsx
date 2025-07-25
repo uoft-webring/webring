@@ -1,5 +1,4 @@
 import { useState, useEffect} from "react";
-import Image, { ImageProps } from "next/image";
 import { cn } from "@/lib/utils";
 
 function FallbackImage({ className, ...props }: any) {

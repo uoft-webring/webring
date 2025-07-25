@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import { cva, VariantProps } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 

@@ -9,7 +9,6 @@ import { checkAddedCodeToPortfolio, getValidPortfolio } from "../actions";
 import StatusCard from "@/components/statusCard";
 import RecheckButton from "../recheckButton";
 import { ExternalToast, toast } from "sonner";
-import { isValid } from "zod";
 
 export default async function JoinSection({ id }: { id: number }) {
     const isValidPortfolio = await getValidPortfolio();

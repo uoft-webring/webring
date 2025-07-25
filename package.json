@@ -6,7 +6,8 @@
         "dev": "next dev --turbopack",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "lint:fix": "next lint --fix"
     },
     "dependencies": {
         "@layered/dns-records": "^2.3.0",
@@ -29,6 +30,7 @@
         "copy-to-clipboard": "^3.3.3",
         "dayjs": "^1.11.13",
         "dotenv": "^16.5.0",
+        "eslint-plugin-unused-imports": "^4.1.4",
         "framer-motion": "^12.16.0",
         "highlight.js": "^11.11.1",
         "input-otp": "^1.4.2",

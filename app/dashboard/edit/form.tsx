@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TagInputComponent from "@/components/ui/input-tag";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,7 +59,7 @@ export default function EditForm({
             // structuredClone produces a deep copy of No_ERRORS, otherwise
             // error states update after onChange of the next updated text field,
             // resulting in buggy ui.
-            let newErrors = structuredClone(NO_ERRORS);
+            const newErrors = structuredClone(NO_ERRORS);
             parseResult.error.issues.forEach((issue) => {
                 newErrors[issue.path[0] as UserKeys] = issue.message;
             });

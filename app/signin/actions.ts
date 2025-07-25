@@ -1,8 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
 
 export const signInAction = async (email: string) => {
     const supabase = await createClient();

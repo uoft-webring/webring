@@ -1,8 +1,6 @@
 "use server";
 
-import { createClient, createAdminClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { createAdminClient } from "@/utils/supabase/server";
 
 // TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {

@@ -2,7 +2,6 @@
 
 import { createAdminClient } from "@/utils/supabase/server";
 import { UserType } from "@/utils/zod";
-import { PostgrestError } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
 export const saveData = async (formData: UserType) => {

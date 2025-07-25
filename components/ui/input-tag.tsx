@@ -9,7 +9,6 @@ import {
     TagsItem,
     TagsList,
     TagsTrigger,
-    TagsValue,
 } from "@/components/ui/kibo-ui/tags";
 import { CheckIcon } from "lucide-react";
 import { TAGS } from "@/utils/tags";

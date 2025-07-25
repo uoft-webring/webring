@@ -2,7 +2,6 @@
 
 import loadingAnimation from "@/assets/loading-animation.json";
 // import loader from "@/assets/loading-animation.svg"; //TODO: Fix
-import Image from "next/image";
 // Importing Lottie, importing directly makes Lottie
 // think SSR is being used which causes errors
 import dynamic from "next/dynamic";

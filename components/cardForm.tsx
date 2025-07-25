@@ -6,10 +6,6 @@ import {
     CardHeader,
     CardTitle,
 } from "./ui/card";
-import { signUpAction } from "@/app/signup/actions";
-import { Label } from "@radix-ui/react-label";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 
 export default function CardForm({
     cardTitle,

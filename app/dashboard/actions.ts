@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { getDnsRecords, getAllDnsRecords } from "@layered/dns-records";
+import { getDnsRecords } from "@layered/dns-records";
 import { createHmac } from "crypto";
 import { UserType } from "@/utils/zod";
 
@@ -60,7 +60,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 
     let result: boolean = false;
-    let domainURL: URL = new URL(userData.domain);
+    const domainURL: URL = new URL(userData.domain);
     const txtRecords = await getDnsRecords(domainURL.hostname, "TXT");
     const expectedTxtValue = await getTXTRecordValue(userData.id);
 
