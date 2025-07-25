@@ -1,6 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-// import { createClient } from "@supabase/supabase-js";
-import { createAdminClient, SupabaseClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: __dirname + "/../../../.env.local" });
@@ -14,7 +12,7 @@ dotenv.config({ path: __dirname + "/../../../.env.local" });
 
 const supabase = createAdminClient();
 
-async function seed_users_random(index) {
+async function seed_users_random(index: number) {
     const name = `user${index}`; // generate random
     const email = `${name}@mail.utoronto.ca`;
     const domain = `https://${name}.com`;
