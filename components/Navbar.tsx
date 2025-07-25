@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "./ui/button";
 import { signOutAction } from "@/app/dashboard/actions";
-import Logo from "./logo";
+import Logo from "./Logo";
 
 export default function Navbar() {
     return (

@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
-import Loading from "./loadingComponent";
+import Loading from "./LoadingComponent";
 import Image from "next/image";
-import SkillTag from "./skillTag";
+import SkillTag from "./SkillTag";
 
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
 import verifiedIcon from "@/icons/verified.svg";
 import Link from "next/link";
-import FallbackImage from "./fallbackImage";
+import FallbackImage from "./FallbackImage";
 import { cn } from "@/lib/utils";
 
 export default function ProfileCard({

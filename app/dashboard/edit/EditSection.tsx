@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import EditForm from "./form";
+import EditForm from "./Form";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserType } from "@/utils/zod";
 import { getCurrentUserDataForClient } from "../actions";
-import ProfileCard from "@/components/profileCard";
+import ProfileCard from "@/components/ProfileCard";
 
 export default function EditSection() {
     const [data, setData] = useState<UserType | null>(null);
