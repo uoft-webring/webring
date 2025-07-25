@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { ClientRing } from "./ClientRing";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { SafeUserType } from "@/utils/zod";
 
-export default function RingSection({ data }: { data: any[] }) {
+export default function RingSection({ data }: { data: SafeUserType[] }) {
     const [fullSize, setFullSize] = useState<boolean>(false);
-
     const toggleSize = () => {
         setFullSize((fullSize) => !fullSize);
     };
