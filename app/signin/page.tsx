@@ -1,4 +1,4 @@
-"use server";
+export const dynamic = "force-dynamic";
 
 import CardForm from "@/components/cardForm";
 import SigninForm from "./form";

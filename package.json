@@ -9,6 +9,7 @@
         "lint": "next lint"
     },
     "dependencies": {
+        "@layered/dns-records": "^2.3.0",
         "@radix-ui/react-dialog": "^1.1.14",
         "@radix-ui/react-dropdown-menu": "^2.1.14",
         "@radix-ui/react-label": "^2.1.6",

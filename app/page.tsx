@@ -1,4 +1,5 @@
-"use server";
+export const dynamic = "force-dynamic";
+
 import { fetchProfilesForRing } from "./homeComponents/actions";
 
 import Link from "next/link";
@@ -9,6 +10,8 @@ import RingSection from "./homeComponents/RingSection";
 import { ScrollText } from "./homeComponents/scrollText";
 import Logo from "@/components/logo";
 import { createClient } from "@/utils/supabase/server";
+// import { Suspense } from "react";
+// import AuthButton from "./homeComponents/authButton";
 
 export default async function Home() {
     const { data, error } = await fetchProfilesForRing();
@@ -55,6 +58,9 @@ export default async function Home() {
                         <Button>Sign up</Button>
                     </Link>
                 )}
+<!--                 <Suspense fallback={<div>Loading...</div>}>
+                    <AuthButton />
+                </Suspense> -->
             </nav>
             <div className="overflow-clip">
                 <RingSection data={data} />

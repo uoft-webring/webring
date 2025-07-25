@@ -1,4 +1,5 @@
-"use server";
+export const dynamic = "force-dynamic";
+
 import CardForm from "@/components/cardForm";
 import SignupForm from "./form";
 import { getCurrentUser } from "../dashboard/actions";
