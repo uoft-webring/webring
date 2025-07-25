@@ -63,8 +63,8 @@ export default async function Home() {
                 </Suspense> */}
             </nav>
             <div className="overflow-clip">
-                {/*                 <RingSection data={data} />
-                 */}{" "}
+                {/* Temp check for null data */}
+                {data ? <RingSection data={data} /> : <></>}
                 <div className="px-4">
                     <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
                     <div className="max-w-[85rem] mx-auto overflow-clip">
