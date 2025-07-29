@@ -14,7 +14,7 @@ import { CheckIcon } from "lucide-react";
 import { TAGS } from "@/utils/tags";
 import SkillTag from "../SkillTag";
 
-const Example = ({
+const TagInputComponent = ({
     tags,
     onTagsChange,
     error,
@@ -24,6 +24,7 @@ const Example = ({
     onTagsChange: (tags: string[]) => void;
     error: string | undefined;
 } & React.ComponentProps<"div">) => {
+    // TODO fix the logic and var names
     const handleRemove = (value: string) => {
         if (!tags.includes(value)) {
             return;
@@ -66,12 +67,12 @@ const Example = ({
                         <TagsGroup>
                             {TAGS.map((tag) => (
                                 <TagsItem
-                                    key={tag.id}
+                                    key={tag}
                                     onSelect={handleSelect}
-                                    value={tag.id}
+                                    value={tag}
                                 >
-                                    {tag.label}
-                                    {tags.includes(tag.id) && (
+                                    {tag}
+                                    {tags.includes(tag) && (
                                         <CheckIcon
                                             className="text-muted-foreground"
                                             size={14}
@@ -88,4 +89,4 @@ const Example = ({
     );
 };
 
-export default Example;
+export default TagInputComponent;
