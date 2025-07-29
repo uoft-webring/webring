@@ -3,8 +3,6 @@ import StatusCard from "@/components/StatusCard";
 import CopyButton from "../CopyButton";
 import RecheckButton from "../RecheckButton";
 
-import { UserType } from "@/utils/zod";
-
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
 
@@ -15,9 +13,12 @@ import {
 } from "../actions";
 import { ExternalToast, toast } from "sonner";
 
-export default async function VerifySection({ user }: { user: UserType }) {
-    const domainTXTKey = "uoft-webring-" + user.id;
-    const domainTXTValue = await getTXTRecordValue(user.id);
+export default async function Verify() {
+    // TODO-J this is a state problem, provisioning temp ID below, fetch it later!!!
+    const id: number = 1;
+
+    const domainTXTKey = "uoft-webring-" + id;
+    const domainTXTValue = await getTXTRecordValue(String(id));
 
     hljs.registerLanguage("txt", yaml);
     const keyResult = hljs.highlight(domainTXTKey, {

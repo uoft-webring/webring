@@ -150,7 +150,7 @@ export const getValidPortfolio = async (): Promise<boolean> => {
     }
     return userObject.valid as boolean;
 };
-
+// TODO-J merge with getUserInfo
 export const getCurrentUserDataForClient =
     async (): Promise<UserType | null> => {
         const { data: userData, error: dataError } = await getUserInfo();
@@ -176,7 +176,7 @@ export const getCurrentUser = async () => {
 
     return { user, error };
 };
-
+// TODO-J merge with getCurrentUser
 export const getUserInfo = async () => {
     const supabase = await createClient();
     const { user: authUser, error } = await getCurrentUser();
