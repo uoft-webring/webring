@@ -7,15 +7,17 @@ import { UserType } from "@/utils/zod";
 import { getCurrentUserDataForClient } from "../actions";
 import ProfileCard from "@/components/ProfileCard";
 
-export default function EditSection() {
+export default function Edit() {
     const [data, setData] = useState<UserType | null>(null);
 
     //* Fetching inside a useEffect.
     //* May God forgive me.
 
+    // TODO-J fetch data use state
     useEffect(() => {
         async function fetchData() {
             // Simulate fetching data
+            //! FIX: THERE ARE THREE LEVELS OF CLIENT FETCHING
             const result = await getCurrentUserDataForClient();
             setData(result);
         }

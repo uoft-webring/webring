@@ -75,99 +75,98 @@ export default function EditForm({
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {};
+    // TODO-J refactor to flexbox
+    // add fake save button even though we auto save for UX
     return (
-        <>
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                }}
-            >
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <div className="grname gap-2 [&>*:not(label)]:mb-4 [&>*:not(label)]:mt-1">
-                            <Label
-                                htmlFor="name"
-                                className="after:content-['*'] after:text-destructive after:ml-1"
-                            >
-                                Name
-                            </Label>
-                            <Input
-                                name="name"
-                                type="text"
-                                placeholder="John Doe"
-                                required
-                                defaultValue={formData.name}
-                                onChange={(e) => {
-                                    saveToForm({ name: e.target.value });
-                                }}
-                                error={errors.name}
-                            />
-                            <Label
-                                htmlFor="email"
-                                className="after:content-['*'] after:text-destructive after:ml-1"
-                            >
-                                Email
-                            </Label>
-                            <Input
-                                disabled
-                                name="email"
-                                type="email"
-                                placeholder="your.email@mail.utoronto.ca"
-                                required
-                                defaultValue={formData.email}
-                                error={errors.email}
-                            />
-                            <Label
-                                htmlFor="domain"
-                                className="after:content-['*'] after:text-destructive after:ml-1"
-                            >
-                                Portfolio link
-                            </Label>
-                            <Input
-                                name="domain"
-                                type="url"
-                                placeholder="https://yourdomain.com"
-                                required
-                                defaultValue={formData.domain}
-                                onChange={(e) => {
-                                    saveToForm({
-                                        domain: e.target.value,
-                                        is_verified: false,
-                                    });
-                                }}
-                                error={errors.domain}
-                            />
-                            <Label htmlFor="github_url">GitHub link</Label>
-                            <Input
-                                name="github_url"
-                                type="url"
-                                placeholder="https://github.com/your-username"
-                                required
-                                defaultValue={formData.github_url ?? ""}
-                                onChange={(e) => {
-                                    saveToForm({ github_url: e.target.value });
-                                }}
-                                error={errors.github_url}
-                            />
-                            <Label htmlFor="image_url">
-                                Profile picture link
-                            </Label>
-                            <Input
-                                name="image_url"
-                                type="url"
-                                placeholder="https://yourdomain.com/profile.jpg"
-                                required
-                                defaultValue={formData.image_url ?? ""}
-                                onChange={(e) => {
-                                    // just do fetch, if fetch doesnt give 200
-                                    saveToForm({
-                                        image_url: e.target.value,
-                                    });
-                                }}
-                                error={errors.image_url}
-                            />
-                            <Label htmlFor="tags">Tags</Label>
-                            {/* <Input
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+            }}
+        >
+            <div className="grid gap-6">
+                <div className="grid gap-2">
+                    <div className="grname gap-2 [&>*:not(label)]:mb-4 [&>*:not(label)]:mt-1">
+                        <Label
+                            htmlFor="name"
+                            className="after:content-['*'] after:text-destructive after:ml-1"
+                        >
+                            Name
+                        </Label>
+                        <Input
+                            name="name"
+                            type="text"
+                            placeholder="John Doe"
+                            required
+                            defaultValue={formData.name}
+                            onChange={(e) => {
+                                saveToForm({ name: e.target.value });
+                            }}
+                            error={errors.name}
+                        />
+                        <Label
+                            htmlFor="email"
+                            className="after:content-['*'] after:text-destructive after:ml-1"
+                        >
+                            Email
+                        </Label>
+                        <Input
+                            disabled
+                            name="email"
+                            type="email"
+                            placeholder="your.email@mail.utoronto.ca"
+                            required
+                            defaultValue={formData.email}
+                            error={errors.email}
+                        />
+                        <Label
+                            htmlFor="domain"
+                            className="after:content-['*'] after:text-destructive after:ml-1"
+                        >
+                            Portfolio link
+                        </Label>
+                        <Input
+                            name="domain"
+                            type="url"
+                            placeholder="https://yourdomain.com"
+                            required
+                            defaultValue={formData.domain}
+                            onChange={(e) => {
+                                saveToForm({
+                                    domain: e.target.value,
+                                    is_verified: false,
+                                });
+                            }}
+                            error={errors.domain}
+                        />
+                        <Label htmlFor="github_url">GitHub link</Label>
+                        <Input
+                            name="github_url"
+                            type="url"
+                            placeholder="https://github.com/your-username"
+                            required
+                            defaultValue={formData.github_url ?? ""}
+                            onChange={(e) => {
+                                saveToForm({ github_url: e.target.value });
+                            }}
+                            error={errors.github_url}
+                        />
+                        <Label htmlFor="image_url">Profile picture link</Label>
+                        <Input
+                            name="image_url"
+                            type="url"
+                            placeholder="https://yourdomain.com/profile.jpg"
+                            required
+                            defaultValue={formData.image_url ?? ""}
+                            onChange={(e) => {
+                                // just do fetch, if fetch doesnt give 200
+                                saveToForm({
+                                    image_url: e.target.value,
+                                });
+                            }}
+                            error={errors.image_url}
+                        />
+                        <Label htmlFor="tags">Tags</Label>
+                        {/* <Input
                                 name="tags"
                                 type="text"
                                 placeholder="https://github.com/your-username"
@@ -180,38 +179,38 @@ export default function EditForm({
                                 }}
                                 error={errors.tags}
                             /> */}
-                            <TagInputComponent
-                                tags={formData.tags ?? []}
-                                onTagsChange={(tags: string[]) => {
-                                    // console.log("Saving", tags);
-                                    saveToForm({
-                                        tags:
-                                            JSON.stringify(tags) ===
-                                            JSON.stringify([])
-                                                ? null
-                                                : tags,
-                                    });
-                                }}
-                                error={errors.tags}
-                            />
-                            <Label htmlFor="tagline">Tagline</Label>
-                            <Textarea
-                                name="tagline"
-                                placeholder="John Doe is a full stack..."
-                                required
-                                remaining={
-                                    formData.tagline === null
-                                        ? 255
-                                        : 255 - formData.tagline.length
-                                }
-                                defaultValue={formData.tagline ?? ""}
-                                onChange={(e) => {
-                                    saveToForm({ tagline: e.target.value });
-                                }}
-                                error={errors.tagline}
-                            />
-                        </div>
-                        {/* <div className="flex justify-start items-center gap-4">
+                        <TagInputComponent
+                            tags={formData.tags ?? []}
+                            onTagsChange={(tags: string[]) => {
+                                // console.log("Saving", tags);
+                                saveToForm({
+                                    tags:
+                                        JSON.stringify(tags) ===
+                                        JSON.stringify([])
+                                            ? null
+                                            : tags,
+                                });
+                            }}
+                            error={errors.tags}
+                        />
+                        <Label htmlFor="tagline">Tagline</Label>
+                        <Textarea
+                            name="tagline"
+                            placeholder="John Doe is a full stack..."
+                            required
+                            remaining={
+                                formData.tagline === null
+                                    ? 255
+                                    : 255 - formData.tagline.length
+                            }
+                            defaultValue={formData.tagline ?? ""}
+                            onChange={(e) => {
+                                saveToForm({ tagline: e.target.value });
+                            }}
+                            error={errors.tagline}
+                        />
+                    </div>
+                    {/* <div className="flex justify-start items-center gap-4">
                             <Button variant={"secondary"} onClick={prev}>
                                 Back
                             </Button>
@@ -220,9 +219,8 @@ export default function EditForm({
                                 Continue
                             </Button>
                         </div> */}
-                    </div>
                 </div>
-            </form>
-        </>
+            </div>
+        </form>
     );
 }

@@ -10,8 +10,12 @@ import StatusCard from "@/components/StatusCard";
 import RecheckButton from "../RecheckButton";
 import { ExternalToast, toast } from "sonner";
 
-export default async function JoinSection({ id }: { id: number }) {
+export default async function Join() {
     const isValidPortfolio = await getValidPortfolio();
+
+    // TODO-J this is a state problem, provisioning temp ID below, fetch it later!!!
+    const id: number = 1;
+
     const codeString = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
