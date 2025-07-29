@@ -18,23 +18,6 @@ export default function ProfileCard({
 }: {
     userData: any;
 } & React.ComponentPropsWithoutRef<"div">) {
-    // const [userData, setUserData] = useState<UserType | undefined>(undefined);
-
-    /* useEffect(() => {
-        const fetchData = async () => {
-            const { user, error } = await getUserInfo();
-
-            if (!user) {
-                // TODO: Handle this error (if user exists but isn't in the profile database)
-            } else {
-                console.log(user);
-                setUserData(user);
-            }
-        };
-
-        fetchData();
-    }, []); */
-
     return (
         <div
             className={cn(
