@@ -1,31 +1,28 @@
-export const dynamic = "force-dynamic";
-
 import { fetchRingProfiles } from "./actions";
 
 import Link from "next/link";
 import ProfileCarousel from "../components/homeComponents/Carousel";
-import RingSection from "../components/Ring/RingSection";
 import Navbar from "@/components/Navbar";
 
 import { ScrollText } from "../components/homeComponents/ScrollText";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser, getUserInfo } from "./dashboard/actions";
+import { getUserProfile } from "./dashboard/actions";
+import { WebRing } from "@/components/Ring/WebRing";
 
 export default async function Home() {
     const { ringProfiles, error } = await fetchRingProfiles();
-    const { user: authUser, error: authError } = await getCurrentUser();
-    const { data: userData, error: userError } = await getUserInfo();
+    const { data: userData, error: userError } = await getUserProfile();
 
     if (!ringProfiles) {
-        console.error("Error fetching profiles:", error);
+        console.error("[Home] Error fetching profiles:", error);
         return <p>Error loading profiles.</p>;
     }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <Navbar user={authUser} imageData={userData.image_url} />
+            <Navbar user={userData} imageData={userData.image_url} />
             <div className="overflow-clip">
-                <RingSection data={ringProfiles} />
+                <WebRing data={ringProfiles} />
                 <div className="px-4">
                     <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
                     <div className="max-w-[85rem] mx-auto overflow-clip">
