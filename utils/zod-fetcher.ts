@@ -3,7 +3,8 @@ export const validateUrl = async (val: string) => {
     console.log("Fetching", val);
     console.log("\n\n\n");
     try {
-        const result = await fetch(val);
+        // Fetch without downloading the body
+        const result = await fetch(val, { method: "HEAD" });
         console.log(result);
         return result.ok;
     } catch {
