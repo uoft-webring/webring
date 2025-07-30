@@ -1,23 +1,48 @@
-import { useState, useEffect} from "react";
-import { cn } from "@/lib/utils";
+"use client";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 
-function FallbackImage({ className, ...props }: any) {
+type FallbackImageProps = {
+    src?: string;
+    ringId: number;
+    className?: string;
+    alt?: string;
+    width?: number;
+    height?: number;
+};
+
+function FallbackImage({
+    src,
+    ringId,
+    className = "",
+    alt = "",
+    width = 128,
+    height = 128,
+}: FallbackImageProps) {
     const [imageError, setImageError] = useState(false);
-    const fallbackSrc = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${props.ringId}&radius=50`
+    const fallbackSrc = `https://api.dicebear.com/9.x/bottts-neutral/png?seed=${ringId}&radius=50`;
 
     useEffect(() => {
         setImageError(false);
-    }, [props.src]);
+    }, [src]);
 
     return (
-        <img
-            src={(imageError || !props.src) ? fallbackSrc : props.src}
-            className={cn("object-cover", className)}
-            onError={(e) => {
-                console.log("Profile error! Switching to fallback");
-                
+        <Image
+            src={imageError || !src ? fallbackSrc : src}
+            width={width}
+            height={height}
+            className={`object-cover ${className}`}
+            alt={alt}
+            onError={(err) => {
+                console.log(
+                    "[FallbackImage] Profile Image error! Switching to fallback: ",
+                    err
+                );
                 setImageError(true);
             }}
+            priority={false}
+            loading="lazy"
+            unoptimized // Optimized Images won't allow arb. domains
         />
     );
 }
