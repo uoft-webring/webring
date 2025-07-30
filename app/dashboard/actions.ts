@@ -13,7 +13,7 @@ const client = createAdminClient();
 
 // Here, we fetch the verification status of a user from supabase.
 export const getDomainStatus = async (): Promise<boolean> => {
-    const { data: userData, error: dataError } = await getUserInfo();
+    const { data: userData, error: dataError } = await getUserProfile();
 
     if (!userData) {
         return false;
@@ -52,7 +52,7 @@ export const getTXTRecordValue = async (userId: string): Promise<string> => {
 
 // Here we check whether the user has verified their domain or not from supabase.
 export const checkDomainRecords = async (): Promise<boolean> => {
-    const { data: userData, error: dataError } = await getUserInfo();
+    const { data: userData, error: dataError } = await getUserProfile();
 
     if (dataError) {
         console.error("Error fetching user data:", dataError);
@@ -96,7 +96,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
 
 // Here we check whether the user has a valid portfolio or not from supabase.
 export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
-    const { data: userData, error: dataError } = await getUserInfo();
+    const { data: userData, error: dataError } = await getUserProfile();
 
     if (dataError) {
         console.error("Error fetching user data:", dataError);
@@ -124,51 +124,36 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
 };
 
 // Here we fetch the domain to see whether the user added the links on their page or not.
-export const getValidPortfolio = async (): Promise<boolean> => {
-    const { data: userData, error: dataError } = await getUserInfo();
-
+export const getValidPortfolio = async (
+    userData?: UserType
+): Promise<boolean> => {
     if (!userData) {
-        return false;
+        const { data: fetchedUserData, error: dataError } =
+            await getUserProfile();
+        if (!fetchedUserData) {
+            return false;
+        }
+        userData = fetchedUserData;
     }
 
     console.log(`Fetching verification status for user ID: ${userData.id}`);
 
     const { data, error } = await client
-        .from("profile") // Select the 'profiles' table
-        .select("valid") // We only need the 'is_verified' column
-        .eq("id", userData.id); // Find the row where 'id' matches
+        .from("profile")
+        .select("valid")
+        .eq("id", userData.id);
 
     console.log(data);
     if (!data) {
-        console.error("Error fetching verification status:", error.message);
+        console.error("Error fetching verification status:", error?.message);
         return false;
     }
 
     const userObject = data.at(0);
-    if (userObject === undefined) {
-        return false;
-    }
-    return userObject.valid as boolean;
+    return userObject?.valid === true;
 };
-// TODO-J merge with getUserInfo
-export const getCurrentUserDataForClient =
-    async (): Promise<UserType | null> => {
-        const { data: userData, error: dataError } = await getUserInfo();
 
-        if (dataError) {
-            console.error("Error fetching user data:", dataError);
-            return null;
-        }
-
-        if (!userData) {
-            return null;
-        }
-
-        // Return the user data
-        return userData as UserType;
-    };
-
-export const getCurrentUser = async () => {
+export const getAuthUser = async () => {
     const supabase = await createClient(); // Get the Supabase client instance
 
     const { data, error } = await supabase.auth.getUser();
@@ -176,10 +161,10 @@ export const getCurrentUser = async () => {
 
     return { user, error };
 };
-// TODO-J merge with getCurrentUser
-export const getUserInfo = async () => {
+
+export const getUserProfile = async () => {
     const supabase = await createClient();
-    const { user: authUser, error } = await getCurrentUser();
+    const { user: authUser, error } = await getAuthUser();
     if (!authUser) {
         redirect("/signup");
     }

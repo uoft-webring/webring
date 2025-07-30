@@ -52,7 +52,7 @@ export async function fetchRingProfiles(): Promise<FetchRingProfilesResponse> {
         };
     }
     return {
-        ringProfiles: parsedData.data,
+        ringProfiles: parsedData.data as SafeUserType[],
         error: null,
     };
 }

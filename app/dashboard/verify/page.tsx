@@ -1,7 +1,6 @@
-import React from "react";
 import StatusCard from "@/components/StatusCard";
-import CopyButton from "../CopyButton";
-import RecheckButton from "../RecheckButton";
+import CopyButton from "../../../components/CopyButton";
+import RecheckButton from "../../../components/RecheckButton";
 
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
