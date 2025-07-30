@@ -38,7 +38,7 @@ export default function CopyButton({
             {copied ? (
                 <CheckIcon />
             ) : (
-                <Image src={copyIcon} alt="Copy" className="size-4"></Image>
+                <Image src={copyIcon} alt="Copy" className="size-4" />
             )}
         </Button>
     );
