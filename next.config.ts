@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
     /* config options here */
     productionBrowserSourceMaps: true,
-
+    reactStrictMode: true,
     images: {
         remotePatterns: [
             {
@@ -11,6 +11,13 @@ const nextConfig: NextConfig = {
                 hostname: "api.dicebear.com",
                 pathname: "/**",
             },
+            /*  {
+                // TODO-A This feels like a bad security issue - but we need it for user uploaded img URL's
+                protocol: "https",
+                hostname: "**",
+                port: "",
+                pathname: "**",
+            }, */
         ],
     },
     eslint: {

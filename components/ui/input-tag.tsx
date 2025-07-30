@@ -49,10 +49,8 @@ const TagInputComponent = ({
             <Tags>
                 <TagsTrigger>
                     {tags.map((tag) => (
-                        /* {/* <TagsValue key={tag} onRemove={() => handleRemove(tag)}>
-                            {TAGS.find((t) => t.id === tag)?.label}
-                        </TagsValue> */
                         <SkillTag
+                            key={tag} // Unique by assumption
                             tagName={tag}
                             size="mini"
                             onClick={() => handleRemove(tag)}
