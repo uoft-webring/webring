@@ -65,7 +65,6 @@ interface SkillTagProps extends React.ComponentProps<"div"> {
 
 const SkillTag: React.FC<SkillTagProps> = ({
     tagName,
-    index,
     size = "default", // Default to "default" variant
     deleteButton = false,
     ...props
@@ -81,7 +80,6 @@ const SkillTag: React.FC<SkillTagProps> = ({
 
     return (
         <div
-            key={index}
             className={cn(
                 { "flex items-center justify-center": deleteButton },
                 tagContainerStyles,
@@ -94,15 +92,13 @@ const SkillTag: React.FC<SkillTagProps> = ({
                 {tagName}
             </p>
             {deleteButton && (
-                <button
+                <Delete
                     className="ml-2 text-white hover:text-red-500"
                     onClick={() => {
                         // Handle delete action here
                         console.log(`Delete tag: ${tagName}`);
                     }}
-                >
-                    <Delete className="-ml-1 w-4 h-4" />
-                </button>
+                />
             )}
         </div>
     );
