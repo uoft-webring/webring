@@ -60,7 +60,7 @@ export default function ProfileCard({
             <div className="flex flex-row flex-wrap justify-center gap-4  items-center mt-auto">
                 {user.github_url && (
                     <Link
-                        href={user.github_url}
+                        href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         className="flex items-center"
                     >

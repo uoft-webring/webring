@@ -59,6 +59,7 @@ export function createAdminClient() {
         // }
     );
 }
+
 export function createServiceClient() {
     return createServiceRoleClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

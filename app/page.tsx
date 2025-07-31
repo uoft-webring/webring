@@ -1,3 +1,5 @@
+"use server";
+
 import { fetchRingProfiles } from "./actions";
 
 import Link from "next/link";
@@ -6,12 +8,12 @@ import Navbar from "@/components/Navbar";
 
 import { ScrollText } from "../components/homeComponents/ScrollText";
 import { Button } from "@/components/ui/button";
-import { getUserProfile } from "./dashboard/actions";
+import { getUserProfile } from "./actions";
 import { WebRing } from "@/components/Ring/WebRing";
 
 export default async function Home() {
     const { ringProfiles, error } = await fetchRingProfiles();
-    const { data: userData, error: userError } = await getUserProfile();
+    const { data: userData, error: userError } = await getUserProfile(); // TODO: use userError?
 
     if (!ringProfiles) {
         console.error("[Home] Error fetching profiles:", error);
@@ -20,7 +22,7 @@ export default async function Home() {
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <Navbar user={userData} imageData={userData.image_url} />
+            <Navbar user={userData} imageData={userData?.image_url || ""} />
             <div className="overflow-clip">
                 <WebRing data={ringProfiles} />
                 <div className="px-4">

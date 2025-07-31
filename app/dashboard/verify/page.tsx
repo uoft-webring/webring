@@ -1,5 +1,5 @@
 import StatusCard from "@/components/StatusCard";
-import RecheckButton from "../../../components/RecheckButton";
+import RecheckButton from "@/components/RecheckButton";
 
 import {
     checkDomainRecords,

@@ -1,6 +1,5 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/utils/supabase/server";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getDnsRecords } from "@layered/dns-records";
@@ -9,11 +8,12 @@ import { UserType } from "@/utils/zod";
 
 // TODO: RLS to allow regular client to access this?
 // TODO: Should be an issue since this is on the server
-const client = createAdminClient();
 
 // TODO-A @TheAmanM please rewrite function names and descriptions to make more sense
 // Here, we fetch the verification status of a user from supabase.
 export const getDomainStatus = async (): Promise<boolean> => {
+    const supabase = await createClient();
+
     const { data: userData, error: dataError } = await getUserProfile();
 
     if (!userData) {
@@ -22,7 +22,7 @@ export const getDomainStatus = async (): Promise<boolean> => {
 
     console.log(`Fetching verification status for user ID: ${userData.id}`);
 
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("profile") // Select the 'profiles' table
         .select("is_verified") // We only need the 'is_verified' column
         .eq("id", userData.id); // Find the row where 'id' matches
@@ -53,6 +53,8 @@ export const getTXTRecordValue = async (userId: string): Promise<string> => {
 
 // Here we check whether the user has verified their domain or not from supabase.
 export const checkDomainRecords = async (): Promise<boolean> => {
+    const supabase = await createClient();
+
     const { data: userData, error: dataError } = await getUserProfile();
 
     if (dataError) {
@@ -79,7 +81,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 
     if (result) {
-        const { error } = await client
+        const { error } = await supabase
             .from("profile")
             .update({ is_verified: true })
             .eq("id", userData.id)
@@ -97,6 +99,8 @@ export const checkDomainRecords = async (): Promise<boolean> => {
 
 // Here we check whether the user has a valid portfolio or not from supabase.
 export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
+    const supabase = await createClient();
+
     const { data: userData, error: dataError } = await getUserProfile();
 
     if (dataError) {
@@ -108,7 +112,7 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
     const result: boolean = true;
 
     if (result) {
-        const { error } = await client
+        const { error } = await supabase
             .from("profile")
             .update({ valid: true })
             .eq("id", userData.id)
@@ -128,6 +132,8 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
 export const getValidPortfolio = async (
     userData?: UserType
 ): Promise<boolean> => {
+    const supabase = await createClient();
+
     if (!userData) {
         const { data: fetchedUserData, error: dataError } =
             await getUserProfile();
@@ -139,7 +145,7 @@ export const getValidPortfolio = async (
 
     console.log(`Fetching verification status for user ID: ${userData.id}`);
 
-    const { data, error } = await client
+    const { data, error } = await supabase
         .from("profile")
         .select("valid")
         .eq("id", userData.id);
@@ -165,15 +171,11 @@ export const getAuthUser = async () => {
 
 export const getUserProfile = async () => {
     const supabase = await createClient();
-    const { user: authUser, error } = await getAuthUser();
-    if (!authUser) {
-        redirect("/signup");
-    }
 
     const { data: userData, error: dataError } = await supabase
         .from("profile")
-        .select("*")
-        .eq("id", authUser.id);
+        .select("*");
+
     return {
         data: userData?.at(0) as UserType,
         error: dataError,
