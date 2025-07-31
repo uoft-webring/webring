@@ -1,20 +1,21 @@
-import React from "react";
-
 import hljs from "highlight.js/lib/core";
 import xml from "highlight.js/lib/languages/xml";
 import "highlight.js/styles/github-dark.css";
-
-import { checkAddedCodeToPortfolio, getValidPortfolio } from "../actions";
+import {
+    checkAddedCodeToPortfolio,
+    getUserProfile,
+    getValidPortfolio,
+} from "../actions";
 import StatusCard from "@/components/StatusCard";
 import { ExternalToast, toast } from "sonner";
-import RecheckButton from "@/components/RecheckButton";
-import CopyButton from "@/components/CopyButton";
+import CodeSnippet from "@/components/CodeSnippet";
 
 export default async function Join() {
-    // TODO there is a useContext surrounding this, that can be used for state
-    const isValidPortfolio = await getValidPortfolio();
+    const { data: userData, error: userError } = await getUserProfile();
 
-    const id: number = 1;
+    const isValidPortfolio = await getValidPortfolio(userData);
+
+    const id: number = userData.ring_id;
 
     const codeString = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
@@ -29,7 +30,6 @@ export default async function Join() {
 </div>`;
 
     const action = async () => {
-        "use server";
         const result = await checkAddedCodeToPortfolio();
         const options: ExternalToast = {
             position: "top-center",
@@ -57,27 +57,26 @@ export default async function Join() {
                 Copy the HTML code and paste it into your portfolio to join the
                 community.
             </p>
-            <div className="relative mb-6">
-                <pre>
-                    <code
-                        className="hljs language-handlebars rounded-xl"
-                        dangerouslySetInnerHTML={{
-                            __html: codeResult,
-                        }}
-                    />
-                </pre>
-                <CopyButton codeString={codeString} />
-            </div>
+            {/*   <pre>
+                <code
+                    className="hljs language-handlebars rounded-xl"
+                    dangerouslySetInnerHTML={{
+                        __html: codeResult,
+                    }}
+                />
+            </pre> */}
+            <CodeSnippet codeString={codeString} />
+
             <StatusCard
                 showCTA={false}
                 showButton={false}
                 status={isValidPortfolio ? "connected" : "disconnected"}
             />
-            {!isValidPortfolio && (
-                <form action={action}>
+            {/*   {!isValidPortfolio && (
+                <Form action={action}>
                     <RecheckButton />
-                </form>
-            )}
+                </Form>
+            )} */}
         </section>
     );
 }

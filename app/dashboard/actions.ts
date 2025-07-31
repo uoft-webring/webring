@@ -11,6 +11,7 @@ import { UserType } from "@/utils/zod";
 // TODO: Should be an issue since this is on the server
 const client = createAdminClient();
 
+// TODO-A @TheAmanM please rewrite function names and descriptions to make more sense
 // Here, we fetch the verification status of a user from supabase.
 export const getDomainStatus = async (): Promise<boolean> => {
     const { data: userData, error: dataError } = await getUserProfile();
