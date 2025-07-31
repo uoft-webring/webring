@@ -57,7 +57,7 @@ export default function ProfileCard({
             <p className="text-wrap break-all text-center mb-4">
                 {user.tagline}
             </p>
-            <div className="flex flex-row flex-wrap justify-center gap-4  items-center">
+            <div className="flex flex-row flex-wrap justify-center gap-4  items-center mt-auto">
                 {user.github_url && (
                     <Link
                         href={user.github_url}
