@@ -22,6 +22,7 @@ HOME_DOMAIN =https://ourdomain/
 #    S3 Secret Key: 850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907
 #        S3 Region: local
 ```
+
 You will also require a `DOMAIN_VALIDATION_SECRET_KEY`.
 
 ## Getting Started

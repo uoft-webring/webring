@@ -1,12 +1,10 @@
-export const dynamic = "force-dynamic";
-
-import CardForm from "@/components/cardForm";
-import SigninForm from "./form";
-import { getCurrentUser } from "../dashboard/actions";
+import CardForm from "@/components/CardForm";
+import SigninForm from "./Form";
+import { getAuthUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
 
 export default async function Signin() {
-    const { user } = await getCurrentUser();
+    const { user } = await getAuthUser();
 
     if (user) {
         redirect("/dashboard");

@@ -1,6 +1,6 @@
 "use client";
 
-import { getCurrentUser, signOutAction } from "../dashboard/actions";
+import { getAuthUser, signOutAction } from "../../app/dashboard/actions";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react"; // Import useState and useEffect
@@ -15,7 +15,7 @@ export default function AuthButton() {
         async function fetchUser() {
             setLoading(true);
             const { user: fetchedUser, error: fetchedError } =
-                await getCurrentUser();
+                await getAuthUser();
             setUser(fetchedUser);
             setError(fetchedError);
             setLoading(false);

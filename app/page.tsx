@@ -1,75 +1,33 @@
-export const dynamic = "force-dynamic";
-
-import { fetchProfilesForRing } from "./homeComponents/actions";
+import { fetchRingProfiles } from "./actions";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import ProfileCarousel from "../components/homeComponents/Carousel";
+import Navbar from "@/components/Navbar";
 
-import ProfileCarousel from "./homeComponents/Carousel";
-import RingSection from "./homeComponents/RingSection";
-import { ScrollText } from "./homeComponents/scrollText";
-import Logo from "@/components/logo";
-import { createClient } from "@/utils/supabase/server";
-// import { Suspense } from "react";
-// import AuthButton from "./homeComponents/authButton";
+import { ScrollText } from "../components/homeComponents/ScrollText";
+import { Button } from "@/components/ui/button";
+import { getUserProfile } from "./dashboard/actions";
+import { WebRing } from "@/components/Ring/WebRing";
 
 export default async function Home() {
-    const { data, error } = await fetchProfilesForRing();
+    const { ringProfiles, error } = await fetchRingProfiles();
+    const { data: userData, error: userError } = await getUserProfile();
 
-    const supabase = await createClient();
-    const {
-        data: { user },
-        error: authError,
-    } = await supabase.auth.getUser();
-
-    const { data: image_data, error: fetchError } = await supabase
-        .from("profile")
-        .select("*")
-        .eq("id", user?.id);
-
-    const userData = image_data?.at(0);
-    const fallbackSrc = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${userData?.ring_id}&radius=50`;
-
-    if (!data) {
-        console.error("Error fetching profiles:", error);
+    if (!ringProfiles) {
+        console.error("[Home] Error fetching profiles:", error);
         return <p>Error loading profiles.</p>;
     }
 
     return (
-        <>
-            <nav className="absolute top-0 left-[50%] translate-x-[-50%] max-w-[85rem] w-full px-6 py-4 flex justify-between items-center z-999">
-                <Logo />
-                {user ? (
-                    <Link href="/dashboard">
-                        <img
-                            src={
-                                !userData?.image_url
-                                    ? fallbackSrc
-                                    : userData?.image_url
-                            }
-                            className={`rounded-full w-14 aspect-square
-                                "border-4 border-card outline-4 outline-white"
-                            }`}
-                            alt="Profile picture"
-                        />
-                    </Link>
-                ) : (
-                    <Link href={"/signup"}>
-                        <Button>Sign up</Button>
-                    </Link>
-                )}
-                {/* <Suspense fallback={<div>Loading...</div>}>
-                    <AuthButton />
-                </Suspense> */}
-            </nav>
+        <div className="min-h-screen bg-background flex flex-col">
+            <Navbar user={userData} imageData={userData.image_url} />
             <div className="overflow-clip">
-                {/* Temp check for null data */}
-                {data ? <RingSection data={data} /> : <></>}
+                <WebRing data={ringProfiles} />
                 <div className="px-4">
                     <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
                     <div className="max-w-[85rem] mx-auto overflow-clip">
-                        {data ? (
-                            <ProfileCarousel data={data} />
+                        {ringProfiles ? (
+                            <ProfileCarousel data={ringProfiles} />
                         ) : (
                             <p>No data</p>
                         )}
@@ -113,6 +71,6 @@ export default async function Home() {
                     View on GitHub
                 </Link>
             </footer>
-        </>
+        </div>
     );
 }

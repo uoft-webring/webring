@@ -1,26 +1,15 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import EditForm from "./form";
+import { useState } from "react";
+import EditForm from "./Form";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserType } from "@/utils/zod";
-import { getCurrentUserDataForClient } from "../actions";
-import ProfileCard from "@/components/profileCard";
+import ProfileCard from "@/components/ProfileCard";
+import { useUser } from "../UserProvider";
 
-export default function EditSection() {
-    const [data, setData] = useState<UserType | null>(null);
-
-    //* Fetching inside a useEffect.
-    //* May God forgive me.
-
-    useEffect(() => {
-        async function fetchData() {
-            // Simulate fetching data
-            const result = await getCurrentUserDataForClient();
-            setData(result);
-        }
-        fetchData();
-    }, []);
+export default function Edit() {
+    const user: UserType = useUser();
+    const [data, setData] = useState<UserType | null>(user);
 
     if (!data) {
         return <p>Loading...</p>; // or a loading spinner
@@ -45,7 +34,7 @@ export default function EditSection() {
                     <p className="mb-6">
                         Preview your profile live, as you make changes.
                     </p>
-                    <ProfileCard userData={data} />
+                    <ProfileCard user={data} />
                 </TabsContent>
             </Tabs>
             <section className="hidden lg:flex items-start justify-center gap-12 [&>*]:grow [&>*]:shrink [&>*]:basis-0">
@@ -61,7 +50,7 @@ export default function EditSection() {
                     <p className="mb-6 lg:text-base">
                         Preview your profile live, as you make changes.
                     </p>
-                    <ProfileCard userData={data} />
+                    <ProfileCard user={data} />
                 </div>
             </section>
         </>

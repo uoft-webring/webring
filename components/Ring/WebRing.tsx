@@ -24,17 +24,47 @@ import {
     getSpherePosition,
     getXPosition,
 } from "./ringUtils";
-import { UserType } from "@/utils/zod";
+import { SafeUserType } from "@/utils/zod";
+import { Button } from "../ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function ClientRing({ data }: { data: UserType[] }) {
+export function WebRing({ data }: { data: SafeUserType[] }) {
+    console.log("[WebRing]", data);
+    const [fullSize, setFullSize] = useState<boolean>(false);
+    const toggleSize = () => {
+        setFullSize((fullSize) => !fullSize);
+    };
+
+    if (!data) return <div></div>;
     return (
-        <Canvas gl={{ antialias: true, alpha: true }} className="h-full w-full">
-            <Scene data={data} />
-        </Canvas>
+        <div
+            className={cn(
+                "relative max-w-svw w-full flex flex-col items-center justify-center mb-8 transition-all",
+                { "h-[calc(100svh-6rem)]": fullSize },
+                { "h-[calc(100svh-36rem)]": !fullSize }
+            )}
+        >
+            <Canvas
+                gl={{ antialias: true, alpha: true }}
+                className="h-full w-full"
+            >
+                <Scene data={data} />
+            </Canvas>
+            <div className="max-h-fit w-full items-center justify-center flex flex-col mt-2">
+                <Button size="icon" variant="outline" onClick={toggleSize}>
+                    {fullSize ? (
+                        <ChevronUp className="size-8" />
+                    ) : (
+                        <ChevronDown className="size-8" />
+                    )}
+                </Button>
+            </div>
+        </div>
     );
 }
 
-function Scene({ data }: { data: UserType[] }) {
+function Scene({ data }: { data: SafeUserType[] }) {
     const planeRef = useRef<THREE.Mesh>(null);
     const groupRef = useRef<THREE.Group>(null);
     const simplex = useMemo(() => new SimplexNoise(), []);
