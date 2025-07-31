@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
@@ -11,7 +12,7 @@ type FallbackImageProps = {
     height?: number;
 };
 
-function FallbackImage({
+export default function FallbackImage({
     src,
     ringId,
     className = "",
@@ -46,5 +47,3 @@ function FallbackImage({
         />
     );
 }
-
-export default FallbackImage;

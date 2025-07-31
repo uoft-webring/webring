@@ -1,12 +1,12 @@
 "use server";
 
-import { createAdminClient } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
 import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
 
 export const saveData = async (formData: UserType) => {
     try {
-        const supabase = createAdminClient();
+        const supabase = await createClient();
         const result = await supabase
             .from("profile") // Replace with your table name
             .update({

@@ -142,11 +142,11 @@ export default function EditForm({
                     }}
                     error={errors.domain}
                 />
-                <Label htmlFor="github_url">GitHub link</Label>
+                <Label htmlFor="github_url">GitHub User</Label>
                 <Input
                     name="github_url"
                     type="url"
-                    placeholder="https://github.com/torvalds"
+                    placeholder="torvalds"
                     required
                     defaultValue={formData.github_url ?? ""}
                     onChange={(e) => {

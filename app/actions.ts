@@ -1,8 +1,16 @@
 "use server";
 
-import { createAdminClient } from "@/utils/supabase/server";
+import {
+    createAdminClient,
+    createClient,
+    createServiceClient,
+} from "@/utils/supabase/server";
 import { SafeUser, SafeUserType } from "@/utils/zod";
 import { PostgrestError } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
+import { UserType } from "@/utils/zod";
+import { getAuthUser } from "./dashboard/actions";
+import { redirect } from "next/navigation";
 
 type FetchRingProfilesResponse =
     | {
@@ -17,10 +25,12 @@ type FetchRingProfilesResponse =
 export async function fetchRingProfiles(): Promise<FetchRingProfilesResponse> {
     console.log("FETCHING PROFILES FOR RING");
     // First, we get the client and fetch everything
-    const supabase = createAdminClient();
+    const supabase = createAdminClient(); // Requires admin client to bypass RLS
     const { data, error } = await supabase
         .from("profile")
-        .select("*")
+        .select(
+            "ring_id, tagline, domain, name, valid, github_url, image_url, is_verified, tags"
+        )
         .order("ring_id", { ascending: true });
 
     if (error) {
@@ -37,22 +47,21 @@ export async function fetchRingProfiles(): Promise<FetchRingProfilesResponse> {
     // Currently, no filtering is being done since a valid domain is required upon registration
     // Below is some boiletplate code.
 
-    /* newData = newData.filter((profile) => {
-            return profile.
-        }) */
-
-    // Since the data we are getting is exactly like the data we want to return,
-    // we can parse it directly into SafeUser[]
-    // If the data is not in the correct format, it will throw an error
-    const parsedData = await SafeUser.array().safeParseAsync(data);
-    if (!parsedData.success) {
-        return {
-            ringProfiles: null,
-            error: "Error: Failed to parse Supabase response into SafeUser[].",
-        };
-    }
     return {
-        ringProfiles: parsedData.data as SafeUserType[],
+        ringProfiles: data,
         error: null,
     };
 }
+
+export const getUserProfile = async () => {
+    const supabase = await createClient();
+
+    const { data, error: dataError } = await supabase
+        .from("profile")
+        .select("*");
+
+    return {
+        data: data?.at(0) as UserType,
+        error: dataError,
+    };
+};

@@ -10,7 +10,9 @@ create table public.profile (
     image_url text default '',
     is_verified boolean default false,
     github_url text default '',
-    tags text[3] default array[]::text[]
+    tags text[3] default array[]::text[],
+    graduation_year int,
+    program text
 );
 comment on table public.profile is 'Table to store user data';
 

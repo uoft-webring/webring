@@ -1,6 +1,6 @@
 "use server";
 
-import { createAdminClient } from "@/utils/supabase/server";
+import { createAdminClient, createClient } from "@/utils/supabase/server";
 
 // TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {
@@ -11,6 +11,7 @@ export const signUpAction = async (name: string, email: string) => {
         .select("*")
         .eq("email", email);
 
+    console.log("data found for user email on signup", data);
     if (data?.length) {
         return { error: 1 };
     }

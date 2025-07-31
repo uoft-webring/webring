@@ -1,13 +1,8 @@
 import StatusCard from "@/components/StatusCard";
-<<<<<<< HEAD
-import CopyButton from "../../../components/CopyButton";
-import RecheckButton from "../../../components/RecheckButton";
+import RecheckButton from "@/components/RecheckButton";
 
 import hljs from "highlight.js/lib/core";
 import yaml from "highlight.js/lib/languages/yaml";
-=======
-import RecheckButton from "../../../components/RecheckButton";
->>>>>>> 8a351fc215d7932511a5cd0b70d4f3cb51a6a1cd
 
 import {
     checkDomainRecords,
@@ -19,15 +14,10 @@ import { ExternalToast, toast } from "sonner";
 import CodeSnippet from "@/components/CodeSnippet";
 
 export default async function Verify() {
-<<<<<<< HEAD
-    // TODO-J this is a state problem, provisioning temp ID below, fetch it later!!!
-    const id: number = 1;
-=======
     // const data = await getRingProfile("get-profile");
     const { data: userData, error: userError } = await getUserProfile();
 
     const id: number = userData.ring_id;
->>>>>>> 8a351fc215d7932511a5cd0b70d4f3cb51a6a1cd
 
     const domainTXTKey = "uoft-webring-" + id;
     const domainTXTValue = await getTXTRecordValue(String(id));

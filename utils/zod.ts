@@ -58,24 +58,13 @@ export const User = z.object({
             },
             { message: "Invalid host format in URL." }
         )
-        .refine(validateUrl, { message: "Please enter a live URL." }),
+        .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
     image_url: z
         .string()
         .url({ message: "Please enter a valid URL." })
         .or(z.literal("")),
     is_verified: z.boolean(),
-    github_url: z
-        .string()
-        .refine(
-            (val) => {
-                // Check if the string is empty or starts with "https://github.com"
-                return val === "" || /^https:\/\/github\.com\//.test(val);
-            },
-            {
-                message: 'The URL must start with "https://github.com/".',
-            }
-        )
-        .nullable(),
+    github_url: z.string().nullable(),
     tags: z
         .string()
         .nonempty()

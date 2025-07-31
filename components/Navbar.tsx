@@ -36,7 +36,7 @@ export default function Navbar({ user, imageData }: NavbarProps) {
                             src={imageData}
                             ringId={user.ring_id}
                             alt="Profile picture"
-                            className="rounded-2xl w-14 aspect-square border-1 border-card outline-2 outline-white"
+                            className="rounded-full w-14 aspect-square border-4 border-card outline-2 outline-white"
                         />
                     </Link>
                 </div>

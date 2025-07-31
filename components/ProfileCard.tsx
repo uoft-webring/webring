@@ -24,7 +24,7 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "min-w-[20rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center gap-4 sm:h-[30rem] min-h-max border-1",
+                "min-w-[20rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
                 className
             )}
         >
@@ -60,7 +60,7 @@ export default function ProfileCard({
             <div className="flex flex-row flex-wrap justify-center gap-4  items-center mt-auto">
                 {user.github_url && (
                     <Link
-                        href={user.github_url}
+                        href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         className="flex items-center"
                     >
