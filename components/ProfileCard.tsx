@@ -28,7 +28,7 @@ export default function ProfileCard({
                 className
             )}
         >
-            <div className="w-32 aspect-square rounded-full mb-4 relative">
+            <div className="w-32 aspect-square rounded-full relative">
                 <FallbackImage
                     key={user.image_url + user.ring_id}
                     src={user.image_url}
@@ -49,15 +49,13 @@ export default function ProfileCard({
                 )}
             </div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>{" "}
-            <div className="flex flex-row flex-wrap gap-2 mb-8 justify-center">
+            <div className="flex flex-row flex-wrap gap-2 justify-center">
                 {user.tags?.map((tagName: string, index: number) => {
                     return <SkillTag key={index} tagName={tagName} />;
                 })}
             </div>
-            <p className="text-wrap break-all text-center mb-4">
-                {user.tagline}
-            </p>
-            <div className="flex flex-row flex-wrap justify-center gap-4  items-center mt-auto">
+            <p className="text-wrap break-all text-center">{user.tagline}</p>
+            <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (
                     <Link
                         href={`https://github.com/${user.github_url}`}
@@ -70,9 +68,7 @@ export default function ProfileCard({
                             className="size-8 mr-2"
                         />
                         {/* When we migrate to just github_username we won't need this */}
-                        {user.github_url
-                            ?.split("github.com/")[1]
-                            ?.split("/")[0] || ""}
+                        {user.github_url}
                     </Link>
                 )}
                 <Link
