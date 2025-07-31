@@ -1,6 +1,9 @@
 import StatusCard from "@/components/StatusCard";
 import RecheckButton from "@/components/RecheckButton";
 
+import hljs from "highlight.js/lib/core";
+import yaml from "highlight.js/lib/languages/yaml";
+
 import {
     checkDomainRecords,
     getDomainStatus,

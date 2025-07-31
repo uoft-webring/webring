@@ -21,7 +21,7 @@ export default async function Join() {
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
         <img
-            src='https://uoftwebring.com/favicon.ico'
+            src='https://uoftwebring.com/ring_logo.svg'
             alt='UofT Webring'
             style="width: '24px'; height: 'auto'"
         />
