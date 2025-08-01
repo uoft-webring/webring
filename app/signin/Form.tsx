@@ -28,7 +28,7 @@ export default function SigninForm() {
                 console.log("Success");
                 const { error } = await signInAction(email);
                 if (error) {
-                    setEmailError("Email not registered");
+                    setEmailError(error?.message);
                 } else {
                     redirect(`/auth/confirm?email=${email}`);
                 }

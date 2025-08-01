@@ -3,8 +3,9 @@
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import dayjs from "dayjs";
+import { queryRateLimit } from "@/app/rateLimiter";
 
-const ms_to_minute = 60 * 1000;
+const minutes_to_ms = 60 * 1000;
 
 export const verifyToken = async (email: string, token: string) => {
     // const token = formData.get("token")?.toString();
@@ -29,6 +30,11 @@ export const verifyToken = async (email: string, token: string) => {
 export const resendMagicLink = async (email: string) => {
     const supabase = await createClient();
 
+    const { error: RateLimitError } = await queryRateLimit(email);
+    if (RateLimitError) {
+        return { error: RateLimitError };
+    }
+
     const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -38,8 +44,10 @@ export const resendMagicLink = async (email: string) => {
     });
 
     if (error) {
-        console.error(error.code + " " + error.message);
+        return { error };
     }
+
+    return {};
 };
 
 // TODO: decide on how much time to allow users to be able to enter code for
@@ -67,7 +75,7 @@ export const canLoadPage = async (email: string) => {
     m_time.add(20, "minute"); //  change this to minutes later
     // console.log(dayjs());
     console.log("difference", dayjs().diff(m_time));
-    if (dayjs().diff(m_time) < 20 * ms_to_minute) {
+    if (dayjs().diff(m_time) < 20 * minutes_to_ms) {
         return true;
     }
 
