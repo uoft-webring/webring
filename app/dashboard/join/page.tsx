@@ -1,6 +1,3 @@
-import hljs from "highlight.js/lib/core";
-import xml from "highlight.js/lib/languages/xml";
-import "highlight.js/styles/github-dark.css";
 import {
     checkAddedCodeToPortfolio,
     getUserProfile,
@@ -9,6 +6,8 @@ import {
 import StatusCard from "@/components/StatusCard";
 import { ExternalToast, toast } from "sonner";
 import CodeSnippet from "@/components/CodeSnippet";
+import Form from "next/form";
+import RecheckButton from "@/components/RecheckButton";
 
 export default async function Join() {
     const { data: userData, error: userError } = await getUserProfile();
@@ -30,6 +29,7 @@ export default async function Join() {
 </div>`;
 
     const action = async () => {
+        "use server";
         const result = await checkAddedCodeToPortfolio();
         const options: ExternalToast = {
             position: "top-center",
@@ -45,11 +45,6 @@ export default async function Join() {
         }
     };
 
-    hljs.registerLanguage("html", xml);
-    const codeResult = hljs.highlight(codeString, {
-        language: "html",
-    }).value;
-
     return (
         <section>
             <h2>Join the commmunity</h2>
@@ -57,14 +52,7 @@ export default async function Join() {
                 Copy the HTML code and paste it into your portfolio to join the
                 community.
             </p>
-            {/*   <pre>
-                <code
-                    className="hljs language-handlebars rounded-xl"
-                    dangerouslySetInnerHTML={{
-                        __html: codeResult,
-                    }}
-                />
-            </pre> */}
+
             <CodeSnippet codeString={codeString} />
 
             <StatusCard
@@ -72,11 +60,11 @@ export default async function Join() {
                 showButton={false}
                 status={isValidPortfolio ? "connected" : "disconnected"}
             />
-            {/*   {!isValidPortfolio && (
+            {!isValidPortfolio && (
                 <Form action={action}>
                     <RecheckButton />
                 </Form>
-            )} */}
+            )}
         </section>
     );
 }

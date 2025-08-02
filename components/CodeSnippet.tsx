@@ -1,38 +1,39 @@
 "use client";
 import { CopyBlock } from "react-code-blocks";
 
-export default function CodeSnippet({ codeString }: { codeString: string }) {
+export default function CodeSnippet({
+    codeString,
+    width = "100%",
+}: {
+    codeString: string;
+    width?: string;
+}) {
     return (
         <CopyBlock
             text={codeString}
-            language="html"
-            showLineNumbers={true}
+            language={"html"}
+            showLineNumbers={false}
             customStyle={{
-                width: "100%",
-                height: "100%",
-                borderRadius: "0.5rem",
+                width: width,
+                borderRadius: "0.75rem",
                 padding: "1rem",
-                overflow: "hidden",
+                overflowX: "scroll",
             }}
             theme={AmansTheme}
-            highlight="1-11"
-            /*   codeBlock={true} */
         />
     );
 }
 
 const AmansTheme = {
-    lineNumberColor: `#5f6671`,
-    lineNumberBgColor: `#1c1d21`,
-    backgroundColor: `#0D1117`,
-    textColor: `#c0c5ce`, // default text
-    substringColor: `#c0c5ce`, // fallback/default
-    keywordColor: `#5ebfcc`, // `style`, `href`, `src`, `target`
-    attributeColor: `#f0c674`, // inline `display`, `align-items`, etc.
-    selectorAttributeColor: `#5ebfcc`, // same as keywordColor
+    backgroundColor: `#0d1117`,
+    textColor: `#9DCBF4`,
+    substringColor: `#c0c5ce`,
+    keywordColor: `#79c0ff`, // `style`, `href`, `src`, `target`
+    attributeColor: `#79c0ff`, // inline `display`, `align-items`, etc.
+    selectorAttributeColor: `#5ebfcc`,
     docTagColor: `#c0c5ce`,
-    nameColor: `#9cdcfe`, // tag names like `div`, `a`, `img`
-    builtInColor: `#dcdcaa`,
+    nameColor: `#9cdcfe`,
+    builtInColor: `#6AC273`,
     literalColor: `#dcdcaa`,
     bulletColor: `#dcdcaa`,
     codeColor: `#c0c5ce`,
@@ -41,17 +42,17 @@ const AmansTheme = {
     symbolColor: `#5ebfcc`,
     variableColor: `#d4d4d4`,
     templateVariableColor: `#d4d4d4`,
-    linkColor: `#dcdcaa`, // external URL strings
+    linkColor: `#9DCCF5`,
     selectorClassColor: `#9cdcfe`,
-    typeColor: `#4ec9b0`,
-    stringColor: `#ce9178`, // strings in quotes
-    selectorIdColor: `#4ec9b0`,
+    typeColor: `#a5d6ff`,
+    stringColor: `#ce9178`,
+    selectorIdColor: `#a5d6ff`,
     quoteColor: `#ce9178`,
-    templateTagColor: `#c586c0`,
+    templateTagColor: `#a5d6ff`,
     deletionColor: `#f44747`,
-    titleColor: `#4ec9b0`,
-    sectionColor: `#4ec9b0`,
-    commentColor: `#6a9955`, // not in screenshot, assumed standard
+    titleColor: `#a5d6ff`,
+    sectionColor: `#a5d6ff`,
+    commentColor: `#6a9955`,
     metaKeywordColor: `#569cd6`,
     metaColor: `#dcdcaa`,
     functionColor: `#dcdcaa`,

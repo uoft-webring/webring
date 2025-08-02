@@ -144,10 +144,12 @@ export default function EditForm({
                 />
                 <Label htmlFor="github_url">GitHub User</Label>
                 <Input
+                    /* Data type is named github_url but it's a username */
                     name="github_url"
-                    type="url"
+                    type="text"
                     placeholder="torvalds"
                     required
+                    maxLength={39}
                     defaultValue={formData.github_url ?? ""}
                     onChange={(e) => {
                         saveToForm({ github_url: e.target.value });
@@ -201,7 +203,9 @@ export default function EditForm({
 
             <div className="flex justify-start items-center gap-4">
                 {/* TODO-A allow saving or smth */}
-                <Button variant="secondary">Save</Button>
+                <Button variant="secondary" type="submit">
+                    Save
+                </Button>
 
                 <Link href="/dashboard/join" className="ml-auto">
                     <Button type="button">Continue</Button>
