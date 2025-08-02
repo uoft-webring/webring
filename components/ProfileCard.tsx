@@ -24,7 +24,7 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "min-w-[20rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
+                "min-w-[18rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
                 className
             )}
         >
@@ -68,7 +68,9 @@ export default function ProfileCard({
                             className="size-8 mr-2"
                         />
                         {/* When we migrate to just github_username we won't need this */}
-                        {user.github_url}
+                        {user.github_url && user.github_url.length <= 30
+                            ? user.github_url
+                            : "GitHub"}
                     </Link>
                 )}
                 <Link
