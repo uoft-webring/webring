@@ -11,6 +11,12 @@ import { UserType } from "@/utils/zod";
 
 // TODO-A @TheAmanM please rewrite function names and descriptions to make more sense
 // Here, we fetch the verification status of a user from supabase.
+/*
+- fetch supabase and check if domain is verified
+- fetches txt records to check if record exists
+- fetches user data for user profile ?
+- check if they added code to portfolio
+*/
 export const getDomainStatus = async (): Promise<boolean> => {
     const supabase = await createClient();
 

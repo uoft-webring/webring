@@ -1,9 +1,6 @@
 import StatusCard from "@/components/StatusCard";
 import RecheckButton from "@/components/RecheckButton";
 
-import hljs from "highlight.js/lib/core";
-import yaml from "highlight.js/lib/languages/yaml";
-
 import {
     checkDomainRecords,
     getDomainStatus,
@@ -50,24 +47,10 @@ export default async function Verify() {
                 Now.” We'll fetch your DNS and verify the domain automatically.
             </p>
             <h3>Key: </h3>
-            {/* <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6 justify-between w-full">
-                <code
-                    className="rounded-xl block overflow-scroll"
-                    dangerouslySetInnerHTML={{
-                        __html: keyResult,
-                    }}
-                />
-            </pre>{" "} */}
+
             <CodeSnippet codeString={domainTXTKey} />
             <h3>Value: </h3>
-            {/* <pre className="flex items-center pl-2 pr-1 py-1 gap-2 hljs rounded-md mb-6 justify-between w-full">
-                <code
-                    className="rounded-xl block overflow-scroll"
-                    dangerouslySetInnerHTML={{
-                        __html: valueResult,
-                    }}
-                />
-            </pre>{" "} */}
+
             <CodeSnippet codeString={domainTXTValue} />
             <StatusCard
                 status={isVerified ? "connected" : "unverified"}
