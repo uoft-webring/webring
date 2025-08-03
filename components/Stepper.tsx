@@ -22,7 +22,11 @@ export default function Stepper({
     const currentIndex = utils.getIndex(stepper.current.id);
 
     useEffect(() => {
-        if (pathSegment && stepper.current.id !== pathSegment) {
+        if (
+            pathSegment &&
+            stepper.current.id !== pathSegment &&
+            stepper.all.some((step) => step.id === pathSegment)
+        ) {
             stepper.goTo(pathSegment);
         }
     }, [pathSegment, stepper.current.id, stepper]);
@@ -32,7 +36,7 @@ export default function Stepper({
             <ol className="flex flex-row md:flex-col ">
                 {stepper.all.map((step, index, array) => (
                     <React.Fragment key={step.id}>
-                        <Link href={step.id}>
+                        <Link href={step.id} className="cursor-pointer">
                             <li className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
                                 <Button
                                     type="button"
@@ -52,7 +56,7 @@ export default function Stepper({
                                     aria-selected={
                                         stepper.current.id === step.id
                                     }
-                                    className="rounded-full md:text-lg"
+                                    className="rounded-full md:text-lg cursor-pointer"
                                     onClick={() => stepper.goTo(step.id)}
                                 >
                                     {index + 1}
@@ -71,7 +75,7 @@ export default function Stepper({
                                             ? "bg-primary"
                                             : "bg-muted"
                                     }`}
-                                />
+                                ></Separator>
                                 <Separator
                                     orientation="vertical"
                                     className={`hidden md:flex mx-5  ${
@@ -79,7 +83,7 @@ export default function Stepper({
                                             ? "bg-primary"
                                             : "bg-muted"
                                     }`}
-                                />
+                                ></Separator>
                                 <Separator
                                     orientation="vertical"
                                     className={`hidden md:flex mx-5  ${
@@ -87,7 +91,7 @@ export default function Stepper({
                                             ? "bg-primary"
                                             : "bg-muted"
                                     }`}
-                                />
+                                ></Separator>
                             </>
                         )}
                     </React.Fragment>
