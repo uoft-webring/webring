@@ -44,6 +44,8 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
                 { "h-[calc(100svh-6rem)]": fullSize },
                 { "h-[calc(100svh-36rem)]": !fullSize }
             )}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
         >
             <Canvas
                 gl={{ antialias: true, alpha: true }}
@@ -52,7 +54,12 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
                 <Scene data={data} />
             </Canvas>
             <div className="max-h-fit w-full items-center justify-center flex flex-col mt-2">
-                <Button size="icon" variant="outline" onClick={toggleSize}>
+                <Button
+                    className="sm:px-6 px-8 rounded-lg py-2"
+                    size="icon"
+                    variant="outline"
+                    onClick={toggleSize}
+                >
                     {fullSize ? (
                         <ChevronUp className="size-8" />
                     ) : (
