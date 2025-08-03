@@ -2,10 +2,16 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { useMemo } from "react";
+import { createAvatar } from "@dicebear/core";
+import { personas } from "@dicebear/collection";
 
 type FallbackImageProps = {
     src?: string;
-    ringId: number;
+    // The seed is a deterministic value used to generate a unique avatar
+    // Could be a user ID, domain, or any unique identifier
+    seed: string;
     className?: string;
     alt?: string;
     width?: number;
@@ -14,25 +20,54 @@ type FallbackImageProps = {
 
 export default function FallbackImage({
     src,
-    ringId,
+    seed,
     className = "",
     alt = "",
     width = 128,
     height = 128,
 }: FallbackImageProps) {
     const [imageError, setImageError] = useState(false);
-    const fallbackSrc = `https://api.dicebear.com/9.x/bottts-neutral/png?seed=${ringId}&radius=50`;
+    // Instead of using a dynamic fallback image, we use a local one
+    const avatar = useMemo(() => {
+        return createAvatar(personas, {
+            size: 128,
+            seed: seed,
+        }).toDataUri();
+    }, []);
 
     useEffect(() => {
+        if (!src) {
+            console.warn(
+                "[FallbackImage] No src provided, using fallback image."
+            );
+            setImageError(true);
+            return;
+        }
         setImageError(false);
     }, [src]);
+    console.log(
+        "[FallbackImage] Rendering image for ringId:",
+        seed,
+        "with src:",
+        src
+    );
 
-    return (
+    return imageError || !src ? (
         <Image
-            src={imageError || !src ? fallbackSrc : src}
+            draggable={false}
+            priority={false}
             width={width}
             height={height}
-            className={`object-cover ${className}`}
+            src={avatar}
+            alt="Avatar"
+            className={cn("object-cover", className)}
+        />
+    ) : (
+        <Image
+            src={src}
+            width={width}
+            height={height}
+            className={cn("object-cover", className)}
             alt={alt}
             onError={(err) => {
                 console.log(
@@ -41,6 +76,7 @@ export default function FallbackImage({
                 );
                 setImageError(true);
             }}
+            crossOrigin="anonymous"
             priority={false}
             loading="lazy"
             unoptimized // Optimized Images won't allow arb. domains
