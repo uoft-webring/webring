@@ -15,6 +15,7 @@ export default function ProfileCard({
     className,
 }: {
     user: SafeUserType;
+    className?: string;
 } & React.ComponentPropsWithoutRef<"div">) {
     if (!user) {
         return <Loading />;
@@ -32,7 +33,7 @@ export default function ProfileCard({
                 <FallbackImage
                     key={user.image_url + user.ring_id}
                     src={user.image_url}
-                    ringId={user.ring_id}
+                    seed={user.domain}
                     alt="Profile picture"
                     className={cn(
                         "rounded-full w-32 aspect-square object-cover",
@@ -58,6 +59,7 @@ export default function ProfileCard({
             <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (
                     <Link
+                        prefetch={false}
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         className="flex items-center"
@@ -74,6 +76,7 @@ export default function ProfileCard({
                     </Link>
                 )}
                 <Link
+                    prefetch={false}
                     href={user.domain}
                     target="_blank"
                     rel="noopener noreferrer nofollow"

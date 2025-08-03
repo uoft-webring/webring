@@ -1,24 +1,23 @@
-import React from "react";
-import { getAuthUser, getUserProfile } from "@/app/dashboard/actions";
+import { getAuthUser } from "@/app/dashboard/actions";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { UserProvider } from "./UserProvider";
 import Stepper from "../../components/Stepper";
+import { getAuthUserProfile } from "../actions";
 
 export default async function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const { user: authUser, error: authError } = await getAuthUser();
-    if (!authUser) redirect("/signup");
+    const { data: authUser, error: authError } = await getAuthUser();
+    if (!authUser || authError) redirect("/signup");
 
-    const { data: userData, error: userError } = await getUserProfile();
-
-    if (authError || userError) {
+    const { data: userData, error: userError } = await getAuthUserProfile();
+    if (!userData || userError) {
         redirect("/signup");
-        //TODO error handling
     }
+
     const onboardingRoutes = [
         {
             id: "edit",
@@ -39,7 +38,7 @@ export default async function DashboardLayout({
     return (
         <UserProvider user={userData}>
             <div className="min-h-screen bg-background flex flex-col">
-                <Navbar user={userData} imageData={userData.image_url} />
+                <Navbar user={userData} />
                 <section className="max-w-[70rem] mx-auto w-full px-6">
                     <h1 className="mb-4">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
                 </section>

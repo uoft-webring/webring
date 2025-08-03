@@ -1,18 +1,20 @@
-import {
-    checkAddedCodeToPortfolio,
-    getUserProfile,
-    getValidPortfolio,
-} from "../actions";
+import { checkAddedCodeToPortfolio, getDomainValidity } from "../actions";
 import StatusCard from "@/components/StatusCard";
 import { ExternalToast, toast } from "sonner";
 import CodeSnippet from "@/components/CodeSnippet";
 import Form from "next/form";
 import RecheckButton from "@/components/RecheckButton";
+import { getAuthUserProfile } from "@/app/actions";
+import { redirect } from "next/navigation";
 
 export default async function Join() {
-    const { data: userData, error: userError } = await getUserProfile();
+    const { data: userData, error: userError } = await getAuthUserProfile();
 
-    const isValidPortfolio = await getValidPortfolio(userData);
+    if (userError || !userData) {
+        console.error("[Join] Error fetching user profile:", userError);
+        redirect("/signup");
+    }
+    const isValidPortfolio = await getDomainValidity(userData);
 
     const id: number = userData.ring_id;
 

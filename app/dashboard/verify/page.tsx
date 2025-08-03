@@ -3,39 +3,43 @@ import RecheckButton from "@/components/RecheckButton";
 
 import {
     checkDomainRecords,
-    getDomainStatus,
+    getDomainVerification,
     getTXTRecordValue,
-    getUserProfile,
 } from "../actions";
-import { ExternalToast, toast } from "sonner";
+import { toast } from "sonner";
 import CodeSnippet from "@/components/CodeSnippet";
+import { getAuthUserProfile } from "@/app/actions";
+import { redirect } from "next/navigation";
 
 export default async function Verify() {
-    // const data = await getRingProfile("get-profile");
-    const { data: userData, error: userError } = await getUserProfile();
-
+    const { data: userData, error: userError } = await getAuthUserProfile();
+    if (userError || !userData) {
+        console.error("[Join] Error fetching user profile:", userError);
+        redirect("/signup");
+    }
     const id: number = userData.ring_id;
 
     const domainTXTKey = "uoft-webring-" + id;
     const domainTXTValue = await getTXTRecordValue(String(id));
 
-    const isVerified = await getDomainStatus();
+    const isVerified = await getDomainVerification();
 
     const action = async () => {
         "use server";
         const result = await checkDomainRecords();
-        const options: ExternalToast = {
-            position: "top-center",
-        };
-
         if (result) {
-            toast.success("Domain verified successfully!", options);
-        } else {
-            toast.error(
-                "Domain verification failed. Please try again.",
-                options
-            );
+            // we want to trigger a UI refresh
+            redirect("/dashboard/verify");
         }
+        /*     if (result) {
+            toast.success("Domain verified successfully!", {
+                duration: 1000,
+            });
+        } else {
+            toast.error("Domain verification failed. Please try again.", {
+                duration: 1000,
+            });
+        } */
     };
 
     return (

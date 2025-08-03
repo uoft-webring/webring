@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchRingProfiles } from "./actions";
+import { getAllUserProfiles } from "./actions";
 
 import Link from "next/link";
 import ProfileCarousel from "../components/homeComponents/Carousel";
@@ -8,21 +8,27 @@ import Navbar from "@/components/Navbar";
 
 import { ScrollText } from "../components/homeComponents/ScrollText";
 import { Button } from "@/components/ui/button";
-import { getUserProfile } from "./actions";
+import { getAuthUserProfile } from "./actions";
 import { WebRing } from "@/components/Ring/WebRing";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
-    const { ringProfiles, error } = await fetchRingProfiles();
-    const { data: userData, error: userError } = await getUserProfile(); // TODO: use userError?
+    const { data: ringProfiles, error: ringProfilesError } =
+        await getAllUserProfiles();
+    const { data: userData, error: userError } = await getAuthUserProfile(); // TODO: use userError?
 
-    if (!ringProfiles) {
-        console.error("[Home] Error fetching profiles:", error);
+    if (!ringProfiles || ringProfilesError) {
+        console.error("[Home] Error fetching profiles:", ringProfilesError);
         return <p>Error loading profiles.</p>;
+    }
+    if (!userData || userError) {
+        console.error("[Home] Error fetching user profile:", userError);
+        return redirect("/signup");
     }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <Navbar user={userData} imageData={userData?.image_url || ""} />
+            <Navbar user={userData} />
             <div className="overflow-clip">
                 <WebRing data={ringProfiles} />
                 <div className="px-4">

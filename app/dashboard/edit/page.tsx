@@ -12,7 +12,7 @@ export default function Edit() {
     const [data, setData] = useState<UserType | null>(user);
 
     if (!data) {
-        return <p>Loading...</p>; // or a loading spinner
+        return null;
     }
 
     return (
