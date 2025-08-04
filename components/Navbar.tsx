@@ -16,7 +16,7 @@ import {
 export default function Navbar({
     user,
 }: {
-    user?: UserType;
+    user?: UserType | null;
 } & React.ComponentPropsWithoutRef<"nav">) {
     return (
         <nav className="max-w-[85rem] w-full px-6 py-4 flex justify-between items-center self-center z-999">
