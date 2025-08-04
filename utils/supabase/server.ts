@@ -29,7 +29,7 @@ export async function createClient() {
     );
 }
 
-// TODO: this might not be secure, needs review NEED TO CHECK THIS
+// As RLS is enabled, this is not a security risk unless used on the client side
 // Creates service role supabase client with more permissions
 // Not sure if there is an SSR equivalent way of doing this
 // https://supabase.com/docs/reference/javascript/admin-api

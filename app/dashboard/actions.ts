@@ -2,15 +2,11 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { getDnsRecords } from "@layered/dns-records";
 import { createHmac } from "crypto";
 import { UserType } from "@/utils/zod";
 import { ApiResponse, getAuthUserProfile } from "../actions";
 import dns from "node:dns/promises";
 import { User } from "@supabase/supabase-js";
-
-// TODO: RLS to allow regular client to access this?
-// TODO: Should be an issue since this is on the server
 
 /**
  * There is a clear distinction between domain vailidity and verification

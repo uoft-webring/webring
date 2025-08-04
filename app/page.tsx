@@ -15,7 +15,7 @@ import { redirect } from "next/navigation";
 export default async function Home() {
     const { data: ringProfiles, error: ringProfilesError } =
         await getAllUserProfiles();
-    const { data: userData, error: userError } = await getAuthUserProfile(); // TODO: use userError?
+    const { data: userData, error: userError } = await getAuthUserProfile();
 
     if (!ringProfiles || ringProfilesError) {
         console.error("[Home] Error fetching profiles:", ringProfilesError);
