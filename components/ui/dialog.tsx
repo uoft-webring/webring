@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { XIcon } from "lucide-react";
-// TODO-A move this to a shadcn specific folder
 import { cn } from "@/lib/utils";
 
 function Dialog({
@@ -15,7 +14,9 @@ function Dialog({
 function DialogTrigger({
     ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-    return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+    return (
+        <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+    );
 }
 
 function DialogPortal({
@@ -80,7 +81,10 @@ function DialogContent({
     );
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({
+    className,
+    ...props
+}: React.ComponentProps<"div">) {
     return (
         <div
             data-slot="dialog-header"
@@ -93,7 +97,10 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
     );
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter({
+    className,
+    ...props
+}: React.ComponentProps<"div">) {
     return (
         <div
             data-slot="dialog-footer"
