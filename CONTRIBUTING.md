@@ -14,7 +14,7 @@ When committing changes please use [semantic commit messages](https://gist.githu
 
 When making pull requests please provide a descriptive title explaning the overall scope of the PR and provide details in a "description" section.
 
-We do not enfore a PR template to follow but if you are having trouble writing one, here is one you can follow:
+We do not enforce a PR template to follow but if you are having trouble writing one, here is one you can follow:
 
 ```
 Closes #{insert ticket number}
