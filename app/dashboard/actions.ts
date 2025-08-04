@@ -7,6 +7,7 @@ import { UserType } from "@/utils/zod";
 import { ApiResponse, getAuthUserProfile } from "../actions";
 import dns from "node:dns/promises";
 import { User } from "@supabase/supabase-js";
+import { Status } from "@/components/StatusCard";
 
 /**
  * There is a clear distinction between domain vailidity and verification
@@ -136,26 +137,23 @@ export const checkDomainRecords = async (): Promise<boolean> => {
  * @throws {Error} If there is an error fetching the user profile or validation status.
  * @param {UserType} [user] - Optional user data. If not provided, it will be fetched.
 
- */ export const getDomainValidity = async (
-    user?: UserType
-): Promise<boolean> => {
+ */ export const getDomainValidity = async (): Promise<Status> => {
     const supabase = await createClient();
 
-    if (!user) {
-        const { data, error } = await getAuthUserProfile();
-        if (error || !data) {
-            console.error("Failed to fetch authenticated user profile:", error);
-            return false;
-        }
-        user = data;
-    }
+    // if (!user) {
+    //     const { data, error } = await getAuthUserProfile();
+    //     if (error || !data) {
+    //         console.error("Failed to fetch authenticated user profile:", error);
+    //         return false;
+    //     }
+    //     user = data;
+    // }
 
-    console.log(`Fetching verification status for user ID: ${user.id}`);
+    // console.log(`Fetching verification status for user ID: ${user.id}`);
 
     const { data, error } = await supabase
         .from("profile")
-        .select("valid")
-        .eq("id", user.id)
+        .select("validated_user_component")
         .single();
 
     console.log(data);
@@ -164,10 +162,10 @@ export const checkDomainRecords = async (): Promise<boolean> => {
             "Error fetching domain validation status:",
             error.message
         );
-        return false;
+        return "disconnected"; // equivalent to default false status
     }
 
-    return data?.valid === true;
+    return data?.validated_user_component;
 };
 
 // Here we check whether the user has a valid portfolio or not from supabase.
@@ -181,13 +179,29 @@ export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
         return false;
     }
 
+    // fetch initial user validate_user_component state
+    // TODO: fix typescript typing warning
+    if (userData?.validated_user_component !== "pending") {
+        const { error } = await supabase
+            .from("profile")
+            .update({ validated_user_component: "pending" })
+            .eq("id", userData?.id)
+            .select();
+
+        if (error) {
+            console.error("Error updating domain verification status:", error);
+            return false;
+        }
+        revalidatePath("/dashboard");
+    }
+
     // TODO: Replace this with actual domain verification logic.
-    const result: boolean = true;
+    const result: boolean = false; // this will be an api check
     //TODO need to write code to make a request in the DB
     if (result) {
         const { error } = await supabase
             .from("profile")
-            .update({ valid: true })
+            .update({ validated_user_component: "connected" })
             .eq("id", userData?.id)
             .select();
 

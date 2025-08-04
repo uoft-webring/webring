@@ -37,7 +37,7 @@ export default function Navbar({
                             width={64}
                             height={64}
                             src={user.image_url}
-                            seed={user.domain}
+                            seed={user.ring_id}
                             alt={user.name + "'s Profile picture"}
                             className="rounded-full w-14 aspect-square border-4 border-card outline-2 outline-white"
                         />
@@ -58,7 +58,7 @@ export default function Navbar({
                 </DropdownMenu>
             ) : (
                 <Link prefetch={true} href={"/signup"}>
-                    <Button className="text-lg rounded-xl">Sign up</Button>
+                    <Button>Sign up</Button>
                 </Link>
             )}
         </nav>

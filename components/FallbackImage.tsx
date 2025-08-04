@@ -11,7 +11,7 @@ type FallbackImageProps = {
     src?: string;
     // The seed is a deterministic value used to generate a unique avatar
     // Could be a user ID, domain, or any unique identifier
-    seed: string;
+    seed: number;
     className?: string;
     alt?: string;
     width?: number;
@@ -28,12 +28,13 @@ export default function FallbackImage({
 }: FallbackImageProps) {
     const [imageError, setImageError] = useState(false);
     // Instead of using a dynamic fallback image, we use a local one
+    console.log("navbar profile seed", seed);
     const avatar = useMemo(() => {
         return createAvatar(personas, {
             size: 128,
-            seed: seed,
+            seed: seed.toString(),
         }).toDataUri();
-    }, []);
+    }, [seed]);
 
     useEffect(() => {
         if (!src) {

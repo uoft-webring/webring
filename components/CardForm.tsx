@@ -29,7 +29,14 @@ export default function CardForm({
                             )}
                             {cardDescription && (
                                 <CardDescription>
-                                    {cardDescription}
+                                    {cardDescription.split("\n").map((line) => {
+                                        return (
+                                            <>
+                                                {line}
+                                                <br />
+                                            </>
+                                        );
+                                    })}
                                 </CardDescription>
                             )}
                         </CardHeader>

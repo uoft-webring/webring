@@ -6,6 +6,9 @@ import Form from "next/form";
 import RecheckButton from "@/components/RecheckButton";
 import { getAuthUserProfile } from "@/app/actions";
 import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Status } from "@/components/StatusCard";
 
 export default async function Join() {
     const { data: userData, error: userError } = await getAuthUserProfile();
@@ -14,7 +17,8 @@ export default async function Join() {
         console.error("[Join] Error fetching user profile:", userError);
         redirect("/signup");
     }
-    const isValidPortfolio = await getDomainValidity(userData);
+    const validPortfolioStatus: Status = await getDomainValidity(); // Returns
+    console.log("status", validPortfolioStatus);
 
     const id: number = userData.ring_id;
 
@@ -32,19 +36,20 @@ export default async function Join() {
 
     const action = async () => {
         "use server";
+        // TODO: add this back in later when this is automated, going with manual process first
         const result = await checkAddedCodeToPortfolio();
-        const options: ExternalToast = {
-            position: "top-center",
-        };
+        // const options: ExternalToast = {
+        //     position: "top-center",
+        // };
 
-        if (result) {
-            toast.success("Domain verified successfully!", options);
-        } else {
-            toast.error(
-                "Domain verification failed. Please try again.",
-                options
-            );
-        }
+        // if (result) {
+        //     toast.success("Domain verified successfully!", options);
+        // } else {
+        //     toast.error(
+        //         "Domain verification failed. Please try again.",
+        //         options
+        //     );
+        // }
     };
 
     return (
@@ -60,12 +65,20 @@ export default async function Join() {
             <StatusCard
                 showCTA={false}
                 showButton={false}
-                status={isValidPortfolio ? "connected" : "disconnected"}
+                status={validPortfolioStatus}
             />
-            {!isValidPortfolio && (
+            {validPortfolioStatus == "disconnected" && (
                 <Form action={action}>
                     <RecheckButton />
                 </Form>
+            )}
+
+            {["pending", "connected"].includes(validPortfolioStatus) && (
+                <div className="flex">
+                    <Link href="/dashboard/verify" className="ml-auto">
+                        <Button type="button">Continue</Button>
+                    </Link>
+                </div>
             )}
         </section>
     );

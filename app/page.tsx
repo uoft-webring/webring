@@ -21,10 +21,10 @@ export default async function Home() {
         console.error("[Home] Error fetching profiles:", ringProfilesError);
         return <p>Error loading profiles.</p>;
     }
-    if (!userData || userError) {
-        console.error("[Home] Error fetching user profile:", userError);
-        return redirect("/signup");
-    }
+    // if (!userData || userError) {
+    //     console.error("[Home] Error fetching user profile:", userError);
+    //     return redirect("/signup");
+    // }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -47,7 +47,7 @@ export default async function Home() {
                 <ScrollText
                     content={[
                         "We're bringing our digital portfolios together into a single, connected ecosystem.",
-                        "Our purpose is to build a more connected and visible UofT CS community. We believe that by showcasing our work collectively, we create more opportunities for everyone.",
+                        "Our purpose is to build a more connected and visible UofT community. We believe that by showcasing our work collectively, we create more opportunities for everyone.",
                         "This is our chance to strengthen our network, celebrate our skills, and build a lasting platform that elevates all of us, together.",
                     ]}
                 />

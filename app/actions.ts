@@ -6,7 +6,7 @@ import { PostgrestError } from "@supabase/supabase-js";
 import { UserType } from "@/utils/zod";
 
 const PROFILE_COLUMNS =
-    "ring_id, tagline, domain, name, valid, github_url, image_url, is_verified, tags";
+    "ring_id, tagline, domain, name, validated_user_component, github_url, image_url, is_verified, tags";
 
 // Generic response type for uniform handling
 export type ApiResponse<T> =

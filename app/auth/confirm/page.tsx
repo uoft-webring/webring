@@ -64,7 +64,7 @@ export default function Confirm() {
         // TODO: Error state for invalid OTP
         <CardForm
             cardTitle="Verify OTP"
-            cardDescription={`Enter the OTP we sent to ${email}.`}
+            cardDescription={`Enter the OTP we sent to ${email}.\nYour email may take some time to arrive.`}
         >
             <div>
                 <InputOTP

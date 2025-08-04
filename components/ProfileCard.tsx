@@ -33,7 +33,7 @@ export default function ProfileCard({
                 <FallbackImage
                     key={user.image_url + user.ring_id}
                     src={user.image_url}
-                    seed={user.domain}
+                    seed={user.ring_id}
                     alt="Profile picture"
                     className={cn(
                         "rounded-full w-32 aspect-square object-cover",

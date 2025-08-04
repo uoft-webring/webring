@@ -64,6 +64,7 @@ export const User = z.object({
         .url({ message: "Please enter a valid URL." })
         .or(z.literal("")),
     is_verified: z.boolean(),
+    validated_user_component: z.string(),
     github_url: z.string().nullable(),
     tags: z
         .string()
