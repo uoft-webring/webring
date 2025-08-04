@@ -20,6 +20,7 @@ export default async function User({ params }: { params: Promise<{ slug: string 
         github_url: "mh-anwar",
         image_url: "https://avatars.githubusercontent.com/u/12345678?v=4",
         is_verified: true,
+        validated_user_component: "disconnected",
         tags: ["web", "developer", "mock"],
         subdomain: slug,
     };
