@@ -20,7 +20,7 @@ export const verifyToken = async (email: string, token: string) => {
         console.error(authResponse.error.code + " " + authResponse.error.message);
         return authResponse.error;
     } else {
-        return redirect(`/dashboard`); // return email in auth/confirm link as a search param
+        return redirect("/dashboard/edit"); // return email in auth/confirm link as a search param
     }
 };
 
@@ -57,7 +57,7 @@ export const canLoadPage = async (email: string) => {
     }
 
     console.log("conf time", confirmation_time);
-
+    // TODO dayjs causes hydration errors in dev
     const m_time = dayjs(confirmation_time);
     m_time.add(20, "minute"); //  change this to minutes later
     // console.log(dayjs());

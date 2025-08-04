@@ -8,7 +8,7 @@ export default async function SignUp() {
 
     if (user) {
         console.log("user session exists at sign up");
-        redirect("/dashboard");
+        redirect("/dashboard/edit");
     }
 
     return (
