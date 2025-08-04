@@ -15,6 +15,7 @@ export default function ProfileCard({
     className,
 }: {
     user: SafeUserType;
+    className?: string;
 } & React.ComponentPropsWithoutRef<"div">) {
     if (!user) {
         return <Loading />;
@@ -24,71 +25,54 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "min-w-[20rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
+                "min-w-[18rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
                 className
             )}
         >
-            <div className="w-32 aspect-square rounded-full mb-4 relative">
+            <div className="w-32 aspect-square rounded-full relative">
                 <FallbackImage
                     key={user.image_url + user.ring_id}
                     src={user.image_url}
-                    ringId={user.ring_id}
+                    seed={user.ring_id}
                     alt="Profile picture"
                     className={cn(
                         "rounded-full w-32 aspect-square object-cover",
-                        user.is_verified &&
-                            "border-4 border-card outline outline-white"
+                        user.is_verified && "border-4 border-card outline outline-white"
                     )}
                 />
                 {user.is_verified && (
-                    <Image
-                        src={verifiedIcon}
-                        alt="Verified"
-                        className="absolute right-0 bottom-0 size-8"
-                    />
+                    <Image src={verifiedIcon} alt="Verified" className="absolute right-0 bottom-0 size-8" />
                 )}
             </div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>{" "}
-            <div className="flex flex-row flex-wrap gap-2 mb-8 justify-center">
+            <div className="flex flex-row flex-wrap gap-2 justify-center">
                 {user.tags?.map((tagName: string, index: number) => {
                     return <SkillTag key={index} tagName={tagName} />;
                 })}
             </div>
-            <p className="text-wrap break-all text-center mb-4">
-                {user.tagline}
-            </p>
-            <div className="flex flex-row flex-wrap justify-center gap-4  items-center mt-auto">
+            <p className="text-wrap break-all text-center">{user.tagline}</p>
+            <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (
                     <Link
+                        prefetch={false}
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         className="flex items-center"
                     >
-                        <Image
-                            src={gitHubIcon}
-                            alt="GitHub"
-                            className="size-8 mr-2"
-                        />
+                        <Image src={gitHubIcon} alt="GitHub" className="size-8 mr-2" />
                         {/* When we migrate to just github_username we won't need this */}
-                        {user.github_url
-                            ?.split("github.com/")[1]
-                            ?.split("/")[0] || ""}
+                        {user.github_url && user.github_url.length <= 30 ? user.github_url : "GitHub"}
                     </Link>
                 )}
                 <Link
+                    prefetch={false}
                     href={user.domain}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
                     className="flex items-center"
                 >
-                    <Image
-                        src={portfolioIcon}
-                        alt="Website"
-                        className="size-8 mr-2"
-                    />
-                    {domainUrl && domainUrl.length <= 30
-                        ? domainUrl
-                        : "Portfolio"}
+                    <Image src={portfolioIcon} alt="Website" className="size-8 mr-2" />
+                    {domainUrl && domainUrl.length <= 30 ? domainUrl : "Portfolio"}
                 </Link>
             </div>
         </div>

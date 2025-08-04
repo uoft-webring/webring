@@ -41,9 +41,7 @@ export default function SignupForm() {
                 console.log("Finished");
             } else {
                 setIsFormDisabled(false);
-                setEmailError(
-                    emailParseResult?.error?.errors[0]?.message || ""
-                );
+                setEmailError(emailParseResult?.error?.errors[0]?.message || "");
                 setNameError(nameParseResult?.error?.errors[0]?.message || "");
             }
             setIsFormDisabled(false);
@@ -87,20 +85,13 @@ export default function SignupForm() {
                             }}
                         />
                     </div>
-                    <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isFormDisabled}
-                    >
+                    <Button type="submit" className="w-full" disabled={isFormDisabled}>
                         Continue
                     </Button>
                 </div>
                 <div className="text-center text-sm">
                     Already ring-ed?{" "}
-                    <Link
-                        href="/signin"
-                        className="underline underline-offset-4"
-                    >
+                    <Link href="/signin" className="underline underline-offset-4">
                         Sign in instead.
                     </Link>
                 </div>

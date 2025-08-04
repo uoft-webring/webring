@@ -5,14 +5,15 @@ create table public.profile (
     domain text default '', -- user domain
     name text, -- user name
     ring_id serial, -- id to identify user domain on the webring
-    valid boolean default false, -- check if user domain is "valid"
+    validated_user_component text default 'disconnected', -- check if user domain is "valid", contains either "disconnected", "pending" or "connected"
     tagline text default '',
     image_url text default '',
     is_verified boolean default false,
     github_url text default '',
     tags text[3] default array[]::text[],
     graduation_year int,
-    program text
+    program text,
+    subdomain text
 );
 comment on table public.profile is 'Table to store user data';
 

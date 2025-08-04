@@ -10,18 +10,12 @@ export async function POST(request: NextRequest) {
     // Check if the secret is missing in your environment variables
     if (!secret) {
         console.error("REVALIDATION_SECRET_TOKEN is not set.");
-        return NextResponse.json(
-            { message: "Server configuration error." },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Server configuration error." }, { status: 500 });
     }
 
     // Check if the token from the header matches
     if (authHeader !== `Bearer ${secret}`) {
-        return NextResponse.json(
-            { message: "Unauthorized: Invalid token." },
-            { status: 401 }
-        );
+        return NextResponse.json({ message: "Unauthorized: Invalid token." }, { status: 401 });
     }
 
     // 2. Perform the revalidation
@@ -39,9 +33,6 @@ export async function POST(request: NextRequest) {
         });
     } catch (err) {
         console.error("Error during revalidation:", err);
-        return NextResponse.json(
-            { message: "Error revalidating" },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Error revalidating" }, { status: 500 });
     }
 }

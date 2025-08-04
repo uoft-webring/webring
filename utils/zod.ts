@@ -12,18 +12,14 @@ export const parseEmail = (email: any) => {
 };
 
 export const parseName = (name: any) => {
-    const nameSchema = z
-        .string()
-        .nonempty({ message: "Please enter your full name." });
+    const nameSchema = z.string().nonempty({ message: "Please enter your full name." });
     return nameSchema.safeParse(name);
 };
 
 export const parseDomain = (domain: any) => {
-    const domainSchema = z
-        .string()
-        .regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9].[a-zA-Z]{2,}$/, {
-            message: "Please enter a valid domain.",
-        }); // TODO: refine with blacklisted websites
+    const domainSchema = z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9].[a-zA-Z]{2,}$/, {
+        message: "Please enter a valid domain.",
+    }); // TODO: refine with blacklisted websites
     return domainSchema.safeParse(domain);
 };
 
@@ -37,10 +33,7 @@ export const User = z.object({
     ring_id: z.number().int().nonnegative(),
     id: z.string(),
     name: z.string().nonempty({ message: "Please enter a valid name." }),
-    tagline: z
-        .string()
-        .max(255, { message: "Tagline can not be longer than 255 characters." })
-        .nullable(),
+    tagline: z.string().max(255, { message: "Tagline can not be longer than 255 characters." }).nullable(),
     domain: z
         .string()
         .url({ message: "Please enter a valid URL." })
@@ -59,18 +52,11 @@ export const User = z.object({
             { message: "Invalid host format in URL." }
         )
         .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
-    image_url: z
-        .string()
-        .url({ message: "Please enter a valid URL." })
-        .or(z.literal("")),
+    image_url: z.string().url({ message: "Please enter a valid URL." }).or(z.literal("")),
     is_verified: z.boolean(),
+    validated_user_component: z.string(),
     github_url: z.string().nullable(),
-    tags: z
-        .string()
-        .nonempty()
-        .array()
-        .max(3, { message: "You can choose up to 3 tags." })
-        .nullable(),
+    tags: z.string().nonempty().array().max(3, { message: "You can choose up to 3 tags." }).nullable(),
 });
 
 export const SafeUser = User.omit({

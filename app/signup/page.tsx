@@ -4,9 +4,8 @@ import { getAuthUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
 
 export default async function SignUp() {
-    const { user } = await getAuthUser();
+    const { data: user } = await getAuthUser();
 
-    // TODO; do we need this?
     if (user) {
         console.log("user session exists at sign up");
         redirect("/dashboard");

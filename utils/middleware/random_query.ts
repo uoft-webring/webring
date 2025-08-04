@@ -1,9 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-export default async function random_domain(
-    supabase: SupabaseClient,
-    length: number
-) {
+export default async function random_domain(supabase: SupabaseClient, length: number) {
     // get a random integer between 0 and (length - 1)
     const random_index = Math.floor(Math.random() * (length - 1));
 

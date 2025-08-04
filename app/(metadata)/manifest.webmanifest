@@ -1,0 +1,16 @@
+{
+    "name": "UofT Webring",
+    "start_url": "/",
+    "theme_color": "#010414",
+    "background_color": "#010414",
+    "display": "fullscreen",
+    "lang": "en",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "url": "/favicon.ico",
+            "sizes": "16x16",
+            "type": "image/png"
+        }
+    ]
+}

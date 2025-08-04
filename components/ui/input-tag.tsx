@@ -64,17 +64,10 @@ const TagInputComponent = ({
                         <TagsEmpty />
                         <TagsGroup>
                             {TAGS.map((tag) => (
-                                <TagsItem
-                                    key={tag}
-                                    onSelect={handleSelect}
-                                    value={tag}
-                                >
+                                <TagsItem key={tag} onSelect={handleSelect} value={tag}>
                                     {tag}
                                     {tags.includes(tag) && (
-                                        <CheckIcon
-                                            className="text-muted-foreground"
-                                            size={14}
-                                        />
+                                        <CheckIcon className="text-muted-foreground" size={14} />
                                     )}
                                 </TagsItem>
                             ))}

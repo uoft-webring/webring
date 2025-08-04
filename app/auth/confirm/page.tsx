@@ -5,11 +5,7 @@ import { useState, useEffect } from "react";
 
 import { verifyToken, resendMagicLink, canLoadPage } from "./actions";
 import CardForm from "@/components/CardForm";
-import {
-    InputOTP,
-    InputOTPGroup,
-    InputOTPSlot,
-} from "@/components/ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import useInputFocus from "@/hooks/useFocus";
@@ -64,7 +60,7 @@ export default function Confirm() {
         // TODO: Error state for invalid OTP
         <CardForm
             cardTitle="Verify OTP"
-            cardDescription={`Enter the OTP we sent to ${email}.`}
+            cardDescription={`Enter the OTP we sent to ${email}.\nYour email may take some time to arrive.`}
         >
             <div>
                 <InputOTP

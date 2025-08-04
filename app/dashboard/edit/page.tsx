@@ -12,7 +12,7 @@ export default function Edit() {
     const [data, setData] = useState<UserType | null>(user);
 
     if (!data) {
-        return <p>Loading...</p>; // or a loading spinner
+        return null;
     }
 
     return (
@@ -24,16 +24,12 @@ export default function Edit() {
                 </TabsList>
                 <TabsContent value="edit">
                     <h2>Edit your profile</h2>
-                    <p className="mb-6">
-                        Complete the information below to complete your profile.
-                    </p>
+                    <p className="mb-6">Complete the information below to complete your profile.</p>
                     <EditForm formData={data} setFormData={setData} />
                 </TabsContent>
                 <TabsContent value="preview">
                     <h2>Preview</h2>
-                    <p className="mb-6">
-                        Preview your profile live, as you make changes.
-                    </p>
+                    <p className="mb-6">Preview your profile live, as you make changes.</p>
                     <ProfileCard user={data} />
                 </TabsContent>
             </Tabs>
@@ -47,9 +43,7 @@ export default function Edit() {
                 </div>
                 <div>
                     <h2>Preview</h2>
-                    <p className="mb-6 lg:text-base">
-                        Preview your profile live, as you make changes.
-                    </p>
+                    <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
                     <ProfileCard user={data} />
                 </div>
             </section>

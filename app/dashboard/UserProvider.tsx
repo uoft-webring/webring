@@ -5,13 +5,7 @@ import { UserType } from "@/utils/zod";
 
 const UserContext = createContext<UserType | null>(null);
 
-export function UserProvider({
-    user,
-    children,
-}: {
-    user: UserType;
-    children: React.ReactNode;
-}) {
+export function UserProvider({ user, children }: { user: UserType; children: React.ReactNode }) {
     return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
 }
 

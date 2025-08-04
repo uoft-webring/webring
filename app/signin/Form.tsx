@@ -59,20 +59,13 @@ export default function SigninForm() {
                             }}
                         />
                     </div>
-                    <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isFormDisabled}
-                    >
+                    <Button type="submit" className="w-full" disabled={isFormDisabled}>
                         Continue
                     </Button>
                 </div>
                 <div className="text-center text-sm">
                     New to the ring?{" "}
-                    <Link
-                        href="/signup"
-                        className="underline underline-offset-4"
-                    >
+                    <Link href="/signup" className="underline underline-offset-4">
                         Sign up here.
                     </Link>
                 </div>

@@ -2,17 +2,12 @@ import { createAdminClient } from "@/utils/supabase/server";
 import random_domain from "@/utils/middleware/random_query";
 import query from "@/utils/middleware/query_db";
 
-export default async function domain_from_id(
-    initial_id: number,
-    direction: string
-) {
+export default async function domain_from_id(initial_id: number, direction: string) {
     // querying db "profile" for "domain" whose row id is "index"
     const supabase = await createAdminClient(); // TODO: check this later
 
     // get number of rows in db
-    const { count } = await supabase
-        .from("profile")
-        .select("ring_id", { count: "exact", head: true });
+    const { count } = await supabase.from("profile").select("ring_id", { count: "exact", head: true });
     console.log("count", count);
 
     // make sure count is not null and initial_id is in range of ids

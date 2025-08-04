@@ -7,10 +7,7 @@ type ToastTriggerProps = {
     message: string;
 };
 
-export default function ToastTrigger({
-    messageType,
-    message,
-}: ToastTriggerProps) {
+export default function ToastTrigger({ messageType, message }: ToastTriggerProps) {
     const options: ExternalToast = {
         duration: 999999,
         closeButton: true,

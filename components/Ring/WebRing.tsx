@@ -1,21 +1,11 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import {
-    PerspectiveCamera,
-    OrbitControls,
-    Sphere,
-    Billboard,
-    Text,
-} from "@react-three/drei";
+import { PerspectiveCamera, OrbitControls, Sphere, Billboard, Text } from "@react-three/drei";
 import { useRef, useMemo, useState, useEffect, Suspense } from "react";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
-import {
-    EffectComposer,
-    Bloom,
-    ToneMapping,
-} from "@react-three/postprocessing";
+import { EffectComposer, Bloom, ToneMapping } from "@react-three/postprocessing";
 import {
     PLANE_DENSITY,
     PLANE_SIZE,
@@ -44,20 +34,20 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
                 { "h-[calc(100svh-6rem)]": fullSize },
                 { "h-[calc(100svh-36rem)]": !fullSize }
             )}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
         >
-            <Canvas
-                gl={{ antialias: true, alpha: true }}
-                className="h-full w-full"
-            >
+            <Canvas gl={{ antialias: true, alpha: true }} className="h-full w-full">
                 <Scene data={data} />
             </Canvas>
             <div className="max-h-fit w-full items-center justify-center flex flex-col mt-2">
-                <Button size="icon" variant="outline" onClick={toggleSize}>
-                    {fullSize ? (
-                        <ChevronUp className="size-8" />
-                    ) : (
-                        <ChevronDown className="size-8" />
-                    )}
+                <Button
+                    className="sm:px-6 px-8 rounded-lg py-2"
+                    size="icon"
+                    variant="outline"
+                    onClick={toggleSize}
+                >
+                    {fullSize ? <ChevronUp className="size-8" /> : <ChevronDown className="size-8" />}
                 </Button>
             </div>
         </div>
@@ -93,19 +83,11 @@ function Scene({ data }: { data: SafeUserType[] }) {
 
     return (
         <>
-            <PerspectiveCamera
-                makeDefault
-                fov={40}
-                position={[getXPosition(data.length), 0, 20]}
-            />
+            <PerspectiveCamera makeDefault fov={40} position={[getXPosition(data.length), 0, 20]} />
             <ambientLight />
             <OrbitControls makeDefault enablePan={false} rotateSpeed={0.3} />
 
-            <group
-                ref={groupRef}
-                position={[0, -30, 0]}
-                rotation={[-0.5 * Math.PI, 0, 0]}
-            >
+            <group ref={groupRef} position={[0, -30, 0]} rotation={[-0.5 * Math.PI, 0, 0]}>
                 <mesh ref={planeRef}>
                     <planeGeometry
                         args={[
@@ -115,11 +97,7 @@ function Scene({ data }: { data: SafeUserType[] }) {
                             PLANE_SIZE * PLANE_DENSITY,
                         ]}
                     />
-                    <meshLambertMaterial
-                        color={0x334466}
-                        wireframe
-                        side={THREE.FrontSide}
-                    />
+                    <meshLambertMaterial color={0x334466} wireframe side={THREE.FrontSide} />
                 </mesh>
             </group>
 
@@ -141,24 +119,15 @@ function Scene({ data }: { data: SafeUserType[] }) {
                             <Sphere
                                 args={[1, 8, 8]}
                                 scale={1}
-                                onPointerOver={() =>
-                                    (document.body.style.cursor = "pointer")
-                                }
-                                onPointerOut={() =>
-                                    (document.body.style.cursor = "default")
-                                }
-                                onClick={() =>
-                                    window.open(user.domain, "_blank")
-                                }
+                                onPointerOver={() => (document.body.style.cursor = "pointer")}
+                                onPointerOut={() => (document.body.style.cursor = "default")}
+                                onClick={() => window.open(user.domain, "_blank")}
                             >
                                 <meshBasicMaterial color="#fff" wireframe />
                             </Sphere>
                             <Suspense fallback={<></>}>
                                 <Billboard>
-                                    <Text
-                                        fontSize={0.4}
-                                        position={[0, -1.2, 0]}
-                                    >
+                                    <Text fontSize={0.4} position={[0, -1.2, 0]}>
                                         {user.domain}
                                     </Text>
                                 </Billboard>

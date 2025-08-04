@@ -19,28 +19,17 @@ function InputOTP({
         <>
             <OTPInput
                 data-slot="input-otp"
-                containerClassName={cn(
-                    "flex items-center gap-2 has-disabled:opacity-50",
-                    containerClassName
-                )}
+                containerClassName={cn("flex items-center gap-2 has-disabled:opacity-50", containerClassName)}
                 className={cn("disabled:cursor-not-allowed", className)}
                 {...props}
             />
-            {error && (
-                <p className="text-destructive text-center mt-4">{error}</p>
-            )}
+            {error && <p className="text-destructive text-center mt-4">{error}</p>}
         </>
     );
 }
 
 function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
-    return (
-        <div
-            data-slot="input-otp-group"
-            className={cn("flex items-center", className)}
-            {...props}
-        />
-    );
+    return <div data-slot="input-otp-group" className={cn("flex items-center", className)} {...props} />;
 }
 
 function InputOTPSlot({
@@ -51,8 +40,7 @@ function InputOTPSlot({
     index: number;
 }) {
     const inputOTPContext = React.useContext(OTPInputContext);
-    const { char, hasFakeCaret, isActive } =
-        inputOTPContext?.slots[index] ?? {};
+    const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
 
     return (
         <div

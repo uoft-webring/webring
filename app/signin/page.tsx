@@ -4,7 +4,7 @@ import { getAuthUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
 
 export default async function Signin() {
-    const { user } = await getAuthUser();
+    const { data: user } = await getAuthUser();
 
     if (user) {
         redirect("/dashboard");

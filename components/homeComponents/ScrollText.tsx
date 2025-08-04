@@ -58,13 +58,7 @@ const ContentLine = ({
                 const w_start = start + lineLength * (index / words.length);
                 const w_end = w_start + lineLength * (1 / words.length);
                 return (
-                    <ContentWord
-                        key={index}
-                        word={word}
-                        start={w_start}
-                        end={w_end}
-                        progress={progress}
-                    />
+                    <ContentWord key={index} word={word} start={w_start} end={w_end} progress={progress} />
                 );
             })}
         </span>
