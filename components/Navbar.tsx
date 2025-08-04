@@ -51,9 +51,7 @@ export default function Navbar({
                             <DropdownMenuItem>Dashboard</DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={signOutAction}>
-                            Sign out
-                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={signOutAction}>Sign out</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (

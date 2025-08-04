@@ -1,11 +1,5 @@
 import React, { Children } from "react";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 export default function CardForm({
     cardTitle,
@@ -22,11 +16,7 @@ export default function CardForm({
                 <div className="flex flex-col gap-6">
                     <Card className="gap-4">
                         <CardHeader className="text-center">
-                            {cardTitle && (
-                                <CardTitle className="text-2xl">
-                                    {cardTitle}
-                                </CardTitle>
-                            )}
+                            {cardTitle && <CardTitle className="text-2xl">{cardTitle}</CardTitle>}
                             {cardDescription && (
                                 <CardDescription>
                                     {cardDescription.split("\n").map((line) => {

@@ -17,9 +17,7 @@ export const verifyToken = async (email: string, token: string) => {
     });
 
     if (authResponse.error) {
-        console.error(
-            authResponse.error.code + " " + authResponse.error.message
-        );
+        console.error(authResponse.error.code + " " + authResponse.error.message);
         return authResponse.error;
     } else {
         return redirect(`/dashboard`); // return email in auth/confirm link as a search param
@@ -47,10 +45,7 @@ export const canLoadPage = async (email: string) => {
     const supabase = await createAdminClient();
 
     // todo: use supabase rpc and call get_confirmation_sent postgres function
-    const { data, error } = await supabase
-        .from("users")
-        .select("updated_at")
-        .eq("email", email);
+    const { data, error } = await supabase.from("users").select("updated_at").eq("email", email);
 
     if (error) {
         console.log(error.message);

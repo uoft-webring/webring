@@ -3,7 +3,6 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { createHmac } from "crypto";
-import { UserType } from "@/utils/zod";
 import { ApiResponse, getAuthUserProfile } from "../actions";
 import dns from "node:dns/promises";
 import { User } from "@supabase/supabase-js";
@@ -59,14 +58,9 @@ export const getTXTRecordValue = async (seed: any): Promise<string> => {
     // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
     // Increases security by preventing spoofing through ensuring only we can generate valid values
     if (!process.env.DOMAIN_VALIDATION_SECRET_KEY) {
-        throw new Error(
-            "DOMAIN_VALIDATION_SECRET_KEY is not set in environment variables."
-        );
+        throw new Error("DOMAIN_VALIDATION_SECRET_KEY is not set in environment variables.");
     }
-    return createHmac(
-        "sha256",
-        process.env.DOMAIN_VALIDATION_SECRET_KEY as string
-    )
+    return createHmac("sha256", process.env.DOMAIN_VALIDATION_SECRET_KEY as string)
         .update(String(seed)) // based on seed
         .digest("base64url"); // safe for URL's
 };
@@ -151,17 +145,11 @@ export const checkDomainRecords = async (): Promise<boolean> => {
 
     // console.log(`Fetching verification status for user ID: ${user.id}`);
 
-    const { data, error } = await supabase
-        .from("profile")
-        .select("validated_user_component")
-        .single();
+    const { data, error } = await supabase.from("profile").select("validated_user_component").single();
 
     console.log(data);
     if (error || !data) {
-        console.error(
-            "Error fetching domain validation status:",
-            error.message
-        );
+        console.error("Error fetching domain validation status:", error.message);
         return "disconnected"; // equivalent to default false status
     }
 

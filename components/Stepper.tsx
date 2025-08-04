@@ -7,13 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import React, { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-export default function Stepper({
-    steps,
-    className,
-}: {
-    steps: any[];
-    className?: string;
-}) {
+export default function Stepper({ steps, className }: { steps: any[]; className?: string }) {
     const pathname = usePathname();
     const pathSegment = pathname.split("/").pop();
 
@@ -41,29 +35,17 @@ export default function Stepper({
                                 <Button
                                     type="button"
                                     role="tab"
-                                    variant={
-                                        index <= currentIndex
-                                            ? "default"
-                                            : "secondary"
-                                    }
-                                    aria-current={
-                                        stepper.current.id === step.id
-                                            ? "step"
-                                            : undefined
-                                    }
+                                    variant={index <= currentIndex ? "default" : "secondary"}
+                                    aria-current={stepper.current.id === step.id ? "step" : undefined}
                                     aria-posinset={index + 1}
                                     aria-setsize={steps.length}
-                                    aria-selected={
-                                        stepper.current.id === step.id
-                                    }
+                                    aria-selected={stepper.current.id === step.id}
                                     className="rounded-full md:text-lg cursor-pointer"
                                     onClick={() => stepper.goTo(step.id)}
                                 >
                                     {index + 1}
                                 </Button>
-                                <span className="text-sm font-medium md:text-lg">
-                                    {step.title}
-                                </span>
+                                <span className="text-sm font-medium md:text-lg">{step.title}</span>
                             </li>
                         </Link>
                         {index < array.length - 1 && (
@@ -71,25 +53,19 @@ export default function Stepper({
                                 <Separator
                                     /* TODO: find a better vertical height center'er on mobile than `my-4` */
                                     className={`flex-1 h-8 my-4 md:hidden ${
-                                        index < currentIndex
-                                            ? "bg-primary"
-                                            : "bg-muted"
+                                        index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                                 <Separator
                                     orientation="vertical"
                                     className={`hidden md:flex mx-5  ${
-                                        index < currentIndex
-                                            ? "bg-primary"
-                                            : "bg-muted"
+                                        index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                                 <Separator
                                     orientation="vertical"
                                     className={`hidden md:flex mx-5  ${
-                                        index < currentIndex
-                                            ? "bg-primary"
-                                            : "bg-muted"
+                                        index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                             </>

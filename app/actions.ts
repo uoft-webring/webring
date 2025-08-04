@@ -9,9 +9,7 @@ const PROFILE_COLUMNS =
     "ring_id, tagline, domain, name, validated_user_component, github_url, image_url, is_verified, tags";
 
 // Generic response type for uniform handling
-export type ApiResponse<T> =
-    | { data: T; error: null }
-    | { data: null; error: string };
+export type ApiResponse<T> = { data: T; error: null } | { data: null; error: string };
 
 // Specific aliases for clarity
 type GetAllUserProfilesResponse = ApiResponse<SafeUserType[]>;
@@ -41,9 +39,7 @@ export async function getAllUserProfiles(): Promise<GetAllUserProfilesResponse> 
         };
     }
 
-    return data
-        ? { data, error: null }
-        : { data: null, error: "Error: No data returned." };
+    return data ? { data, error: null } : { data: null, error: "Error: No data returned." };
 }
 
 /**
@@ -55,28 +51,23 @@ export async function getAllUserProfiles(): Promise<GetAllUserProfilesResponse> 
  * An object containing the user's profile in `data` if successful,
  * or an error message in `error` if the user is not authenticated or the query fails.
  */
-export const getAuthUserProfile =
-    async (): Promise<GetAuthUserProfileResponse> => {
-        const supabase = await createClient();
-        const {
-            data: { user },
-            error: authError,
-        } = await supabase.auth.getUser();
+export const getAuthUserProfile = async (): Promise<GetAuthUserProfileResponse> => {
+    const supabase = await createClient();
+    const {
+        data: { user },
+        error: authError,
+    } = await supabase.auth.getUser();
 
-        if (!user) {
-            return { data: null, error: authError?.message ?? "Auth error" };
-        }
+    if (!user) {
+        return { data: null, error: authError?.message ?? "Auth error" };
+    }
 
-        const { data, error } = await supabase
-            .from("profile")
-            .select("*")
-            .eq("id", user.id)
-            .single();
+    const { data, error } = await supabase.from("profile").select("*").eq("id", user.id).single();
 
-        return data
-            ? { data: data as UserType, error: null }
-            : { data: null, error: error?.message ?? "Error fetching profile" };
-    };
+    return data
+        ? { data: data as UserType, error: null }
+        : { data: null, error: error?.message ?? "Error fetching profile" };
+};
 
 /**
  * Fetches a single user profile by its associated `subdomain` slug.
@@ -87,9 +78,7 @@ export const getAuthUserProfile =
  * An object containing the matching user profile in `data` if found,
  * or an error message in `error` if the profile is not found or the query fails.
  */
-export const getUserProfile = async (
-    slug: string
-): Promise<GetUserProfileResponse> => {
+export const getUserProfile = async (slug: string): Promise<GetUserProfileResponse> => {
     // To fetch an arbitrary user (not the curr user), we need an admin client to bypass RLS
     const supabase = createAdminClient();
     const { data, error } = await supabase
@@ -104,7 +93,5 @@ export const getUserProfile = async (
             error: `Error: ${(error as PostgrestError).message}`,
         };
     }
-    return data
-        ? { data, error: null }
-        : { data: null, error: "Error: No data returned." };
+    return data ? { data, error: null } : { data: null, error: "Error: No data returned." };
 };

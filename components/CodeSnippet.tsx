@@ -1,13 +1,7 @@
 "use client";
 import { CopyBlock } from "react-code-blocks";
 
-export default function CodeSnippet({
-    codeString,
-    width = "100%",
-}: {
-    codeString: string;
-    width?: string;
-}) {
+export default function CodeSnippet({ codeString, width = "100%" }: { codeString: string; width?: string }) {
     return (
         <CopyBlock
             text={codeString}

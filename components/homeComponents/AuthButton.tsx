@@ -14,8 +14,7 @@ export default function AuthButton() {
     useEffect(() => {
         async function fetchUser() {
             setLoading(true);
-            const { user: fetchedUser, error: fetchedError } =
-                await getAuthUser();
+            const { user: fetchedUser, error: fetchedError } = await getAuthUser();
             setUser(fetchedUser);
             setError(fetchedError);
             setLoading(false);

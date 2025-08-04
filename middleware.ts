@@ -17,9 +17,7 @@ export async function middleware(request: NextRequest) {
     // null check and check if direction is next or prev
     if (!idPram || !direction || !["next", "prev"].includes(direction)) {
         // redirects to webring home page else continue to redirect page
-        return home_domain != null
-            ? NextResponse.redirect(new URL(home_domain))
-            : NextResponse.next();
+        return home_domain != null ? NextResponse.redirect(new URL(home_domain)) : NextResponse.next();
     }
 
     // process id in base 10
@@ -28,18 +26,14 @@ export async function middleware(request: NextRequest) {
     // id not valid number
     if (isNaN(id)) {
         // redirects to webring home page else continue to redirect page
-        return home_domain != null
-            ? NextResponse.redirect(new URL(home_domain))
-            : NextResponse.next();
+        return home_domain != null ? NextResponse.redirect(new URL(home_domain)) : NextResponse.next();
     }
 
     // call fcn to grab domain based on new id from db
     const domain = await domain_from_id(id, direction);
     console.log("domain", domain);
     if (!domain) {
-        return home_domain != null
-            ? NextResponse.redirect(new URL(home_domain))
-            : NextResponse.next();
+        return home_domain != null ? NextResponse.redirect(new URL(home_domain)) : NextResponse.next();
     }
     // redirect to domain from db
     return NextResponse.redirect(new URL(domain));

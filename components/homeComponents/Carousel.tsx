@@ -6,11 +6,7 @@ import React from "react";
 import AliceCarousel, { Responsive } from "react-alice-carousel";
 import "react-alice-carousel/lib/alice-carousel.css";
 
-export default function ProfileCarousel({
-    data: ringProfiles,
-}: {
-    data: SafeUserType[];
-}) {
+export default function ProfileCarousel({ data: ringProfiles }: { data: SafeUserType[] }) {
     const responsive: Responsive = {
         0: {
             items: 1,
@@ -35,11 +31,7 @@ export default function ProfileCarousel({
             items={ringProfiles.map((profile, index) => {
                 return (
                     <div className="mx-3">
-                        <ProfileCard
-                            key={index}
-                            user={profile}
-                            className="ml-0"
-                        />
+                        <ProfileCard key={index} user={profile} className="ml-0" />
                     </div>
                 );
             })}

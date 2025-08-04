@@ -6,7 +6,7 @@
     "bracketSpacing": true,
     "arrowParens": "always",
     "endOfLine": "lf",
-    "printWidth": 75,
+    "printWidth": 110,
     "proseWrap": "preserve",
     "htmlWhitespaceSensitivity": "css"
 }

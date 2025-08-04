@@ -6,12 +6,7 @@ export interface InputProps extends React.InputHTMLAttributes<any> {
     error?: string; // Add error property
 }
 
-function Input({
-    error,
-    className,
-    type,
-    ...props
-}: { error?: string } & React.ComponentProps<"input">) {
+function Input({ error, className, type, ...props }: { error?: string } & React.ComponentProps<"input">) {
     return (
         <>
             <input

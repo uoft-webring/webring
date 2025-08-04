@@ -15,9 +15,10 @@ import Link from "next/link";
 import Form from "next/form";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
-const NO_ERRORS = Object.fromEntries(
-    User.keyof().options.map((key) => [key, undefined])
-) as Record<UserKeys, string | undefined>;
+const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
+    UserKeys,
+    string | undefined
+>;
 
 /**
  * The flow of the component lifecycle is as follows:
@@ -35,9 +36,7 @@ export default function EditForm({
     setFormData: React.Dispatch<React.SetStateAction<UserType | null>>;
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
-    const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(
-        structuredClone(NO_ERRORS)
-    );
+    const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
 
     console.log("Rendering Parent with tags:", formData.tags);
 
@@ -90,10 +89,7 @@ export default function EditForm({
             className="flex flex-col"
         >
             <div className="grname gap-2 [&>*:not(label)]:mb-4 [&>*:not(label)]:mt-1">
-                <Label
-                    htmlFor="name"
-                    className="after:content-['*'] after:text-destructive after:ml-1"
-                >
+                <Label htmlFor="name" className="after:content-['*'] after:text-destructive after:ml-1">
                     Name
                 </Label>
                 <Input
@@ -107,10 +103,7 @@ export default function EditForm({
                     }}
                     error={errors.name}
                 />
-                <Label
-                    htmlFor="email"
-                    className="after:content-['*'] after:text-destructive after:ml-1"
-                >
+                <Label htmlFor="email" className="after:content-['*'] after:text-destructive after:ml-1">
                     Email
                 </Label>
                 <Input
@@ -122,10 +115,7 @@ export default function EditForm({
                     defaultValue={formData.email}
                     error={errors.email}
                 />
-                <Label
-                    htmlFor="domain"
-                    className="after:content-['*'] after:text-destructive after:ml-1"
-                >
+                <Label htmlFor="domain" className="after:content-['*'] after:text-destructive after:ml-1">
                     Portfolio link
                 </Label>
                 <Input
@@ -175,10 +165,7 @@ export default function EditForm({
                     tags={formData.tags ?? []}
                     onTagsChange={(tags: string[]) => {
                         saveToForm({
-                            tags:
-                                JSON.stringify(tags) === JSON.stringify([])
-                                    ? null
-                                    : tags,
+                            tags: JSON.stringify(tags) === JSON.stringify([]) ? null : tags,
                         });
                     }}
                     error={errors.tags}
@@ -188,11 +175,7 @@ export default function EditForm({
                     name="tagline"
                     placeholder="John Doe is a full stack..."
                     required
-                    remaining={
-                        formData.tagline === null
-                            ? 255
-                            : 255 - formData.tagline.length
-                    }
+                    remaining={formData.tagline === null ? 255 : 255 - formData.tagline.length}
                     defaultValue={formData.tagline ?? ""}
                     onChange={(e) => {
                         saveToForm({ tagline: e.target.value });

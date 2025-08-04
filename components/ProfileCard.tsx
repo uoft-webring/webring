@@ -37,16 +37,11 @@ export default function ProfileCard({
                     alt="Profile picture"
                     className={cn(
                         "rounded-full w-32 aspect-square object-cover",
-                        user.is_verified &&
-                            "border-4 border-card outline outline-white"
+                        user.is_verified && "border-4 border-card outline outline-white"
                     )}
                 />
                 {user.is_verified && (
-                    <Image
-                        src={verifiedIcon}
-                        alt="Verified"
-                        className="absolute right-0 bottom-0 size-8"
-                    />
+                    <Image src={verifiedIcon} alt="Verified" className="absolute right-0 bottom-0 size-8" />
                 )}
             </div>
             <h2 className="text-2xl font-semibold">{user.name}</h2>{" "}
@@ -64,15 +59,9 @@ export default function ProfileCard({
                         target="_blank"
                         className="flex items-center"
                     >
-                        <Image
-                            src={gitHubIcon}
-                            alt="GitHub"
-                            className="size-8 mr-2"
-                        />
+                        <Image src={gitHubIcon} alt="GitHub" className="size-8 mr-2" />
                         {/* When we migrate to just github_username we won't need this */}
-                        {user.github_url && user.github_url.length <= 30
-                            ? user.github_url
-                            : "GitHub"}
+                        {user.github_url && user.github_url.length <= 30 ? user.github_url : "GitHub"}
                     </Link>
                 )}
                 <Link
@@ -82,14 +71,8 @@ export default function ProfileCard({
                     rel="noopener noreferrer nofollow"
                     className="flex items-center"
                 >
-                    <Image
-                        src={portfolioIcon}
-                        alt="Website"
-                        className="size-8 mr-2"
-                    />
-                    {domainUrl && domainUrl.length <= 30
-                        ? domainUrl
-                        : "Portfolio"}
+                    <Image src={portfolioIcon} alt="Website" className="size-8 mr-2" />
+                    {domainUrl && domainUrl.length <= 30 ? domainUrl : "Portfolio"}
                 </Link>
             </div>
         </div>

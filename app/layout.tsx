@@ -15,12 +15,7 @@ export const metadata: Metadata = {
     metadataBase: new URL("https://uoftwebring.com"),
     title: "UofT Webring",
     description,
-    keywords: [
-        "UofT Webring",
-        "University of Toronto",
-        "Webring",
-        "Student Community",
-    ],
+    keywords: ["UofT Webring", "University of Toronto", "Webring", "Student Community"],
     /* OG and Twitter Images are auto-added by Next.js */
     openGraph: {
         title: "UofT Webring",

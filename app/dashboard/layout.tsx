@@ -5,11 +5,7 @@ import { UserProvider } from "./UserProvider";
 import Stepper from "../../components/Stepper";
 import { getAuthUserProfile } from "../actions";
 
-export default async function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { data: authUser, error: authError } = await getAuthUser();
     if (!authUser || authError) redirect("/signup");
 
@@ -47,9 +43,7 @@ export default async function DashboardLayout({
                         steps={onboardingRoutes}
                         className="px-6 w-full md:w-min md:h-screen md:flex md:flex-col  mt-12 sm:mt-6"
                     />
-                    <div className="max-w-[70rem] mx-auto w-full px-6 mt-12 sm:mt-6">
-                        {children}
-                    </div>
+                    <div className="max-w-[70rem] mx-auto w-full px-6 mt-12 sm:mt-6">{children}</div>
                 </div>
             </div>
         </UserProvider>

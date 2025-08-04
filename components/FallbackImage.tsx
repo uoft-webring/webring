@@ -38,20 +38,13 @@ export default function FallbackImage({
 
     useEffect(() => {
         if (!src) {
-            console.warn(
-                "[FallbackImage] No src provided, using fallback image."
-            );
+            console.warn("[FallbackImage] No src provided, using fallback image.");
             setImageError(true);
             return;
         }
         setImageError(false);
     }, [src]);
-    console.log(
-        "[FallbackImage] Rendering image for ringId:",
-        seed,
-        "with src:",
-        src
-    );
+    console.log("[FallbackImage] Rendering image for ringId:", seed, "with src:", src);
 
     return imageError || !src ? (
         <Image
@@ -71,10 +64,7 @@ export default function FallbackImage({
             className={cn("object-cover", className)}
             alt={alt}
             onError={(err) => {
-                console.log(
-                    "[FallbackImage] Profile Image error! Switching to fallback: ",
-                    err
-                );
+                console.log("[FallbackImage] Profile Image error! Switching to fallback: ", err);
                 setImageError(true);
             }}
             crossOrigin="anonymous"
