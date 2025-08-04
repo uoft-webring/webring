@@ -12,7 +12,8 @@ create table public.profile (
     github_url text default '',
     tags text[3] default array[]::text[],
     graduation_year int,
-    program text
+    program text,
+    subdomain text
 );
 comment on table public.profile is 'Table to store user data';
 

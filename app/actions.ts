@@ -87,7 +87,6 @@ export const getAuthUserProfile =
  * An object containing the matching user profile in `data` if found,
  * or an error message in `error` if the profile is not found or the query fails.
  */
-// TODO-J add subdomain to the DB schema
 export const getUserProfile = async (
     slug: string
 ): Promise<GetUserProfileResponse> => {
