@@ -21,7 +21,11 @@ import {
     CommandItem,
     CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/popover";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type TagsContextType = {
@@ -46,7 +50,9 @@ const useTagsContext = () => {
     const context = useContext(TagsContext);
 
     if (!context) {
-        throw new Error("useTagsContext must be used within a TagsProvider");
+        throw new Error(
+            "useTagsContext must be used within a TagsProvider"
+        );
     }
 
     return context;
@@ -94,10 +100,20 @@ export const Tags = ({
 
     return (
         <TagsContext.Provider
-            value={{ value, setValue, open, onOpenChange, width, setWidth }}
+            value={{
+                value,
+                setValue,
+                open,
+                onOpenChange,
+                width,
+                setWidth,
+            }}
         >
             <Popover onOpenChange={onOpenChange} open={open}>
-                <div className={cn("relative w-full", className)} ref={ref}>
+                <div
+                    className={cn("relative w-full", className)}
+                    ref={ref}
+                >
                     {children}
                 </div>
             </Popover>
@@ -145,7 +161,10 @@ export const TagsValue = ({
     };
 
     return (
-        <Badge className={cn("flex items-center gap-2", className)} {...props}>
+        <Badge
+            className={cn("flex items-center gap-2", className)}
+            {...props}
+        >
             {children}
             {onRemove && (
                 // biome-ignore lint/a11y/noStaticElementInteractions: "This is a clickable badge"
@@ -211,7 +230,10 @@ export type TagsItemProps = ComponentProps<typeof CommandItem>;
 
 export const TagsItem = ({ className, ...props }: TagsItemProps) => (
     <CommandItem
-        className={cn("cursor-pointer items-center justify-between", className)}
+        className={cn(
+            "cursor-pointer items-center justify-between",
+            className
+        )}
         {...props}
     />
 );
