@@ -7,7 +7,7 @@ export default async function Signin() {
     const { data: user } = await getAuthUser();
 
     if (user) {
-        redirect("/dashboard");
+        redirect("/dashboard/edit");
     }
 
     return (
