@@ -2,7 +2,7 @@
 
 A Webring environment providing a unified space for UofT students to gather and showcase their web portfolios.
 
-**Are you a UofT Student? Come [join] (insert link to sign up page) the UofT Webring community!**
+**Are you a UofT Student? Come [join](https://uoftwebring.com/signup) the UofT Webring community!**
 
 ## Technologies
 
