@@ -5,6 +5,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@utility drag-none {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-select: none;
+}
+
 :root {
     --background: oklch(0.9765 0.0054 274.9666);
     --foreground: oklch(0.3833 0.0399 250.25);
