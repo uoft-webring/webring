@@ -36,7 +36,7 @@ export default function ProfileCard({
                     seed={user.ring_id}
                     alt="Profile picture"
                     className={cn(
-                        "rounded-full w-32 aspect-square object-cover",
+                        "rounded-full w-32 aspect-square object-cover pointer-events-none drag-none select-none",
                         user.is_verified && "border-4 border-card outline outline-white"
                     )}
                 />
