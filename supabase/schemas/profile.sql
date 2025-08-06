@@ -1,3 +1,5 @@
+create type validation_state as enum ('disconnected', 'pending', 'connected');
+
 -- Create profile table 
 create table public.profile (
     id uuid references auth.users not null primary key, -- auth.users uuid, will be used to build txt_record
@@ -5,7 +7,7 @@ create table public.profile (
     domain text default '', -- user domain
     name text, -- user name
     ring_id serial, -- id to identify user domain on the webring
-    validated_user_component text default 'disconnected', -- check if user domain is "valid", contains either "disconnected", "pending" or "connected"
+    validated_user_component validation_state default 'disconnected', -- check if user domain is "valid", contains either "disconnected", "pending" or "connected"
     tagline text default '',
     image_url text default '',
     is_verified boolean default false,
