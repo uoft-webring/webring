@@ -21,6 +21,9 @@ export default function Confirm() {
     const [value, setValue] = useState("");
     const [disabled, setDisabled] = useState(false);
     const [error, setError] = useState<string | undefined>(undefined);
+    const [rateLimitError, setRateLimitError] = useState<string | undefined>(
+        undefined
+    );
     const { focusRef, setFocus } = useInputFocus();
 
     useEffect(() => {
@@ -99,8 +102,13 @@ export default function Confirm() {
                     <div className="flex-1">
                         <Button
                             className="w-full"
-                            onClick={() => {
-                                resendMagicLink(email);
+                            onClick={async () => {
+                                const { error } = await resendMagicLink(email);
+                                console.log(
+                                    "error got when click resend: ",
+                                    error?.message
+                                );
+                                setError(error?.message);
                             }}
                         >
                             Resend

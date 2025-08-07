@@ -54,14 +54,14 @@ export default function FallbackImage({
             height={height}
             src={avatar}
             alt="Avatar"
-            className={cn("object-cover", className)}
+            className={cn("object-cover bg-popover", className)}
         />
     ) : (
         <Image
             src={src}
             width={width}
             height={height}
-            className={cn("object-cover", className)}
+            className={cn("object-cover bg-popover", className)}
             alt={alt}
             onError={(err) => {
                 console.log("[FallbackImage] Profile Image error! Switching to fallback: ", err);

@@ -12,6 +12,7 @@ export const signInAction = async (email: string) => {
         },
     });
 
+    // Catch user not registered error
     if (error) return { error };
 
     return {}; // return email in auth/confirm link as a search param
