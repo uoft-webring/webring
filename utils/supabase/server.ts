@@ -38,7 +38,7 @@ export function createAdminClient() {
 
     return createServiceRoleClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
         // {
         //     cookies: {
         //         getAll() {
@@ -57,12 +57,5 @@ export function createAdminClient() {
         //         },
         //     },
         // }
-    );
-}
-
-export function createServiceClient() {
-    return createServiceRoleClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 }
