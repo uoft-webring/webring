@@ -77,30 +77,28 @@ export default async function Join() {
             <h2>Join the commmunity</h2>
             <p className="mb-4">Copy the HTML code and paste it into your portfolio to join the community.</p>
 
-            <div className="flex w-full flex-col gap-6">
-                <Tabs defaultValue="CSS" className="relative mr-auto w-full">
-                    <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-                        {Object.keys(codeStringMap).map((value, index) => {
-                            return (
-                                <TabsTrigger
-                                    className="relative rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
-                                    key={index}
-                                    value={value}
-                                >
-                                    {value}
-                                </TabsTrigger>
-                            );
-                        })}
-                    </TabsList>
-                    {Object.entries(codeStringMap).map(([key, value], index) => {
+            <Tabs defaultValue="CSS" className="relative mr-auto flex w-full flex-col gap-6">
+                <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
+                    {Object.keys(codeStringMap).map((value, index) => {
                         return (
-                            <TabsContent key={index} value={key}>
-                                <CodeSnippet codeString={value} />
-                            </TabsContent>
+                            <TabsTrigger
+                                className="relative rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
+                                key={index}
+                                value={value}
+                            >
+                                {value}
+                            </TabsTrigger>
                         );
                     })}
-                </Tabs>
-            </div>
+                </TabsList>
+                {Object.entries(codeStringMap).map(([key, value], index) => {
+                    return (
+                        <TabsContent key={index} value={key}>
+                            <CodeSnippet codeString={value} />
+                        </TabsContent>
+                    );
+                })}
+            </Tabs>
 
             <StatusCard showCTA={false} showButton={false} status={validPortfolioStatus} />
             {validPortfolioStatus == "disconnected" && (
