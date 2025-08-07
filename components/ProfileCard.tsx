@@ -50,7 +50,7 @@ export default function ProfileCard({
                     return <SkillTag key={index} tagName={tagName} />;
                 })}
             </div>
-            <p className="text-wrap break-all text-center">{user.tagline}</p>
+            <p className="text-wrap text-center">{user.tagline}</p>
             <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (
                     <Link

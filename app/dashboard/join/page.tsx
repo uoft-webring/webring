@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Status } from "@/components/StatusCard";
+import next from "next";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function Join() {
     const { data: userData, error: userError } = await getAuthUserProfile();
@@ -21,7 +23,7 @@ export default async function Join() {
 
     const id: number = userData.ring_id;
 
-    const codeString = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
+    const css = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
         <img
@@ -33,22 +35,41 @@ export default async function Join() {
     <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
 </div>`;
 
+    const react_and_tailwind = `<div className="flex items-center gap-2">
+    <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
+    <a href='https://uoftwebring.com' target='_blank'>
+        <img
+            src='https://uoftwebring.com/ring_logo.svg'
+            alt='UofT Webring'
+            className="w-6 h-auto"
+        />
+    </a>
+    <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
+</div>`;
+
+    const next_and_tailwind = `<div className="flex items-center gap-2">
+    <Link href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</Link>
+    <Link href='https://uoftwebring.com' target='_blank'>
+        <Image
+            src='https://uoftwebring.com/ring_logo.svg'
+            alt='UofT Webring'
+            height={24}
+            width={24}
+        />
+    </Link>
+    <Link href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</Link>
+</div>`;
+
+    const codeStringMap = {
+        CSS: css,
+        "React & Tailwind": react_and_tailwind,
+        "Nextjs & Tailwind": next_and_tailwind,
+    };
+
     const action = async () => {
         "use server";
         // TODO: add this back in later when this is automated, going with manual process first
         const result = await checkAddedCodeToPortfolio();
-        // const options: ExternalToast = {
-        //     position: "top-center",
-        // };
-
-        // if (result) {
-        //     toast.success("Domain verified successfully!", options);
-        // } else {
-        //     toast.error(
-        //         "Domain verification failed. Please try again.",
-        //         options
-        //     );
-        // }
     };
 
     return (
@@ -56,7 +77,28 @@ export default async function Join() {
             <h2>Join the commmunity</h2>
             <p className="mb-4">Copy the HTML code and paste it into your portfolio to join the community.</p>
 
-            <CodeSnippet codeString={codeString} />
+            <Tabs defaultValue="CSS" className="relative mr-auto flex w-full flex-col gap-6">
+                <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
+                    {Object.keys(codeStringMap).map((value, index) => {
+                        return (
+                            <TabsTrigger
+                                className="relative rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
+                                key={index}
+                                value={value}
+                            >
+                                {value}
+                            </TabsTrigger>
+                        );
+                    })}
+                </TabsList>
+                {Object.entries(codeStringMap).map(([key, value], index) => {
+                    return (
+                        <TabsContent key={index} value={key}>
+                            <CodeSnippet codeString={value} />
+                        </TabsContent>
+                    );
+                })}
+            </Tabs>
 
             <StatusCard showCTA={false} showButton={false} status={validPortfolioStatus} />
             {validPortfolioStatus == "disconnected" && (
