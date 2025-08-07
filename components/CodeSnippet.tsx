@@ -9,7 +9,7 @@ export default function CodeSnippet({ codeString, width = "100%" }: { codeString
             showLineNumbers={false}
             customStyle={{
                 width: width,
-                borderRadius: "0.75rem",
+                // borderRadius: "0.75rem",
                 padding: "1rem",
                 overflowX: "scroll",
             }}
