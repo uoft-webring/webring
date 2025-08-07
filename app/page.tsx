@@ -24,11 +24,14 @@ export default async function Home() {
     //     return redirect("/signup");
     // }
 
+    // Filter webring profile data
+    const filteredRingProfiles = ringProfiles.filter((profile) => profile.domain);
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Navbar user={userData} />
             <div className="overflow-clip">
-                <WebRing data={ringProfiles} />
+                <WebRing data={filteredRingProfiles} />
                 <div className="px-4">
                     <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
                     <div className="max-w-[85rem] mx-auto overflow-clip">
