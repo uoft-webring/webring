@@ -12,6 +12,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import verifiedIcon from "@/icons/verified.svg";
+import { cn } from "@/lib/utils";
+import { House, LayoutDashboard, LogOut } from "lucide-react";
+import { DropdownMenuArrow } from "@radix-ui/react-dropdown-menu";
 
 export default function Navbar({
     user,
@@ -32,26 +36,54 @@ export default function Navbar({
             </Link>
             {user ? (
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="outline-none focus:outline-none">
-                        <FallbackImage
-                            width={64}
-                            height={64}
-                            src={user.image_url}
-                            seed={user.ring_id}
-                            alt={user.name + "'s Profile picture"}
-                            className="rounded-full w-14 aspect-square border-4 border-card outline-2 outline-white"
-                        />
+                    <DropdownMenuTrigger
+                        className={cn(
+                            "outline-none focus:outline-none"
+                            // user.is_verified && "bg-popover rounded-t-full border-x"
+                        )}
+                    >
+                        <div className="w-14 aspect-square rounded-full relative">
+                            <FallbackImage
+                                src={user.image_url}
+                                seed={user.ring_id}
+                                alt={user.name + "'s Profile picture"}
+                                className={cn(
+                                    "rounded-full w-14 aspect-square object-cover pointer-events-none drag-none select-none",
+                                    user.is_verified && "border-1 border-white"
+                                )}
+                            />
+                            {user.is_verified && (
+                                <Image
+                                    src={verifiedIcon}
+                                    alt="Verified"
+                                    className="absolute right-0 bottom-0 size-4"
+                                />
+                            )}
+                        </div>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="text-md">
-                        <Link href="/">
-                            <DropdownMenuItem>Home</DropdownMenuItem>
+                    <DropdownMenuContent
+                        className="min-w-14 rounded-full border-t-0 py-2"
+                        align="center"
+                        sideOffset={10}
+                    >
+                        <Link href="/" className="flex mb-2" title="Home">
+                            <DropdownMenuItem className="mx-auto">
+                                <House className="size-6" />
+                            </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuSeparator />
-                        <Link href="/dashboard">
-                            <DropdownMenuItem>Dashboard</DropdownMenuItem>
+
+                        <Link href="/dashboard" className="flex mb-2" title="Dashboard">
+                            <DropdownMenuItem className="mx-auto">
+                                <LayoutDashboard className="size-6" />
+                            </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={signOutAction}>Sign out</DropdownMenuItem>
+
+                        <div className="flex" title="Sign out">
+                            <DropdownMenuItem className="mx-auto" onClick={signOutAction}>
+                                <LogOut className="size-6" />
+                            </DropdownMenuItem>
+                        </div>
+                        {/* <DropdownMenuArrow className="fill-popover" /> */}
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
