@@ -67,19 +67,22 @@ export default function Navbar({
                         sideOffset={10}
                     >
                         <Link href="/" className="flex mb-2" title="Home">
-                            <DropdownMenuItem className="mx-auto">
+                            <DropdownMenuItem className="mx-auto rounded-full aspect-square">
                                 <House className="size-6" />
                             </DropdownMenuItem>
                         </Link>
 
                         <Link href="/dashboard" className="flex mb-2" title="Dashboard">
-                            <DropdownMenuItem className="mx-auto">
+                            <DropdownMenuItem className="mx-auto rounded-full aspect-square">
                                 <LayoutDashboard className="size-6" />
                             </DropdownMenuItem>
                         </Link>
 
                         <div className="flex" title="Sign out">
-                            <DropdownMenuItem className="mx-auto" onClick={signOutAction}>
+                            <DropdownMenuItem
+                                className="mx-auto rounded-full aspect-square"
+                                onClick={signOutAction}
+                            >
                                 <LogOut className="size-6" />
                             </DropdownMenuItem>
                         </div>
