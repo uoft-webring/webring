@@ -6,20 +6,11 @@ const ExampleComponent = () => {
     return (
         <TypeAnimation
             sequence={[
-<<<<<<< Updated upstream
-                // Same substring at the start will only be typed out once, initially
-                "We are for the builders with soul.",
-                1000, // wait 1s before replacing "Mice" with "Hamsters"
-                "We are where code becomes character.",
-                1000,
-                "We are the developer's rebellion.",
-=======
-                "We are for the builders with soul.",
+                "We are re-writing the developer's story.",
                 1000,
                 "We are the difference they can't ignore.",
                 1000,
                 "We are the choice to stand out.",
->>>>>>> Stashed changes
                 1000,
             ]}
             wrapper="p"
