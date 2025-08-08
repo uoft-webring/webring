@@ -1,0 +1,63 @@
+p {
+    font-size: 1rem;
+    color: white;
+}
+
+code {
+    background-color: rgba(255, 255, 255, 0.075);
+    border-radius: 0.375rem;
+    color: white;
+    padding-inline: 0.3rem;
+    padding-block: 0.2rem;
+}
+
+h2 {
+    margin-top: 1rem;
+    font-size: 1.5rem;
+}
+
+h2::before {
+    /* Here we want to draw a box before the h2 tag */
+    content: "";
+    background-color: var(--foreground);
+    display: inline-block;
+    width: 0.3125rem;
+    border-radius: 0.125rem;
+    height: 2ch;
+    margin-bottom: -0.25rem;
+    margin-right: 0.5ch;
+}
+
+.pulse-text {
+    animation: pulse 0.8s ease-in-out infinite;
+    font-weight: 600;
+    display: inline-block; /* Ensures the animation works correctly on a span */
+}
+
+@keyframes pulse {
+    0% {
+        color: #ffffff; /* Start at white */
+    }
+    10% {
+        color: #f88; /* Rapidly shift to red */
+    }
+    100% {
+        color: #ffffff; /* Slowly shift back to white */
+    }
+}
+
+.ghost {
+    animation: ghost-fade 10s ease-in-out infinite;
+}
+
+@keyframes ghost-fade {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
+}
