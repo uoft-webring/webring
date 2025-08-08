@@ -12,8 +12,18 @@ code {
 }
 
 h2 {
-    margin-top: 1rem;
+    margin-top: 1.25ch;
     font-size: 1.5rem;
+}
+
+.tag {
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 1.125rem;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+
+    margin-bottom: 1.25ch;
 }
 
 h2::before {
@@ -47,17 +57,42 @@ h2::before {
 }
 
 .ghost {
-    animation: ghost-fade 10s ease-in-out infinite;
+    animation: ghost-fade 5s ease-in-out infinite;
 }
 
 @keyframes ghost-fade {
     0% {
-        opacity: 0;
+        opacity: 0.25;
     }
     50% {
         opacity: 0.5;
     }
     100% {
-        opacity: 0;
+        opacity: 0.25;
+    }
+}
+
+@media (min-width: 768px) {
+    h1 {
+        font-size: 2.75rem;
+    }
+    h2 {
+        font-size: 2.2rem;
+    }
+    p {
+        font-size: 1.25rem;
+        line-height: 1.6;
+    }
+}
+
+@media (min-width: 1024px) {
+    h1 {
+        font-size: 4.25rem;
+    }
+    h2 {
+        font-size: 2.75rem;
+    }
+    p {
+        font-size: 1.375rem;
     }
 }

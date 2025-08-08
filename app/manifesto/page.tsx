@@ -6,11 +6,11 @@ import "./manifesto.css";
 export default function Page() {
     return (
         <>
-            <section className="max-w-[85rem] w-full mx-auto">
-                <Navbar />
-                <div className="px-4">
+            <section className="max-w-[85rem] w-full mx-auto mb-4">
+                <Navbar className="fixed" />
+                <section className="max-w-[45rem] w-full mx-auto px-4 mt-8">
                     <Manifesto />
-                </div>
+                </section>
             </section>
         </>
     );
