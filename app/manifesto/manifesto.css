@@ -26,6 +26,10 @@ h2 {
     margin-bottom: 1.25ch;
 }
 
+img {
+    border-radius: 0.75rem;
+}
+
 h2::before {
     /* Here we want to draw a box before the h2 tag */
     content: "";
