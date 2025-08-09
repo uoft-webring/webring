@@ -8,7 +8,7 @@ import ProfileCard from "@/components/ProfileCard";
 import { useUser } from "../UserProvider";
 
 export default function Edit() {
-    const user: UserType = useUser();
+    const user = useUser();
     const [data, setData] = useState<UserType | null>(user);
 
     if (!data) {
