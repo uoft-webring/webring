@@ -103,20 +103,51 @@ export default function EditForm({
                     }}
                     error={errors.name}
                 />
-                <Label htmlFor="email" className="after:content-['*'] after:text-destructive after:ml-1">
-                    Email
-                </Label>
-                <Input
-                    disabled
-                    name="email"
-                    type="email"
-                    placeholder="your.email@mail.utoronto.ca"
-                    required
-                    defaultValue={formData.email}
-                    error={errors.email}
-                />
+
+                <div className="flex flex-row gap-2 justify-evenly">
+                    <div className="flex flex-col gap-2 w-full">
+                        <Label
+                            htmlFor="graduation_year"
+                            className="after:content-['*'] after:text-destructive after:ml-1"
+                        >
+                            Graduation Year
+                        </Label>
+                        <Input
+                            name="graduation_year"
+                            type="number"
+                            placeholder="2029"
+                            min={1900}
+                            max={2500}
+                            defaultValue={formData.graduation_year ?? ""}
+                            onChange={(e) => {
+                                const n = e.currentTarget.valueAsNumber;
+                                saveToForm({ graduation_year: Number.isNaN(n) ? null : n });
+                            }}
+                            error={errors.graduation_year}
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                        <Label
+                            htmlFor="program"
+                            className="after:content-['*'] after:text-destructive after:ml-1"
+                        >
+                            Program
+                        </Label>
+                        <Input
+                            name="program"
+                            type="text"
+                            placeholder="Computer Science"
+                            defaultValue={formData.program ?? ""}
+                            onChange={(e) => {
+                                const value = e.currentTarget.value.trim();
+                                saveToForm({ program: value === "" ? null : value });
+                            }}
+                            error={errors.program}
+                        />
+                    </div>
+                </div>
                 <Label htmlFor="domain" className="after:content-['*'] after:text-destructive after:ml-1">
-                    Portfolio link
+                    Portfolio Link
                 </Label>
                 <Input
                     name="domain"
@@ -132,7 +163,7 @@ export default function EditForm({
                     }}
                     error={errors.domain}
                 />
-                <Label htmlFor="github_url">GitHub User</Label>
+                <Label htmlFor="github_url">GitHub Username</Label>
                 <Input
                     /* Data type is named github_url but it's a username */
                     name="github_url"
@@ -170,9 +201,9 @@ export default function EditForm({
                     }}
                     error={errors.tags}
                 />
-                <Label htmlFor="tagline">Tagline</Label>
+                <Label htmlFor="bio">Bio</Label>
                 <Textarea
-                    name="tagline"
+                    name="bio"
                     placeholder="John Doe is a full stack..."
                     required
                     remaining={formData.tagline === null ? 255 : 255 - formData.tagline.length}
