@@ -23,6 +23,8 @@ export default async function User({ params }: { params: Promise<{ slug: string 
         validated_user_component: "disconnected",
         tags: ["web", "developer", "mock"],
         subdomain: slug,
+        graduation_year: 2024,
+        program: "Computer Science",
     };
     return (
         <div className="min-h-screen bg-background flex flex-col">
