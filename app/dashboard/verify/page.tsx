@@ -14,7 +14,6 @@ export default async function Verify() {
     }
     const id: number = userData.ring_id;
 
-    const domainTXTKey = "uoft-webring-" + id;
     const domainTXTValue = await getTXTRecordValue(String(id));
 
     const isVerified = await getDomainVerification();
@@ -26,15 +25,6 @@ export default async function Verify() {
             // we want to trigger a UI refresh
             redirect("/dashboard/verify");
         }
-        /*     if (result) {
-            toast.success("Domain verified successfully!", {
-                duration: 1000,
-            });
-        } else {
-            toast.error("Domain verification failed. Please try again.", {
-                duration: 1000,
-            });
-        } */
     };
 
     return (
@@ -47,7 +37,7 @@ export default async function Verify() {
             </p>
             <h3>Key: </h3>
 
-            <CodeSnippet codeString={domainTXTKey} />
+            <CodeSnippet codeString={"uoft-webring"} />
             <h3>Value: </h3>
 
             <CodeSnippet codeString={domainTXTValue} />

@@ -84,7 +84,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 
     const baseDomain = new URL(user.domain).hostname;
-    const expectedKey = `uoft-webring-${user.ring_id}`;
+    const expectedKey = `uoft-webring`;
     const fullRecordDomain = `${expectedKey}.${baseDomain}`;
     const expectedValue = await getTXTRecordValue(user.ring_id);
     try {
