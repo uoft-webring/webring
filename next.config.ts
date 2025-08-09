@@ -9,15 +9,6 @@ const nextConfig: NextConfig = {
     pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
     productionBrowserSourceMaps: true,
     reactStrictMode: true,
-    images: {
-        remotePatterns: [
-            {
-                protocol: "https",
-                hostname: "api.dicebear.com",
-                pathname: "/**",
-            },
-        ],
-    },
     eslint: {
         ignoreDuringBuilds: true,
     },
