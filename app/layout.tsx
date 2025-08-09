@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import "prismjs/themes/prism-tomorrow.css"; // has to be applied globally
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",

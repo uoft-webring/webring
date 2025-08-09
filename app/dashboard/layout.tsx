@@ -5,6 +5,24 @@ import { UserProvider } from "./UserProvider";
 import Stepper from "../../components/Stepper";
 import { getAuthUserProfile } from "../actions";
 
+const onboardingRoutes = [
+    {
+        id: "edit",
+        title: "Edit",
+        description: "Edit your profile",
+    },
+    {
+        id: "join",
+        title: "Join",
+        description: "Join the webring",
+    },
+    {
+        id: "verify",
+        title: "Verify",
+        description: "Verify your membership",
+    },
+];
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { data: authUser, error: authError } = await getAuthUser();
     if (!authUser || authError) redirect("/signup");
@@ -14,23 +32,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
         redirect("/signup");
     }
 
-    const onboardingRoutes = [
-        {
-            id: "edit",
-            title: "Edit",
-            description: "Edit your profile",
-        },
-        {
-            id: "join",
-            title: "Join",
-            description: "Join the webring",
-        },
-        {
-            id: "verify",
-            title: "Verify",
-            description: "Verify your membership",
-        },
-    ];
     return (
         <UserProvider user={userData}>
             <div className="min-h-screen bg-background flex flex-col">
