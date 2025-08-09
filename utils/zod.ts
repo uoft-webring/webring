@@ -57,6 +57,20 @@ export const User = z.object({
     validated_user_component: z.string(),
     github_url: z.string().nullable(),
     tags: z.string().nonempty().array().max(3, { message: "You can choose up to 3 tags." }).nullable(),
+    graduation_year: z
+        .number({
+            required_error: "Please enter your graduation year.",
+            invalid_type_error: "Graduation year must be a number.",
+        })
+        .int({ message: "Graduation year must be an integer." })
+        .min(1900, { message: "🤨" })
+        .nullable(),
+    program: z
+        .string()
+        .min(2, { message: "Program name must be at least 2 characters." })
+        .max(60, { message: "Program name must be at most 60 characters." })
+        .regex(/^[a-zA-Z0-9\s&(),.-]+$/, { message: "Program name contains invalid characters." })
+        .nullable(),
 });
 
 export const SafeUser = User.omit({
