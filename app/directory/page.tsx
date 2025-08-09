@@ -59,8 +59,7 @@ export default function DirectoryPage() {
             // To build a search index, strip every thing of it's case
             const tags = (p.tags ?? []).map((t) => t.toLowerCase());
             const program = toLower(p.program);
-            const gradYear = p.graduation_year ?? null;
-
+            const gradYear = p.graduation_year != null ? String(p.graduation_year) : null;
             // build once, lowercased for case insensitive query
             const text = [p.name, p.domain, ...tags, program ?? "", gradYear ?? ""]
                 .filter(Boolean)
