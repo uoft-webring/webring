@@ -32,7 +32,6 @@
         "@supabase/ssr": "^0.6.1",
         "@supabase/supabase-js": "^2.49.4",
         "@types/mdx": "^2.0.13",
-        "@types/react-syntax-highlighter": "^15.5.13",
         "@types/three": "^0.176.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
