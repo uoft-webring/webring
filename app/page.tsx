@@ -46,19 +46,38 @@ export default async function Home() {
                     ]}
                 />
             </section>
-            <section className="m-4 bg-card">
+            {!userData && (
+                <section className="m-4 bg-card">
+                    <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
+                        <p className="mb-1 uppercase text-white/40 md:text-xl">guess what</p>
+                        <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                            Getting yourself RING-ed up has never been easier!
+                        </h1>
+                        <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
+                            Get RING-ed up by signing up with your UofT email, entering your domain, and
+                            adding the custom UofT Webring navigation component to your portfolio website!
+                        </p>
+
+                        <Link href="/signup">
+                            <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                                Join now!
+                            </Button>
+                            <Button className="lg:hidden">Join now!</Button>
+                        </Link>
+                    </div>
+                </section>
+            )}
+            <section className="m-4 ">
                 <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
-                    <p className="mb-1 uppercase text-white/40 md:text-xl">guess what</p>
                     <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                        Getting yourself RING-ed up has never been easier!
+                        View The Directory of UofT Webring Members
                     </h1>
-                    <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
-                        Get RING-ed up by signing up with your UofT email, entering your domain, and adding
-                        the custom UofT Webring navigation component to your portfolio website!
-                    </p>
-                    <Link href="/signup">
-                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">Join now!</Button>
-                        <Button className="lg:hidden">Join now!</Button>
+
+                    <Link href="/directory">
+                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                            Go to The Directory!
+                        </Button>
+                        <Button className="lg:hidden">Go to The Directory!</Button>
                     </Link>
                 </div>
             </section>
