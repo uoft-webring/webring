@@ -48,6 +48,7 @@
         "react-alice-carousel": "^2.9.1",
         "react-code-blocks": "^0.1.6",
         "react-dom": "^19.0.0",
+        "react-image-crop": "^11.0.10",
         "react-syntax-highlighter": "^15.6.1",
         "simplex-noise": "^4.0.3",
         "sonner": "^2.0.3",
