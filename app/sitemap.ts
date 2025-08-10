@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllUserProfiles } from "../actions";
+import { getAllUserProfiles } from "./actions";
 
 const ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://uoftwebring.com").origin;
 
