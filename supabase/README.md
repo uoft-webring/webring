@@ -13,7 +13,7 @@ Three shell scripts that been created to aid the process of handling migrations.
 
 > **NOTE**: shell script require extra permissions. Use `chmod +x example.sh` to give permissions to scripts.
 
-- `handle_migration.sh` script handles creating the migrations
+- `handle_migrations.sh` script handles creating the migrations
 - `up_migration.sh` script handles integrating new migrations into local database (migration up)
 - `down_migration.sh` script handles reverting migrations (migration down)
 
