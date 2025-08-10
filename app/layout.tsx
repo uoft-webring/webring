@@ -23,7 +23,6 @@ export const metadata: Metadata = {
         type: "website",
         siteName: "UofT Webring",
         description,
-
         url: "https://uoftwebring.com",
     },
     twitter: {
@@ -32,9 +31,9 @@ export const metadata: Metadata = {
         description,
     },
     referrer: "origin-when-cross-origin",
-    /* alternates: {
+    alternates: {
         canonical: "/",
-    }, */
+    },
     authors: [
         {
             name: "Jonathan Zhu",
@@ -60,8 +59,53 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                url: "https://uoftwebring.com/",
+                name: "UofT Webring",
+            },
+            {
+                "@type": "Organization",
+                name: "UofT Webring",
+                url: "https://uoftwebring.com/",
+                logo: "https://uoftwebring.com/logo.png",
+            },
+            {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                    {
+                        "@type": "ListItem",
+                        position: 1,
+                        name: "Home",
+                        item: "https://uoftwebring.com/",
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 2,
+                        name: "Directory",
+                        item: "https://uoftwebring.com/directory",
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 2,
+                        name: "Manifesto",
+                        item: "https://uoftwebring.com/manifesto",
+                    },
+                ],
+            },
+        ],
+    };
     return (
         <html lang="en" className={oxanium.variable}>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+                }}
+            />
             <body className="scroll-smooth dark antialiased">
                 {children}
                 <Toaster richColors />
