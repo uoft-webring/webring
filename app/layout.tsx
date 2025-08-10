@@ -100,13 +100,13 @@ export default function RootLayout({
     };
     return (
         <html lang="en" className={oxanium.variable}>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-                }}
-            />
             <body className="scroll-smooth dark antialiased">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+                    }}
+                />
                 {children}
                 <Toaster richColors />
             </body>
