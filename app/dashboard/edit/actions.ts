@@ -17,6 +17,8 @@ export const saveData = async (formData: UserType) => {
                 tagline: formData.tagline,
                 tags: formData.tags,
                 domain: formData.domain,
+                program: formData.program,
+                graduation_year: formData.graduation_year,
             })
             .eq("id", formData.id);
 
