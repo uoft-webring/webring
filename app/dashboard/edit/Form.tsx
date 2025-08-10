@@ -1,6 +1,16 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import TagInputComponent from "@/components/ui/input-tag";
 import { Textarea } from "@/components/ui/textarea";
 import useDebounce from "@/hooks/useDebounce";
@@ -13,6 +23,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Form from "next/form";
+import ImageCropper from "@/components/ImageCropper";
+import { Image } from "@react-three/drei";
+import { Crop } from "react-image-crop";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
@@ -37,6 +50,8 @@ export default function EditForm({
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
+    const [open, setOpen] = useState(false);
+    const [imageSrc, setImageSrc] = useState("");
 
     console.log("Rendering Parent with tags:", formData.tags);
 
@@ -74,6 +89,11 @@ export default function EditForm({
         const newData = { ...formData, ...data };
         setFormData(newData);
         debounceCallback(newData);
+    };
+
+    const saveImage = () => {
+        console.log("subbed form");
+        setOpen(false);
     };
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {};
@@ -178,19 +198,46 @@ export default function EditForm({
                     error={errors.github_url}
                 />
                 <Label htmlFor="image_url">Profile picture link</Label>
-                <Input
-                    name="image_url"
-                    type="url"
-                    placeholder="https://yourdomain.com/profile.jpg"
-                    required
-                    defaultValue={formData.image_url ?? ""}
-                    onChange={(e) => {
-                        saveToForm({
-                            image_url: e.target.value,
-                        });
-                    }}
-                    error={errors.image_url}
-                />
+                <Dialog open={open}>
+                    <DialogTrigger asChild>
+                        <Input
+                            name="image_url"
+                            type="file"
+                            placeholder="https://yourdomain.com/profile.jpg"
+                            required
+                            defaultValue={formData.image_url ?? ""}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                // Check if an image is uploaded
+                                if (e.target.files && e.target.files.length > 0) {
+                                    // setCrop(undefined);
+
+                                    const reader = new FileReader();
+
+                                    reader.addEventListener("load", () => {
+                                        const file = reader?.result?.toString() || "";
+                                        setImageSrc(file);
+                                    });
+
+                                    reader.readAsDataURL(e.target.files[0]);
+
+                                    console.log("user uploaded image");
+                                    setOpen(true);
+                                }
+                                // saveToForm({
+                                //     image_url: e.target.value,
+                                // });
+                            }}
+                            className="hover:bg-input/50"
+                            error={errors.image_url}
+                        />
+                    </DialogTrigger>
+                    <DialogContent showCloseButton={false} className="">
+                        <DialogTitle className="">Crop avatar</DialogTitle>
+                        <DialogDescription>Crop your uploaded profile avatar here.</DialogDescription>
+                        <ImageCropper imageSrc={imageSrc} />
+                        <Button onClick={() => saveImage()}>Save</Button>
+                    </DialogContent>
+                </Dialog>
                 <Label htmlFor="tags">Tags</Label>
                 <TagInputComponent
                     tags={formData.tags ?? []}
