@@ -1,20 +1,20 @@
 "use server";
-import { getUserProfile } from "@/app/actions";
-import Navbar from "@/components/Navbar";
+import { getUserProfile } from "@/app/actions"; // ensure this is a server-side util (not a 'use server' action)
+import Navbar from "@/components/Navbar"; // can be a Client Component
 import ProfileCard from "@/components/ProfileCard";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 /**
  * This page is experimental
  */
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-    const { data } = await getUserProfile(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const { data } = await getUserProfile(slug);
+    if (!data) return { title: "User not found" };
 
-    if (!data) {
-        return { title: "User not found" };
-    }
+    const pageUrl = `https://uoftwebring.com/u/${slug}`;
 
     return {
         title: `${data.name} - UofT Webring`,
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             title: data.name,
             description: data.tagline || undefined,
             images: data.image_url ? [data.image_url] : undefined,
-            url: data.domain || undefined,
+            url: pageUrl,
         },
         twitter: {
             title: data.name,
@@ -31,25 +31,17 @@ export async function generateMetadata({ params }: { params: { slug: string } })
             images: data.image_url ? [data.image_url] : undefined,
             card: "summary_large_image",
         },
-        robots: {
-            index: true,
-            follow: true,
-        },
-        alternates: {
-            canonical: data.domain || undefined,
-        },
+        robots: { index: true, follow: true },
+        alternates: { canonical: pageUrl },
     };
 }
 
 export default async function User({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
-    // We get the user profile from the database with the particular slug as their subdomain
     const { data, error } = await getUserProfile(slug);
+    if (error || !data) notFound();
 
-    if (error || !data) {
-        notFound();
-    }
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
@@ -72,12 +64,10 @@ export default async function User({ params }: { params: Promise<{ slug: string 
         <div className="min-h-screen bg-background flex flex-col">
             <script
                 type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-                }}
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
             />
             <Navbar />
-            <div className="flex flex-col md:flex-row max-w-[70rem] mx-auto w-full flex-1  place-items-start">
+            <div className="flex flex-col md:flex-row max-w-[70rem] mx-auto w-full flex-1 place-items-start">
                 <div className="max-w-[70rem] mx-auto w-full px-6 mt-12 sm:mt-6">
                     <ProfileCard user={data} />
                 </div>
