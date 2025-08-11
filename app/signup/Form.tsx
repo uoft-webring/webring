@@ -7,9 +7,10 @@ import React, { FormEvent, useRef, useState } from "react";
 import { signUpAction } from "./actions";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function SignupForm() {
+    const router = useRouter();
     const [nameError, setNameError] = useState<string | undefined>(undefined);
     const [emailError, setEmailError] = useState<string | undefined>(undefined);
 
@@ -23,7 +24,7 @@ export default function SignupForm() {
         setIsFormDisabled(true);
 
         if (emailRef.current && nameRef.current) {
-            const email = emailRef.current.value;
+            const email = emailRef.current.value.trim().toLowerCase();
             const emailParseResult = parseEmail(email);
 
             const name = nameRef.current.value;
@@ -36,7 +37,7 @@ export default function SignupForm() {
                 if (error) {
                     setEmailError("Email registered");
                 } else {
-                    redirect(`/auth/confirm?email=${email}`);
+                    router.push(`/auth/confirm?email=${email}`);
                 }
                 console.log("Finished");
             } else {

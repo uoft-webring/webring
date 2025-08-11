@@ -7,9 +7,9 @@ import { parseEmail } from "@/utils/zod";
 import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
 import { signInAction } from "./actions";
-import { redirect } from "next/navigation";
-
+import { useRouter } from "next/navigation";
 export default function SigninForm() {
+    const router = useRouter();
     const [emailError, setEmailError] = useState<string | undefined>(undefined);
     const [isFormDisabled, setIsFormDisabled] = useState(false);
 
@@ -20,9 +20,8 @@ export default function SigninForm() {
         setIsFormDisabled(true);
 
         if (emailRef.current) {
-            const email = emailRef.current.value;
+            const email = emailRef.current.value.trim().toLowerCase();
             const emailParseResult = parseEmail(email);
-
             // Parsing success or faliure
             if (emailParseResult.success) {
                 console.log("Success");
@@ -30,7 +29,7 @@ export default function SigninForm() {
                 if (error) {
                     setEmailError("Email not registered");
                 } else {
-                    redirect(`/auth/confirm?email=${email}`);
+                    router.push(`/auth/confirm?email=${email}`);
                 }
             } else {
                 setEmailError(emailParseResult.error!.errors[0].message || "");
