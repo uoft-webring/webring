@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllUserProfiles } from "./actions";
+import { SafeUserType } from "@/utils/zod";
 
 const ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://uoftwebring.com").origin;
 
@@ -7,7 +8,7 @@ type PublicProfile = { slug: string };
 
 async function getPublicUserSlugs(): Promise<PublicProfile[]> {
     const res = await getAllUserProfiles();
-    const rows: any[] = res?.data ?? [];
+    const rows: SafeUserType[] = res?.data ?? [];
 
     // subdomain is unique - just need to filter out any user's without it and format the slug
     return rows

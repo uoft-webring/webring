@@ -38,8 +38,6 @@ export default function EditForm({
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
 
-    console.log("Rendering Parent with tags:", formData.tags);
-
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
         console.log(parseResult);
@@ -76,7 +74,6 @@ export default function EditForm({
         debounceCallback(newData);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {};
     // TODO-A check if Next Form can use server action for saving or smth
     // https://nextjs.org/docs/app/api-reference/components/form
     // add fake save button even though we auto save for UX
@@ -211,6 +208,7 @@ export default function EditForm({
                     onChange={(e) => {
                         saveToForm({ tagline: e.target.value });
                     }}
+                    className="rounded-xl"
                     error={errors.tagline}
                 />
             </div>
