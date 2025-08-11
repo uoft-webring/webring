@@ -1,6 +1,30 @@
 import Navbar from "@/components/Navbar";
 import { getAllUserProfiles, getAuthUserProfile } from "../actions";
 import { ProfileProvider } from "./ProfileProvider";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Directory",
+    metadataBase: new URL("https://uoftwebring.com/directory"),
+    description: "Explore the UofT Webring community directory.",
+    keywords: ["UofT Webring", "Directory", "University of Toronto", "Student Profiles"],
+    openGraph: {
+        title: "UofT Webring Directory",
+        type: "website",
+        siteName: "UofT Webring",
+        description: "Explore the UofT Webring community directory.",
+        url: "https://uoftwebring.com/directory",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "UofT Webring Directory",
+        description: "Explore the UofT Webring community directory.",
+    },
+    referrer: "origin-when-cross-origin",
+    alternates: {
+        canonical: "/directory",
+    },
+};
 
 // Helper to make a sorted unique string array
 const uniqueSorter = (arr: (string | number | null | undefined)[]) =>

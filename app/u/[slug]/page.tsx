@@ -2,12 +2,45 @@
 import { getUserProfile } from "@/app/actions";
 import Navbar from "@/components/Navbar";
 import ProfileCard from "@/components/ProfileCard";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 /**
  * This page is experimental
- *
  */
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+    const { data } = await getUserProfile(params.slug);
+
+    if (!data) {
+        return { title: "User not found" };
+    }
+
+    return {
+        title: `${data.name} - UofT Webring`,
+        description: data.tagline || undefined,
+        openGraph: {
+            title: data.name,
+            description: data.tagline || undefined,
+            images: data.image_url ? [data.image_url] : undefined,
+            url: data.domain || undefined,
+        },
+        twitter: {
+            title: data.name,
+            description: data.tagline || undefined,
+            images: data.image_url ? [data.image_url] : undefined,
+            card: "summary_large_image",
+        },
+        robots: {
+            index: true,
+            follow: true,
+        },
+        alternates: {
+            canonical: data.domain || undefined,
+        },
+    };
+}
+
 export default async function User({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
