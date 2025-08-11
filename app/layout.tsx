@@ -71,7 +71,10 @@ export default function RootLayout({
                 "@type": "Organization",
                 name: "UofT Webring",
                 url: "https://uoftwebring.com/",
-                logo: "https://uoftwebring.com/logo.png",
+                logo: {
+                    "@type": "ImageObject",
+                    url: "https://uoftwebring.com/logo.png",
+                },
             },
             {
                 "@type": "BreadcrumbList",
@@ -90,7 +93,7 @@ export default function RootLayout({
                     },
                     {
                         "@type": "ListItem",
-                        position: 2,
+                        position: 3,
                         name: "Manifesto",
                         item: "https://uoftwebring.com/manifesto",
                     },
