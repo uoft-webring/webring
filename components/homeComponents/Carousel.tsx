@@ -30,8 +30,8 @@ export default function ProfileCarousel({ data: ringProfiles }: { data: SafeUser
             disableButtonsControls={true}
             items={ringProfiles.map((profile, index) => {
                 return (
-                    <div className="mx-3">
-                        <ProfileCard key={index} user={profile} className="ml-0" />
+                    <div key={index} className="mx-3">
+                        <ProfileCard key={index} user={profile} />
                     </div>
                 );
             })}

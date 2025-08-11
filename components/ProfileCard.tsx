@@ -21,7 +21,8 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "min-w-[18rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center gap-4 sm:h-[30rem] min-h-max border",
+                /* 26.5 is the perfect width to contain maximum content within a good size */
+                "min-w-[18rem] w-[20rem] md:w-[22rem] lg:w-[26.5rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center gap-4 h-[35rem] sm:h-[30rem]  border",
                 className
             )}
         >
@@ -38,7 +39,9 @@ export default function ProfileCard({
                 </div>
             )}
 
-            {user.tagline && <p className="text-center normal-case text-pretty">{user.tagline}</p>}
+            {user.tagline && (
+                <p className="text-center normal-case break-all hyphens-auto text-pretty">{user.tagline}</p>
+            )}
 
             <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (

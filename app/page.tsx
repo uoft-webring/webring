@@ -13,7 +13,7 @@ import { WebRing } from "@/components/Ring/WebRing";
 
 export default async function Home() {
     const { data: ringProfiles, error: ringProfilesError } = await getAllUserProfiles();
-    const { data: userData, error: userError } = await getAuthUserProfile();
+    const { data: userData } = await getAuthUserProfile();
 
     if (!ringProfiles || ringProfilesError) {
         console.error("[Home] Error fetching profiles:", ringProfilesError);
@@ -29,9 +29,22 @@ export default async function Home() {
             <Navbar user={userData} />
             <div className="overflow-clip">
                 <WebRing data={ringProfiles} />
-                <div className="px-4">
-                    <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
-                    <div className="max-w-[85rem] mx-auto overflow-clip">
+                <div className="px-4 w-full">
+                    <div className="w-full flex flex-row justify-center items-center">
+                        <h2 className="w-min text-xl text-center sm:text-3xl md:text-3xl lg:text-4xl">
+                            Preview
+                        </h2>
+                        <h3>
+                            <Link
+                                href="/directory"
+                                className="text-md ml-2 text-center text-primary hover:underline"
+                            >
+                                (or view the full directory)
+                            </Link>
+                        </h3>
+                    </div>
+
+                    <div className="max-w-[85rem] mx-auto overflow-clip items-center">
                         {ringProfiles ? <ProfileCarousel data={ringProfiles} /> : <p>No data</p>}
                     </div>
                 </div>

@@ -42,9 +42,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 <div className="flex flex-col md:flex-row max-w-[85rem] mx-auto w-full flex-1  place-items-start">
                     <Stepper
                         steps={onboardingRoutes}
-                        className="px-6 w-full md:w-min md:h-screen md:flex md:flex-col  mt-12 sm:mt-6"
+                        className="px-6 w-full md:w-min md:h-screen md:flex md:flex-col mt-6"
                     />
-                    <div className="max-w-[85rem] mx-auto w-full px-6 mt-12 sm:mt-6">{children}</div>
+                    <div className="max-w-[85rem] mx-auto w-full px-6 mt-12 mb-5 sm:mt-6">{children}</div>
+                    {/* On mobile, some space at the bottom feels better */}
+                    <div className="h-10 flex sm:hidden"></div>
                 </div>
             </div>
         </UserProvider>
