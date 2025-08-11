@@ -32,16 +32,21 @@ export default async function Verify() {
             <h2>Verify your domain</h2>
             <p className="mb-4">
                 To confirm that this domain belongs to you, add the TXT record shown below to your DNS
-                records. When you're done, click “Verify Now.” We'll fetch your DNS and verify the domain
-                automatically.
+                records. When you&apos;re done, click &quot;Verify Now.&quot; We&apos;ll fetch your DNS and
+                verify the domain automatically.
             </p>
+
             <h3>Key: </h3>
-
             <CodeSnippet codeString={"uoft-webring"} />
-            <h3>Value: </h3>
 
+            <h3 className="mt-4">Value: </h3>
             <CodeSnippet codeString={domainTXTValue} />
-            <StatusCard status={isVerified ? "connected" : "unverified"} showButton={false} showCTA={false} />
+            <StatusCard
+                className="mt-4"
+                status={isVerified ? "connected" : "unverified"}
+                showButton={false}
+                showCTA={false}
+            />
             {!isVerified && (
                 <form action={action}>
                     <RecheckButton />

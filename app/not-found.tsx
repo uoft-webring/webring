@@ -19,7 +19,7 @@ export default function NotFound() {
             </div>
 
             <p className="max-w-md text-lg text-muted-foreground">
-                What's worse is… we couldn't even find the 404 page either{" "}
+                What&quot;s worse is… we couldn&quot;t even find the 404 page either{" "}
                 <span className="inline-block animate-bounce">🤷‍♂️</span>
             </p>
 

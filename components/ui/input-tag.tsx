@@ -18,7 +18,6 @@ const TagInputComponent = ({
     tags,
     onTagsChange,
     error,
-    ...props
 }: {
     tags: string[];
     onTagsChange: (tags: string[]) => void;
@@ -47,7 +46,7 @@ const TagInputComponent = ({
     return (
         <>
             <Tags>
-                <TagsTrigger>
+                <TagsTrigger className="rounded-xl">
                     {tags.map((tag) => (
                         <SkillTag
                             key={tag} // Unique by assumption
