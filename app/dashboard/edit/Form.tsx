@@ -77,7 +77,6 @@ export default function EditForm({
         debounceCallback(newData);
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {};
     // TODO-A check if Next Form can use server action for saving or smth
     // https://nextjs.org/docs/app/api-reference/components/form
     // add fake save button even though we auto save for UX
