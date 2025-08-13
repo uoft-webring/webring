@@ -45,7 +45,12 @@ export const saveData = async (formData: UserType) => {
  * @param {scaleY}scale of client side image height to actual image height
  * @returns cropped image represented in base64 format
  */
-export const saveCroppedImaged = async (imageSrc, completedCrop: PixelCrop, scaleX, scaleY) => {
+export const saveCroppedImaged = async (
+    imageSrc: string,
+    completedCrop: PixelCrop,
+    scaleX: number,
+    scaleY: number
+) => {
     // Only take the base64 data portion from client side base64 encoded string
     // Since FileReader returns a string that looks like data:image/png;base64,{image data}
     // We only want image data part of encoded string

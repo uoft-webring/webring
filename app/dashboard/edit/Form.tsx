@@ -78,62 +78,6 @@ export default function EditForm({
         debounceCallback(newData);
     };
 
-    const loadImage = (path: string) => {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            // img.crossOrigin = "Anonymous"; // to avoid CORS if used with Canvas
-            img.src = path;
-            img.onload = () => {
-                resolve(img);
-            };
-            img.onerror = (e) => {
-                reject(e);
-            };
-        });
-    };
-
-    /*
-     * Checks if an uploaded image
-     * @param {file} file that is uploaded by user
-     * @param {minWidth} minimum width of image defined
-     * @param {minHeight} minimum height of image defined
-     * @param {maxWidth} maximum width of image defined
-     * @param {maxHeight} minimum height of image defined
-     * @returns success status for image dimension check and "reason" for checkImageDimension
-     *          to fail, or empty string if check is successful
-     */
-    function checkImageDimensions(file, minWidth, minHeight, maxWidth, maxHeight) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const isMaxWithinLimits = img.width < maxWidth && img.height < maxHeight;
-                    const isMinWithinLimits = img.width >= minWidth && img.height >= minHeight;
-                    if (!isMinWithinLimits) {
-                        resolve({ reason: "min", success: false, image: e.target.result });
-                    }
-                    if (!isMaxWithinLimits) {
-                        resolve({ reason: "max", success: false, image: e.target.result });
-                    }
-                    // console.log("within limits", isWithinLimits);
-                    resolve({ reason: "", success: true }); // resolve returns value for Promise
-                };
-                img.onerror = () => {
-                    reject(new Error("Failed to load image."));
-                };
-                img.src = e.target.result;
-            };
-
-            reader.onerror = () => {
-                reject(new Error("Failed to read file."));
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
     // TODO-A check if Next Form can use server action for saving or smth
     // https://nextjs.org/docs/app/api-reference/components/form
     // add fake save button even though we auto save for UX

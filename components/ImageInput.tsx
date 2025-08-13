@@ -21,13 +21,18 @@ import { User } from "@/utils/zod";
  * @returns success status for image dimension check and "reason" for checkImageDimension
  *          to fail, or empty string if check is successful
  */
+type CheckImageDimensionReturn = {
+    reason: string;
+    success: boolean;
+    image: string | ArrayBuffer | null | undefined;
+};
 function checkImageDimensions(
-    file,
+    file: Blob,
     minWidth: number,
     minHeight: number,
     maxWidth: number,
     maxHeight: number
-) {
+): Promise<CheckImageDimensionReturn> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
@@ -37,18 +42,18 @@ function checkImageDimensions(
                 const isMaxWithinLimits = img.width < maxWidth && img.height < maxHeight;
                 const isMinWithinLimits = img.width >= minWidth && img.height >= minHeight;
                 if (!isMinWithinLimits) {
-                    resolve({ reason: "min", success: false, image: e.target.result });
+                    resolve({ reason: "min", success: false, image: e.target?.result });
                 }
                 if (!isMaxWithinLimits) {
-                    resolve({ reason: "max", success: false, image: e.target.result });
+                    resolve({ reason: "max", success: false, image: e.target?.result });
                 }
                 // console.log("within limits", isWithinLimits);
-                resolve({ reason: "", success: true }); // resolve returns value for Promise
+                resolve({ reason: "", success: true, image: null }); // resolve returns value for Promise
             };
             img.onerror = () => {
                 reject(new Error("Failed to load image."));
             };
-            img.src = e.target.result;
+            img.src = e.target?.result;
         };
 
         reader.onerror = () => {
@@ -64,7 +69,7 @@ type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 interface ImageInputInterface {
     errors: Record<UserKeys, string | undefined>;
     setErrors: React.Dispatch<React.SetStateAction<Record<UserKeys, string | undefined>>>;
-    saveToForm: any; // TODO: how do i do this...
+    saveToForm: (data: Record<string, any>) => void; // TODO: how do i do this...
 }
 export default function ImageInput({ errors, setErrors, saveToForm }: ImageInputInterface) {
     const [open, setOpen] = useState(false);
@@ -73,7 +78,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
     const imageRef = useRef(null);
 
-    const saveImage = async (imageSrc, completedCrop) => {
+    const saveImage = async (imageSrc: string, completedCrop: PixelCrop) => {
         console.log("subbed form", imageSrc);
         console.log("complete crop", completedCrop);
 
