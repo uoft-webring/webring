@@ -24,8 +24,15 @@ function centerAspectCrop(
     return centerCrop(makeAspectCrop(aspectCrop, aspect, mediaWidth, mediaHeight), mediaWidth, mediaHeight);
 }
 
-export default function ImageCropper({ crop, setCrop, imageSrc, maxHeight }) {
-    const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+export default function ImageCropper({
+    crop,
+    setCrop,
+    completedCrop,
+    setCompletedCrop,
+    imageSrc,
+    imageRef,
+    maxHeight,
+}) {
     const ASPECT_RATIO = 1;
 
     function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
@@ -40,13 +47,13 @@ export default function ImageCropper({ crop, setCrop, imageSrc, maxHeight }) {
             onChange={(crop, percentageCrop) => {
                 setCrop(percentageCrop);
             }}
-            onComplete={(c) => setCompletedCrop(c)}
+            onComplete={(c, percentageCrop) => setCompletedCrop(c)}
             aspect={ASPECT_RATIO}
             // maxHeight={maxHeight}
             minHeight={100}
             circularCrop
         >
-            <img src={imageSrc} alt="Crop avatar" onLoad={onImageLoad} />
+            <img ref={imageRef} src={imageSrc} alt="Crop avatar" onLoad={onImageLoad} />
         </ReactCrop>
     );
 }
