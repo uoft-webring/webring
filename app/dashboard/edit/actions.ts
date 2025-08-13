@@ -5,6 +5,7 @@ import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 import { Crop, PixelCrop } from "react-image-crop";
+import { WithImplicitCoercion } from "buffer";
 
 export const saveData = async (formData: UserType) => {
     try {
@@ -54,7 +55,7 @@ export const saveCroppedImaged = async (
     // Only take the base64 data portion from client side base64 encoded string
     // Since FileReader returns a string that looks like data:image/png;base64,{image data}
     // We only want image data part of encoded string
-    const uri = imageSrc.split(";base64,").pop();
+    const uri: WithImplicitCoercion<string> = imageSrc.split(";base64,").pop() || "";
     const croppedBuffer = await sharp(Buffer.from(uri, "base64"))
         .extract({
             left: Math.floor(completedCrop.x * scaleX),

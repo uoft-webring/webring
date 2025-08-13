@@ -1,10 +1,13 @@
 "use client";
 
-import ReactCrop, { Pick, Crop, centerCrop, makeAspectCrop, PixelCrop } from "react-image-crop";
-import { useState } from "react";
-import "react-image-crop/dist/ReactCrop.css";
+import ReactCrop, { Crop, PercentCrop, centerCrop, makeAspectCrop, PixelCrop } from "react-image-crop";
+import "react-image-crop/dist/ReactCrop.css"; // Needed for styling ReactCrop component
 
-function createAspectCrop(mediaWidth: number, mediaHeight: number, minimumValue: number): Pick {
+function createAspectCrop(
+    mediaWidth: number,
+    mediaHeight: number,
+    minimumValue: number
+): Pick<PercentCrop, "unit"> & Partial<Omit<PercentCrop, "unit">> {
     if (mediaWidth <= mediaHeight) {
         return { unit: "%", width: minimumValue };
     } else {
@@ -19,7 +22,11 @@ function centerAspectCrop(
     aspect: number,
     minimumValue: number = 70
 ) {
-    const aspectCrop: Pick = createAspectCrop(mediaWidth, mediaHeight, minimumValue);
+    const aspectCrop: Pick<PercentCrop, "unit"> & Partial<Omit<PercentCrop, "unit">> = createAspectCrop(
+        mediaWidth,
+        mediaHeight,
+        minimumValue
+    );
 
     return centerCrop(makeAspectCrop(aspectCrop, aspect, mediaWidth, mediaHeight), mediaWidth, mediaHeight);
 }
@@ -27,11 +34,15 @@ function centerAspectCrop(
 export default function ImageCropper({
     crop,
     setCrop,
-    completedCrop,
     setCompletedCrop,
     imageSrc,
     imageRef,
-    maxHeight,
+}: {
+    crop: Crop | undefined;
+    setCrop: React.Dispatch<React.SetStateAction<Crop | undefined>>;
+    setCompletedCrop: React.Dispatch<React.SetStateAction<PixelCrop | undefined>>;
+    imageSrc: string;
+    imageRef: React.Ref<HTMLImageElement>;
 }) {
     const ASPECT_RATIO = 1;
 
@@ -47,9 +58,8 @@ export default function ImageCropper({
             onChange={(crop, percentageCrop) => {
                 setCrop(percentageCrop);
             }}
-            onComplete={(c, percentageCrop) => setCompletedCrop(c)}
+            onComplete={(c) => setCompletedCrop(c)}
             aspect={ASPECT_RATIO}
-            // maxHeight={maxHeight}
             minHeight={100}
             circularCrop
         >

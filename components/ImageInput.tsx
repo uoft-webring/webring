@@ -53,7 +53,7 @@ function checkImageDimensions(
             img.onerror = () => {
                 reject(new Error("Failed to load image."));
             };
-            img.src = e.target?.result;
+            img.src = e.target?.result?.toString() || "";
         };
 
         reader.onerror = () => {
@@ -74,11 +74,11 @@ interface ImageInputInterface {
 export default function ImageInput({ errors, setErrors, saveToForm }: ImageInputInterface) {
     const [open, setOpen] = useState(false);
     const [imageSrc, setImageSrc] = useState("");
-    const [crop, setCrop] = useState<Crop>();
-    const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+    const [crop, setCrop] = useState<Crop | undefined>();
+    const [completedCrop, setCompletedCrop] = useState<PixelCrop | undefined>();
     const imageRef = useRef(null);
 
-    const saveImage = async (imageSrc: string, completedCrop: PixelCrop) => {
+    const saveImage = async (imageSrc: string, completedCrop: PixelCrop | undefined) => {
         console.log("subbed form", imageSrc);
         console.log("complete crop", completedCrop);
 
@@ -95,7 +95,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
         console.log("natural dimensions", image.naturalWidth, image.naturalHeight);
-        const croppedImage = await saveCroppedImaged(imageSrc, completedCrop, scaleX, scaleY);
+        const croppedImage = await saveCroppedImaged(imageSrc, completedCrop!, scaleX, scaleY);
         console.log(croppedImage);
         saveToForm({
             image_url: croppedImage,
@@ -185,11 +185,9 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                 <ImageCropper
                     crop={crop}
                     setCrop={setCrop}
-                    completedCrop={completedCrop}
-                    setCompletedCrop={setCompletedCrop}
+                    setCompletedCrop={setCompletedCrop!}
                     imageSrc={imageSrc}
                     imageRef={imageRef}
-                    maxHeight={100}
                 />
                 <Button onClick={() => saveImage(imageSrc, completedCrop)}>Save</Button>
             </DialogContent>
