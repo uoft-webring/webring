@@ -53,6 +53,7 @@
         "react-syntax-highlighter": "^15.6.6",
         "react-type-animation": "^3.2.0",
         "react-image-crop": "^11.0.10",
+        "sharp": "^0.34.3",
         "simplex-noise": "^4.0.3",
         "sonner": "^2.0.3",
         "tailwind-merge": "^3.3.0",
