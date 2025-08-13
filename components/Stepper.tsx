@@ -4,33 +4,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 export default function Stepper({ steps, className }: { steps: any[]; className?: string }) {
     const pathname = usePathname();
-    const pathSegment = pathname.split("/").pop();
-
-    const { useStepper, steps: _, utils } = defineStepper(...steps);
+    const { useStepper, steps: _, utils } = useMemo(() => defineStepper(...steps), [steps]);
     const stepper = useStepper();
     const currentIndex = utils.getIndex(stepper.current.id);
 
+    const parts = pathname.split("/").filter(Boolean); // e.g. ["dashboard", "edit"]
+    const slug = parts[parts.length - 1] ?? ""; // e.g. "edit" or "join"
+    const slugIsStep = stepper.all.some((s) => s.id === slug); // not always will a slug match a step (Murphy's law)
+
     useEffect(() => {
-        if (
-            pathSegment &&
-            stepper.current.id !== pathSegment &&
-            stepper.all.some((step) => step.id === pathSegment)
-        ) {
-            stepper.goTo(pathSegment);
-        }
-    }, [pathSegment, stepper.current.id, stepper]);
+        // Every time the pathname changes, check if the slug matches a step and navigate to it
+        if (slugIsStep && stepper.current.id !== slug) stepper.goTo(slug);
+    }, [slugIsStep, slug, stepper]);
 
     return (
         <nav aria-label="" className={cn(className)}>
             <ol className="flex flex-row md:flex-col ">
                 {stepper.all.map((step, index, array) => (
                     <React.Fragment key={step.id}>
-                        <Link href={step.id} className="cursor-pointer">
+                        <Link href={`/dashboard/${step.id}`} className="cursor-pointer">
                             <li className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
                                 <Button
                                     type="button"
@@ -38,7 +35,7 @@ export default function Stepper({ steps, className }: { steps: any[]; className?
                                     variant={index <= currentIndex ? "default" : "secondary"}
                                     aria-current={stepper.current.id === step.id ? "step" : undefined}
                                     aria-posinset={index + 1}
-                                    aria-setsize={steps.length}
+                                    aria-setsize={stepper.all.length}
                                     aria-selected={stepper.current.id === step.id}
                                     className="rounded-full md:text-lg cursor-pointer"
                                     onClick={() => stepper.goTo(step.id)}
@@ -48,6 +45,7 @@ export default function Stepper({ steps, className }: { steps: any[]; className?
                                 <span className="text-sm font-medium md:text-lg">{step.title}</span>
                             </li>
                         </Link>
+
                         {index < array.length - 1 && (
                             <>
                                 <Separator

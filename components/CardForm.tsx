@@ -16,15 +16,20 @@ export default function CardForm({
                 <div className="flex flex-col gap-6">
                     <Card className="gap-4">
                         <CardHeader className="text-center">
-                            {cardTitle && <CardTitle className="text-2xl">{cardTitle}</CardTitle>}
+                            {cardTitle && (
+                                <CardTitle>
+                                    {/* For semanticity */}
+                                    <h1 className="leading-normal text-2xl p-0 m-0">{cardTitle}</h1>
+                                </CardTitle>
+                            )}
                             {cardDescription && (
                                 <CardDescription>
                                     {cardDescription.split("\n").map((line) => {
                                         return (
-                                            <>
+                                            <div key={line}>
                                                 {line}
                                                 <br />
-                                            </>
+                                            </div>
                                         );
                                     })}
                                 </CardDescription>

@@ -1,14 +1,11 @@
-"use client";
 import Loading from "./LoadingComponent";
 import Image from "next/image";
 import SkillTag from "./SkillTag";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
-import verifiedIcon from "@/icons/verified.svg";
-import Link from "next/link";
-import FallbackImage from "./FallbackImage";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
+import Avatar from "./Avatar";
 
 export default function ProfileCard({
     user,
@@ -17,63 +14,70 @@ export default function ProfileCard({
     user: SafeUserType;
     className?: string;
 } & React.ComponentPropsWithoutRef<"div">) {
-    if (!user) {
-        return <Loading />;
-    }
+    if (!user) return <Loading />;
 
-    const domainUrl = user.domain?.replace(/^https?:\/\/(www\.)?/, "");
+    const domainLabel = user.domain?.replace(/^https?:\/\/(www\.)?/i, "");
+
     return (
         <div
             className={cn(
-                "min-w-[18rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center justify-center gap-4 sm:h-[30rem] min-h-max border-1",
+                "min-w-[18rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center gap-4 sm:h-[30rem] min-h-max border",
                 className
             )}
         >
-            <div className="w-32 aspect-square rounded-full relative">
-                <FallbackImage
-                    key={user.image_url + user.ring_id}
-                    src={user.image_url}
-                    seed={user.ring_id}
-                    alt="Profile picture"
-                    className={cn(
-                        "rounded-full w-32 aspect-square object-cover pointer-events-none drag-none select-none",
-                        user.is_verified && "border-4 border-card outline outline-white"
-                    )}
-                />
-                {user.is_verified && (
-                    <Image src={verifiedIcon} alt="Verified" className="absolute right-0 bottom-0 size-8" />
-                )}
-            </div>
-            <h2 className="text-2xl font-semibold">{user.name}</h2>{" "}
-            <div className="flex flex-row flex-wrap gap-2 justify-center">
-                {user.tags?.map((tagName: string, index: number) => {
-                    return <SkillTag key={index} tagName={tagName} />;
-                })}
-            </div>
-            <p className="text-wrap text-center">{user.tagline}</p>
+            {/* Ensure Avatar provides intrinsic size (or pass width/height via its API) */}
+            <Avatar user={user} className="w-32 h-32" />
+
+            <h2 className="text-2xl font-semibold capitalize text-center">{user.name}</h2>
+
+            {!!user.tags?.length && (
+                <div className="flex flex-row flex-wrap gap-2 justify-center">
+                    {user.tags.map((tagName: string) => (
+                        <SkillTag key={tagName} tagName={tagName} />
+                    ))}
+                </div>
+            )}
+
+            {user.tagline && <p className="text-center normal-case text-pretty">{user.tagline}</p>}
+
             <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
                 {user.github_url && (
-                    <Link
-                        prefetch={false}
+                    <a
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
-                        className="flex items-center"
+                        rel="noopener noreferrer nofollow"
+                        className="flex items-center text-wrap normal-case"
                     >
-                        <Image src={gitHubIcon} alt="GitHub" className="size-8 mr-2" />
-                        {/* When we migrate to just github_username we won't need this */}
-                        {user.github_url && user.github_url.length <= 30 ? user.github_url : "GitHub"}
-                    </Link>
+                        <Image
+                            src={gitHubIcon}
+                            alt="GitHub"
+                            width={32}
+                            height={32}
+                            decoding="async"
+                            className="mr-2"
+                        />
+                        {user.github_url.length <= 30 ? user.github_url : "GitHub"}
+                    </a>
                 )}
-                <Link
-                    prefetch={false}
-                    href={user.domain}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="flex items-center"
-                >
-                    <Image src={portfolioIcon} alt="Website" className="size-8 mr-2" />
-                    {domainUrl && domainUrl.length <= 30 ? domainUrl : "Portfolio"}
-                </Link>
+
+                {user.domain && (
+                    <a
+                        href={user.domain}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="flex items-center normal-case"
+                    >
+                        <Image
+                            src={portfolioIcon}
+                            alt="Website"
+                            width={32}
+                            height={32}
+                            decoding="async"
+                            className="mr-2"
+                        />
+                        {domainLabel && domainLabel.length <= 30 ? domainLabel : "Portfolio"}
+                    </a>
+                )}
             </div>
         </div>
     );

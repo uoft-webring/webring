@@ -23,10 +23,10 @@ export default async function Join() {
 
     const id: number = userData.ring_id;
 
-    const css = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
+    const html = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
-        <img
+    <img
             src='https://uoftwebring.com/ring_logo.svg'
             alt='UofT Webring'
             style="width: '24px'; height: 'auto'"
@@ -48,22 +48,22 @@ export default async function Join() {
 </div>`;
 
     const next_and_tailwind = `<div className="flex items-center gap-2">
-    <Link href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</Link>
-    <Link href='https://uoftwebring.com' target='_blank'>
+    <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
+    <a href='https://uoftwebring.com' target='_blank'>
         <Image
             src='https://uoftwebring.com/ring_logo.svg'
             alt='UofT Webring'
             height={24}
             width={24}
         />
-    </Link>
-    <Link href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</Link>
+    </a>
+    <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
 </div>`;
 
     const codeStringMap = {
-        CSS: css,
+        "HTML & CSS": html,
         "React & Tailwind": react_and_tailwind,
-        "Nextjs & Tailwind": next_and_tailwind,
+        "NextJS & Tailwind": next_and_tailwind,
     };
 
     const action = async () => {
@@ -75,9 +75,9 @@ export default async function Join() {
     return (
         <section>
             <h2>Join the commmunity</h2>
-            <p className="mb-4">Copy the HTML code and paste it into your portfolio to join the community.</p>
+            <p className="mb-4">Copy the code and paste it into your portfolio to join the community.</p>
 
-            <Tabs defaultValue="CSS" className="relative mr-auto flex w-full flex-col gap-6">
+            <Tabs defaultValue="HTML & CSS" className="relative mr-auto flex w-full flex-col gap-6">
                 <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
                     {Object.keys(codeStringMap).map((value, index) => {
                         return (
@@ -94,7 +94,7 @@ export default async function Join() {
                 {Object.entries(codeStringMap).map(([key, value], index) => {
                     return (
                         <TabsContent key={index} value={key}>
-                            <CodeSnippet codeString={value} />
+                            <CodeSnippet codeString={value} lang={key === "HTML & CSS" ? "html" : "jsx"} />
                         </TabsContent>
                     );
                 })}

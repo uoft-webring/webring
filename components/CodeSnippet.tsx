@@ -1,54 +1,85 @@
 "use client";
-import { CopyBlock } from "react-code-blocks";
 
-export default function CodeSnippet({ codeString, width = "100%" }: { codeString: string; width?: string }) {
+import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import copyIcon from "@/icons/copy.svg";
+import Prism from "prismjs";
+import prettier from "prettier/standalone";
+import estree from "prettier/plugins/estree";
+import tsPlugin from "prettier/plugins/typescript";
+import htmlPlugin from "prettier/plugins/html";
+import { Button } from "./ui/button";
+
+import "prismjs/themes/prism-tomorrow.css"; // or prism-okaidia.css, prism.css, etc.
+
+import "prismjs/components/prism-jsx";
+import "prismjs/components/prism-markup";
+
+type Lang = "jsx" | "html";
+
+export default function CodeSnippet({
+    codeString,
+    width = "100%",
+    lang = "jsx",
+}: {
+    codeString: string;
+    width?: string;
+    lang?: Lang;
+}) {
+    const [copied, setCopied] = useState(false);
+    const [html, setHtml] = useState("");
+
+    const grammar = useMemo(() => (lang === "html" ? Prism.languages.markup : Prism.languages.jsx), [lang]);
+
+    useEffect(() => {
+        let ignore = false;
+        (async () => {
+            let formatted = codeString;
+
+            // TS parser handles JSX
+            formatted = await prettier.format(codeString, {
+                parser: lang === "html" ? "html" : "typescript",
+                plugins: [estree as any, tsPlugin as any, htmlPlugin as any],
+                tabWidth: 4,
+                useTabs: false,
+                semi: false,
+                singleQuote: false,
+                trailingComma: "es5",
+            });
+
+            if (ignore) return;
+            const highlighted = Prism.highlight(formatted, grammar as any, lang);
+            setHtml(highlighted);
+        })();
+
+        return () => {
+            ignore = true;
+        };
+    }, [codeString, grammar, lang]);
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(codeString);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+    };
+
     return (
-        <CopyBlock
-            text={codeString}
-            language={"html"}
-            showLineNumbers={false}
-            customStyle={{
-                width: width,
-                // borderRadius: "0.75rem",
-                padding: "1rem",
-                overflowX: "scroll",
-            }}
-            theme={AmansTheme}
-        />
+        <figure
+            style={{ width }}
+            className="relative rounded-xl border bg-card text-card-foreground shadow-sm"
+        >
+            <Button
+                size="icon"
+                variant="outline"
+                onClick={handleCopy}
+                className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs"
+            >
+                {copied ? "✓" : <Image src={copyIcon} alt="Copy" className="size-4"></Image>}
+            </Button>
+
+            <pre className="rounded-xl p-4 text-md">
+                <code className={`language-${lang}`} dangerouslySetInnerHTML={{ __html: html }} />
+            </pre>
+        </figure>
     );
 }
-
-const AmansTheme = {
-    backgroundColor: `#0d1117`,
-    textColor: `#9DCBF4`,
-    substringColor: `#c0c5ce`,
-    keywordColor: `#79c0ff`, // `style`, `href`, `src`, `target`
-    attributeColor: `#79c0ff`, // inline `display`, `align-items`, etc.
-    selectorAttributeColor: `#5ebfcc`,
-    docTagColor: `#c0c5ce`,
-    nameColor: `#9cdcfe`,
-    builtInColor: `#6AC273`,
-    literalColor: `#dcdcaa`,
-    bulletColor: `#dcdcaa`,
-    codeColor: `#c0c5ce`,
-    additionColor: `#b5cea8`,
-    regexpColor: `#ce9178`,
-    symbolColor: `#5ebfcc`,
-    variableColor: `#d4d4d4`,
-    templateVariableColor: `#d4d4d4`,
-    linkColor: `#9DCCF5`,
-    selectorClassColor: `#9cdcfe`,
-    typeColor: `#a5d6ff`,
-    stringColor: `#ce9178`,
-    selectorIdColor: `#a5d6ff`,
-    quoteColor: `#ce9178`,
-    templateTagColor: `#a5d6ff`,
-    deletionColor: `#f44747`,
-    titleColor: `#a5d6ff`,
-    sectionColor: `#a5d6ff`,
-    commentColor: `#6a9955`,
-    metaKeywordColor: `#569cd6`,
-    metaColor: `#dcdcaa`,
-    functionColor: `#dcdcaa`,
-    numberColor: `#b5cea8`,
-};

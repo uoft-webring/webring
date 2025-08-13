@@ -40,7 +40,7 @@ const skillTagVariants = cva(
     {
         variants: {
             size: {
-                default: "border-2 py-1", // Default variant with border 2px and padding 1
+                default: "border-1 py-1", // Default variant with border 2px and padding 1
                 mini: "border-1 py-0.5", // Mini variant with border 1px and padding 0.5
             },
             fontWeight: {
@@ -87,7 +87,7 @@ const SkillTag: React.FC<SkillTagProps> = ({
             )} // Apply variant styles and dynamic color
             {...props}
         >
-            <p className={cn(tagTextStyles, "text-white")}>
+            <p className={cn(tagTextStyles, "text-white select-none")}>
                 {/* Apply font weight directly here */}
                 {tagName}
             </p>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import "prismjs/themes/prism-tomorrow.css"; // has to be applied globally
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
@@ -22,18 +23,13 @@ export const metadata: Metadata = {
         type: "website",
         siteName: "UofT Webring",
         description,
+
         url: "https://uoftwebring.com",
     },
     twitter: {
         card: "summary_large_image",
         title: "UofT Webring",
         description,
-    },
-    // We are fine with robots indexing our site
-    robots: {
-        index: true,
-        follow: true,
-        nocache: false,
     },
     referrer: "origin-when-cross-origin",
     /* alternates: {
