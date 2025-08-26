@@ -7,6 +7,9 @@ import sharp from "sharp";
 import { Crop, PixelCrop } from "react-image-crop";
 import { WithImplicitCoercion } from "buffer";
 
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
 export const saveData = async (formData: UserType) => {
     try {
         const supabase = await createClient();
@@ -35,10 +38,46 @@ export const saveData = async (formData: UserType) => {
     }
 };
 
+//KRISH CODE BELOW
+
+const s3Client = new S3Client({
+    region: process.env.AWS_REGION!,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    },
+});
+
+// Remove the Base64 prefix (e.g., "data:image/png;base64,")
+const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
+
+// Decode Base64 string to binary buffer
+const imageBuffer = Buffer.from(base64Data, "base64");
+
+// Generate a unique file key
+const fileExtension = fileType.split("/")[1];
+const s3Key = `avatars/${Date.now()}-${fileName}.${fileExtension}`;
+
+const command = new PutObjectCommand({
+    Bucket: process.env.AWS_S3_BUCKET_NAME,
+    Key: s3Key,
+});
+
+const presignedURL = getSignedUrl(s3Client, command, { expiresIn: 3600 });
+console.log(presignedURL);
+
+// Construct the public URL (or use CloudFront URL)
+const imageURL = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+
 /**
  * TODO-K: add AWS S3 Uploading
  *
  * Saves user cropped profile avatar into AWS S3 Bucket
+ *
+ * provision presigned url - change john code
+ *
+ *
+ *
  *
  * @param {imageSrc} image source represented in base64 format
  * @param {completedCrop} completedCrop based on PixelCrop from react-easy-crop
