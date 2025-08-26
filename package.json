@@ -10,6 +10,8 @@
         "lint:fix": "next lint --fix"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.873.0",
+        "@aws-sdk/s3-request-presigner": "^3.873.0",
         "@dicebear/collection": "^9.2.3",
         "@dicebear/core": "^9.2.3",
         "@mdx-js/loader": "^3.1.0",
