@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 import { Crop, PixelCrop } from "react-image-crop";
 import { WithImplicitCoercion } from "buffer";
+import fetch, { RequestInfo } from "node-fetch";
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -103,10 +104,65 @@ export const saveCroppedImaged = async (
         })
         .avif({ quality: 30 })
         .toBuffer();
-
     // TODO-K: HERE SHOULD RETURN AWS S3 LINK
 
     // return generateUploadUrl
 
-    return "data:image/avif;base64," + croppedBuffer.toString("base64");
+    //return "data:image/avif;base64," + croppedBuffer.toString("base64");
+
+    // Get presigned URL and public URL
+    const { presignedUrl, publicUrl } = await generateUploadUrl();
+
+    const uploadResult = await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
+
+    if (uploadResult.success) {
+        return {
+            success: true,
+            publicUrl,
+        };
+    } else {
+        return uploadResult;
+    }
+};
+
+type UploadableFile = Buffer<ArrayBufferLike>;
+
+interface UploadResult {
+    success: boolean;
+    error?: string;
+    publicUrl?: string;
+}
+
+const uploadToS3 = async (
+    presignedUrl: string,
+    file: UploadableFile,
+    contentType: string = "image/avif"
+): Promise<UploadResult> => {
+    try {
+        const response = await fetch(presignedUrl, {
+            method: "PUT",
+            headers: {
+                "Content-Type": contentType,
+            },
+            body: file,
+        });
+
+        if (response.ok) {
+            console.log("Upload successful!");
+            return { success: true };
+        } else {
+            const errorText = await response.text();
+            console.error("Upload failed:", response.status, response.statusText, errorText);
+            return {
+                success: false,
+                error: `Upload failed: ${response.status} ${response.statusText} - ${errorText}`,
+            };
+        }
+    } catch (error) {
+        console.error("Error uploading to S3:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : "Unknown error occurred",
+        };
+    }
 };
