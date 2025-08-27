@@ -116,16 +116,11 @@ export const saveCroppedImaged = async (
     const uploadResult = await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
 
     if (uploadResult.success) {
-        return {
-            success: true,
-            publicUrl,
-        };
+        return publicUrl;
     } else {
         return uploadResult;
     }
 };
-
-type UploadableFile = Buffer<ArrayBufferLike>;
 
 interface UploadResult {
     success: boolean;
@@ -135,7 +130,7 @@ interface UploadResult {
 
 const uploadToS3 = async (
     presignedUrl: string,
-    file: UploadableFile,
+    file: Buffer<ArrayBufferLike>,
     contentType: string = "image/avif"
 ): Promise<UploadResult> => {
     try {
