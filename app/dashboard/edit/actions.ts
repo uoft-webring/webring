@@ -113,51 +113,26 @@ export const saveCroppedImaged = async (
     // Get presigned URL and public URL
     const { presignedUrl, publicUrl } = await generateUploadUrl();
 
-    const uploadResult = await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
-
-    if (uploadResult.success) {
-        return publicUrl;
-    } else {
-        return uploadResult;
-    }
+    await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
+    return publicUrl;
 };
-
-interface UploadResult {
-    success: boolean;
-    error?: string;
-    publicUrl?: string;
-}
 
 const uploadToS3 = async (
     presignedUrl: string,
     file: Buffer<ArrayBufferLike>,
     contentType: string = "image/avif"
-): Promise<UploadResult> => {
-    try {
-        const response = await fetch(presignedUrl, {
-            method: "PUT",
-            headers: {
-                "Content-Type": contentType,
-            },
-            body: file,
-        });
+): Promise<void> => {
+    const response = await fetch(presignedUrl, {
+        method: "PUT",
+        headers: {
+            "Content-Type": contentType,
+        },
+        body: file,
+    });
 
-        if (response.ok) {
-            console.log("Upload successful!");
-            return { success: true };
-        } else {
-            const errorText = await response.text();
-            console.error("Upload failed:", response.status, response.statusText, errorText);
-            return {
-                success: false,
-                error: `Upload failed: ${response.status} ${response.statusText} - ${errorText}`,
-            };
-        }
-    } catch (error) {
-        console.error("Error uploading to S3:", error);
-        return {
-            success: false,
-            error: error instanceof Error ? error.message : "Unknown error occurred",
-        };
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
+    console.log("Upload successful!");
 };
