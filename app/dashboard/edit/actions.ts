@@ -9,6 +9,7 @@ import { WithImplicitCoercion } from "buffer";
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { v4 } from "uuid";
 
 export const saveData = async (formData: UserType) => {
     try {
@@ -48,26 +49,25 @@ const s3Client = new S3Client({
     },
 });
 
-// Remove the Base64 prefix (e.g., "data:image/png;base64,")
-const base64Data = imageData.replace(/^data:image\/\w+;base64,/, "");
+export const generateUploadUrl = async () => {
+    const uniqueId = v4();
+    const s3Key = `avatars/${uniqueId}.avif`;
 
-// Decode Base64 string to binary buffer
-const imageBuffer = Buffer.from(base64Data, "base64");
+    const command = new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME!,
+        Key: s3Key,
+        ContentType: "image/avif",
+        StorageClass: "INTELLIGENT_TIERING",
+    });
 
-// Generate a unique file key
-const fileExtension = fileType.split("/")[1];
-const s3Key = `avatars/${Date.now()}-${fileName}.${fileExtension}`;
+    const presignedUrl = await getSignedUrl(s3Client, command, {
+        expiresIn: 3600, // 1 hour
+    });
 
-const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET_NAME,
-    Key: s3Key,
-});
+    const publicUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
 
-const presignedURL = getSignedUrl(s3Client, command, { expiresIn: 3600 });
-console.log(presignedURL);
-
-// Construct the public URL (or use CloudFront URL)
-const imageURL = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+    return { presignedUrl, publicUrl };
+};
 
 /**
  * TODO-K: add AWS S3 Uploading
@@ -75,7 +75,6 @@ const imageURL = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS
  * Saves user cropped profile avatar into AWS S3 Bucket
  *
  * provision presigned url - change john code
- *
  *
  *
  *
@@ -106,5 +105,8 @@ export const saveCroppedImaged = async (
         .toBuffer();
 
     // TODO-K: HERE SHOULD RETURN AWS S3 LINK
+
+    // return generateUploadUrl
+
     return "data:image/avif;base64," + croppedBuffer.toString("base64");
 };
