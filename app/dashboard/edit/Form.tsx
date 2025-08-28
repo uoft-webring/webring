@@ -134,17 +134,6 @@ export default function EditForm({
                         >
                             Program
                         </Label>
-                        {/* <Input
-                            name="program"
-                            type="text"
-                            placeholder="Computer Science"
-                            defaultValue={formData.program ?? ""}
-                            onChange={(e) => {
-                                const value = e.currentTarget.value.trim();
-                                saveToForm({ program: value === "" ? null : value });
-                            }}
-                            error={errors.program}
-                        /> */}
                         <ProgramInput
                             program={formData.program ?? ""}
                             onProgramChange={(program: string) => {
