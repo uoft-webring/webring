@@ -1,54 +1,74 @@
 "use client";
-import { CopyBlock } from "react-code-blocks";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import copyIcon from "@/icons/copy.svg";
+import checkIcon from "@/icons/clipboard-check.svg";
+import Prism from "prismjs";
+import prettier from "prettier/standalone";
+import htmlPlugin from "prettier/plugins/html";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
+import "prismjs/themes/prism-tomorrow.css"; // or prism-okaidia.css, prism.css, etc.
+import "prismjs/components/prism-markup";
 
 export default function CodeSnippet({ codeString, width = "100%" }: { codeString: string; width?: string }) {
+    const [copied, setCopied] = useState(false);
+    const [html, setHtml] = useState("");
+
+    useEffect(() => {
+        let ignore = false;
+        (async () => {
+            let formatted = codeString;
+
+            formatted = await prettier.format(codeString, {
+                parser: "html",
+                plugins: [htmlPlugin as any],
+                tabWidth: 4,
+                useTabs: false,
+                semi: false,
+                singleQuote: false,
+            });
+
+            if (ignore) return;
+            const highlighted = Prism.highlight(formatted, Prism.languages.markup, "html");
+            setHtml(highlighted);
+        })();
+
+        return () => {
+            ignore = true;
+        };
+    }, [codeString]);
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(codeString);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+    };
+
     return (
-        <CopyBlock
-            text={codeString}
-            language={"html"}
-            showLineNumbers={false}
-            customStyle={{
-                width: width,
-                // borderRadius: "0.75rem",
-                padding: "1rem",
-                overflowX: "scroll",
-            }}
-            theme={AmansTheme}
-        />
+        <figure
+            style={{ width }}
+            className={cn("flex rounded-xl border bg-card text-card-foreground shadow-sm")}
+        >
+            {/* We expect a hydration warning, because SSR'd client component */}
+            <pre suppressHydrationWarning className="flex-1 rounded-l-xl p-4 text-md overflow-x-scroll">
+                <code className="language-html" dangerouslySetInnerHTML={{ __html: html }} />
+            </pre>
+
+            <div className="p-2">
+                <Button
+                    size="icon"
+                    onClick={handleCopy}
+                    className="rounded-xl text-md !bg-slate-900 !opacity-100"
+                >
+                    {copied ? (
+                        <Image src={checkIcon} alt="Check" className="size-6 invert" width={25} height={25} />
+                    ) : (
+                        <Image src={copyIcon} alt="Copy" className="size-6" width={25} height={25} />
+                    )}
+                </Button>
+            </div>
+        </figure>
     );
 }
-
-const AmansTheme = {
-    backgroundColor: `#0d1117`,
-    textColor: `#9DCBF4`,
-    substringColor: `#c0c5ce`,
-    keywordColor: `#79c0ff`, // `style`, `href`, `src`, `target`
-    attributeColor: `#79c0ff`, // inline `display`, `align-items`, etc.
-    selectorAttributeColor: `#5ebfcc`,
-    docTagColor: `#c0c5ce`,
-    nameColor: `#9cdcfe`,
-    builtInColor: `#6AC273`,
-    literalColor: `#dcdcaa`,
-    bulletColor: `#dcdcaa`,
-    codeColor: `#c0c5ce`,
-    additionColor: `#b5cea8`,
-    regexpColor: `#ce9178`,
-    symbolColor: `#5ebfcc`,
-    variableColor: `#d4d4d4`,
-    templateVariableColor: `#d4d4d4`,
-    linkColor: `#9DCCF5`,
-    selectorClassColor: `#9cdcfe`,
-    typeColor: `#a5d6ff`,
-    stringColor: `#ce9178`,
-    selectorIdColor: `#a5d6ff`,
-    quoteColor: `#ce9178`,
-    templateTagColor: `#a5d6ff`,
-    deletionColor: `#f44747`,
-    titleColor: `#a5d6ff`,
-    sectionColor: `#a5d6ff`,
-    commentColor: `#6a9955`,
-    metaKeywordColor: `#569cd6`,
-    metaColor: `#dcdcaa`,
-    functionColor: `#dcdcaa`,
-    numberColor: `#b5cea8`,
-};

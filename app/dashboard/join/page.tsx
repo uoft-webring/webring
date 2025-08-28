@@ -1,4 +1,4 @@
-import { checkAddedCodeToPortfolio, getDomainValidity } from "../actions";
+import { getDomainValidity } from "../actions";
 import StatusCard from "@/components/StatusCard";
 import CodeSnippet from "@/components/CodeSnippet";
 import Form from "next/form";
@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Status } from "@/components/StatusCard";
-import next from "next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function Join() {
@@ -23,10 +22,10 @@ export default async function Join() {
 
     const id: number = userData.ring_id;
 
-    const css = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
+    const html = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
-        <img
+    <img
             src='https://uoftwebring.com/ring_logo.svg'
             alt='UofT Webring'
             style="width: '24px'; height: 'auto'"
@@ -61,7 +60,7 @@ export default async function Join() {
 </div>`;
 
     const codeStringMap = {
-        CSS: css,
+        "HTML & CSS": html,
         "React & Tailwind": react_and_tailwind,
         "Nextjs & Tailwind": next_and_tailwind,
     };
@@ -69,20 +68,21 @@ export default async function Join() {
     const action = async () => {
         "use server";
         // TODO: add this back in later when this is automated, going with manual process first
-        const result = await checkAddedCodeToPortfolio();
+        //const result = await checkAddedCodeToPortfolio();
     };
 
     return (
         <section>
             <h2>Join the commmunity</h2>
-            <p className="mb-4">Copy the HTML code and paste it into your portfolio to join the community.</p>
+            <p className="mb-4">Copy the code and paste it into your portfolio to join the community.</p>
 
-            <Tabs defaultValue="CSS" className="relative mr-auto flex w-full flex-col gap-6">
-                <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
+            <Tabs defaultValue="HTML & CSS" className="relative mr-auto flex w-full flex-col gap-6">
+                {/* Height is needed to handle mobile responsiveness */}
+                <TabsList className="w-full flex flex-row flex-wrap items-center h-[10rem] sm:h-min rounded-none border-b bg-transparent p-0">
                     {Object.keys(codeStringMap).map((value, index) => {
                         return (
                             <TabsTrigger
-                                className="relative rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
+                                className="relative h-min border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
                                 key={index}
                                 value={value}
                             >

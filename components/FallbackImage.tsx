@@ -17,19 +17,18 @@ type FallbackImageProps = {
     width?: number;
     height?: number;
 };
-
+/* At some point we can merge this with Avatar.tsx no one else uses */
 export default function FallbackImage({
     src,
     seed,
     className = "",
     alt = "",
-    width = 128,
-    height = 128,
+    width = 32,
+    height = 32,
 }: FallbackImageProps) {
     const [imageError, setImageError] = useState(false);
     // Instead of using a dynamic fallback image, we use a local one
-    console.log("navbar profile seed", seed);
-    const avatar = useMemo(() => {
+    const avatarDataUri = useMemo(() => {
         return createAvatar(personas, {
             size: 128,
             seed: seed.toString(),
@@ -38,38 +37,47 @@ export default function FallbackImage({
 
     useEffect(() => {
         if (!src) {
-            console.warn("[FallbackImage] No src provided, using fallback image.");
             setImageError(true);
             return;
         }
         setImageError(false);
     }, [src]);
     console.log("[FallbackImage] Rendering image for ringId:", seed, "with src:", src);
+    const classList = cn("aspect-square object-cover pointer-events-none select-none", className);
 
     return imageError || !src ? (
         <Image
             draggable={false}
+            decoding="async"
             priority={false}
+            fetchPriority="low"
             width={width}
             height={height}
-            src={avatar}
-            alt="Avatar"
-            className={cn("object-cover", className)}
+            src={avatarDataUri}
+            quality={80}
+            alt={alt || "Avatar"}
+            loading="lazy"
+            className={classList}
         />
     ) : (
         <Image
-            src={src}
+            draggable={false}
+            decoding="async"
+            priority={false}
+            fetchPriority="low"
             width={width}
             height={height}
-            className={cn("object-cover", className)}
+            src={src}
+            quality={80}
             alt={alt}
+            loading="lazy"
+            className={classList}
+            crossOrigin="anonymous"
             onError={(err) => {
+                // TODO: try this: https://www.npmjs.com/package/broken-link-checker
                 console.log("[FallbackImage] Profile Image error! Switching to fallback: ", err);
                 setImageError(true);
             }}
-            crossOrigin="anonymous"
-            priority={false}
-            loading="lazy"
             unoptimized // Optimized Images won't allow arb. domains
         />
     );

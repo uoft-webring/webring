@@ -17,6 +17,8 @@ export const saveData = async (formData: UserType) => {
                 tagline: formData.tagline,
                 tags: formData.tags,
                 domain: formData.domain,
+                program: formData.program,
+                graduation_year: formData.graduation_year,
             })
             .eq("id", formData.id);
 
@@ -25,7 +27,7 @@ export const saveData = async (formData: UserType) => {
         }
 
         return result;
-    } catch (e) {
+    } catch (e: any) {
         return { error: "Network error" };
     }
 };

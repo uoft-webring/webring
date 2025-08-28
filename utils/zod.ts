@@ -5,6 +5,7 @@ export const parseEmail = (email: any) => {
     const emailSchema = z
         .string()
         .email({ message: "Please enter an email address." })
+        .transform((val) => val.toLowerCase())
         .refine((email) => email.toLowerCase().endsWith("@mail.utoronto.ca"), {
             message: 'Please use an "@mail.utoronto.ca" email.',
         });
@@ -33,7 +34,7 @@ export const User = z.object({
     ring_id: z.number().int().nonnegative(),
     id: z.string(),
     name: z.string().nonempty({ message: "Please enter a valid name." }),
-    tagline: z.string().max(255, { message: "Tagline can not be longer than 255 characters." }).nullable(),
+    tagline: z.string().max(255, { message: "Bio can not be longer than 255 characters." }).nullable(),
     domain: z
         .string()
         .url({ message: "Please enter a valid URL." })
@@ -57,6 +58,31 @@ export const User = z.object({
     validated_user_component: z.string(),
     github_url: z.string().nullable(),
     tags: z.string().nonempty().array().max(3, { message: "You can choose up to 3 tags." }).nullable(),
+    graduation_year: z
+        .number({
+            required_error: "Please enter your graduation year.",
+            invalid_type_error: "Graduation year must be a number.",
+        })
+        .int({ message: "Graduation year must be an integer." })
+        .min(1900, { message: "🤨" })
+        .nullable(),
+    program: z
+        .string()
+        .min(2, { message: "Program name must be at least 2 characters." })
+        .max(60, { message: "Program name must be at most 60 characters." })
+        .regex(/^[a-zA-Z0-9\s&(),.-]+$/, { message: "Program name contains invalid characters." })
+        .nullable(),
+    subdomain: z
+        .string()
+        .min(2, { message: "Subdomain must be at least 2 characters." })
+        .max(30, { message: "Subdomain must be at most 30 characters." })
+        .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
+            message: "Subdomain can only contain lowercase letters, numbers, and hyphens.",
+        })
+        .refine((val) => !val.startsWith("-") && !val.endsWith("-"), {
+            message: "Subdomain cannot start or end with a hyphen.",
+        })
+        .nullable(),
 });
 
 export const SafeUser = User.omit({

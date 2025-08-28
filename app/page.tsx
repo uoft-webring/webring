@@ -13,7 +13,7 @@ import { WebRing } from "@/components/Ring/WebRing";
 
 export default async function Home() {
     const { data: ringProfiles, error: ringProfilesError } = await getAllUserProfiles();
-    const { data: userData, error: userError } = await getAuthUserProfile();
+    const { data: userData } = await getAuthUserProfile();
 
     if (!ringProfiles || ringProfilesError) {
         console.error("[Home] Error fetching profiles:", ringProfilesError);
@@ -29,9 +29,22 @@ export default async function Home() {
             <Navbar user={userData} />
             <div className="overflow-clip">
                 <WebRing data={ringProfiles} />
-                <div className="px-4">
-                    <h2 className="max-w-[85rem] w-full mx-auto">Preview</h2>
-                    <div className="max-w-[85rem] mx-auto overflow-clip">
+                <div className="px-4 w-full">
+                    <div className="w-full flex flex-row justify-center items-center">
+                        <h2 className="w-min text-xl text-center sm:text-3xl md:text-3xl lg:text-4xl">
+                            Preview
+                        </h2>
+                        <h3>
+                            <Link
+                                href="/directory"
+                                className="text-md ml-2 text-center text-primary hover:underline"
+                            >
+                                (or view the full directory)
+                            </Link>
+                        </h3>
+                    </div>
+
+                    <div className="max-w-[85rem] mx-auto overflow-clip items-center">
                         {ringProfiles ? <ProfileCarousel data={ringProfiles} /> : <p>No data</p>}
                     </div>
                 </div>
@@ -46,19 +59,38 @@ export default async function Home() {
                     ]}
                 />
             </section>
-            <section className="m-4 bg-card">
+            {!userData && (
+                <section className="m-4 bg-card">
+                    <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
+                        <p className="mb-1 uppercase text-white/40 md:text-xl">guess what</p>
+                        <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                            Getting yourself RING-ed up has never been easier!
+                        </h1>
+                        <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
+                            Get RING-ed up by signing up with your UofT email, entering your domain, and
+                            adding the custom UofT Webring navigation component to your portfolio website!
+                        </p>
+
+                        <Link href="/signup">
+                            <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                                Join now!
+                            </Button>
+                            <Button className="lg:hidden">Join now!</Button>
+                        </Link>
+                    </div>
+                </section>
+            )}
+            <section className="m-4 ">
                 <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
-                    <p className="mb-1 uppercase text-white/40 md:text-xl">guess what</p>
                     <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                        Getting yourself RING-ed up has never been easier!
+                        View The Directory of UofT Webring Members
                     </h1>
-                    <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
-                        Get RING-ed up by signing up with your UofT email, entering your domain, and adding
-                        the custom UofT Webring navigation component to your portfolio website!
-                    </p>
-                    <Link href="/signup">
-                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">Join now!</Button>
-                        <Button className="lg:hidden">Join now!</Button>
+
+                    <Link href="/directory">
+                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                            Go to The Directory!
+                        </Button>
+                        <Button className="lg:hidden">Go to The Directory!</Button>
                     </Link>
                 </div>
             </section>

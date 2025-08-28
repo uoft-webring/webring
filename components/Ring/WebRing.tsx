@@ -20,7 +20,6 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function WebRing({ data }: { data: SafeUserType[] }) {
-    console.log("[WebRing]", data);
     const [fullSize, setFullSize] = useState<boolean>(false);
     const toggleSize = () => {
         setFullSize((fullSize) => !fullSize);
@@ -42,7 +41,7 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
             </Canvas>
             <div className="max-h-fit w-full items-center justify-center flex flex-col mt-2">
                 <Button
-                    className="sm:px-6 px-8 rounded-lg py-2"
+                    className="sm:px-6 px-8 rounded-xl py-2"
                     size="icon"
                     variant="outline"
                     onClick={toggleSize}

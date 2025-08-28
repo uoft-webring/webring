@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import "prismjs/themes/prism-tomorrow.css"; // has to be applied globally
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
@@ -29,16 +30,10 @@ export const metadata: Metadata = {
         title: "UofT Webring",
         description,
     },
-    // We are fine with robots indexing our site
-    robots: {
-        index: true,
-        follow: true,
-        nocache: false,
-    },
     referrer: "origin-when-cross-origin",
-    /* alternates: {
+    alternates: {
         canonical: "/",
-    }, */
+    },
     authors: [
         {
             name: "Jonathan Zhu",
@@ -64,9 +59,57 @@ export default function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                url: "https://uoftwebring.com/",
+                name: "UofT Webring",
+            },
+            {
+                "@type": "Organization",
+                name: "UofT Webring",
+                url: "https://uoftwebring.com/",
+                logo: {
+                    "@type": "ImageObject",
+                    url: "https://uoftwebring.com/logo.png",
+                },
+            },
+            {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                    {
+                        "@type": "ListItem",
+                        position: 1,
+                        name: "Home",
+                        item: "https://uoftwebring.com/",
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 2,
+                        name: "Directory",
+                        item: "https://uoftwebring.com/directory",
+                    },
+                    {
+                        "@type": "ListItem",
+                        position: 3,
+                        name: "Manifesto",
+                        item: "https://uoftwebring.com/manifesto",
+                    },
+                ],
+            },
+        ],
+    };
     return (
         <html lang="en" className={oxanium.variable}>
             <body className="scroll-smooth dark antialiased">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+                    }}
+                />
                 {children}
                 <Toaster richColors />
             </body>

@@ -3,6 +3,7 @@ import { cva, VariantProps } from "class-variance-authority";
 import { Button } from "@/components/ui/button";
 
 import { CheckCircle as Success, CircleAlert as Warning, Info as Error } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const statusCardVariants = cva("my-2 px-6 py-3 rounded-lg flex flex-col border-2", {
     variants: {
@@ -68,15 +69,17 @@ type StatusCardProps = {
     status?: Status;
     showButton?: boolean;
     showCTA?: boolean;
+    className?: string;
 };
 
 export default function StatusCard({
     status = "connected",
     showButton = true,
     showCTA = true,
+    className = "",
 }: StatusCardProps) {
     return (
-        <div className={statusCardVariants({ status })}>
+        <div className={cn(statusCardVariants({ status }), "rounded-xl", className)}>
             <div className="flex items-center gap-2">
                 {statusIcons[status]}
                 <h2>{statusLabels[status]}</h2>
