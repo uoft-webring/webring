@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Form from "next/form";
+import ProgramInput from "@/components/ProgramInput";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
@@ -130,7 +131,7 @@ export default function EditForm({
                         >
                             Program
                         </Label>
-                        <Input
+                        {/* <Input
                             name="program"
                             type="text"
                             placeholder="Computer Science"
@@ -140,6 +141,12 @@ export default function EditForm({
                                 saveToForm({ program: value === "" ? null : value });
                             }}
                             error={errors.program}
+                        /> */}
+                        <ProgramInput
+                            program={formData.program ?? ""}
+                            onProgramChange={(program: string) => {
+                                saveToForm({ program: program === "" ? null : program });
+                            }}
                         />
                     </div>
                 </div>
