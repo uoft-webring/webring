@@ -12,7 +12,7 @@ export default function OtpForm({ email }: { email: string }) {
     const [code, setCode] = useState("");
     const [error, setError] = useState<string | undefined>(undefined);
     const [isPending, startTransition] = useTransition();
-    const [cooldown, setCooldown] = useState(0);
+    // const [cooldown, setCooldown] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -20,11 +20,11 @@ export default function OtpForm({ email }: { email: string }) {
         inputRef.current?.focus();
     }, []);
 
-    useEffect(() => {
-        if (cooldown <= 0) return;
-        const t = setInterval(() => setCooldown((c) => c - 1), 1000);
-        return () => clearInterval(t);
-    });
+    // useEffect(() => {
+    //     if (cooldown <= 0) return;
+    //     const t = setInterval(() => setCooldown((c) => c - 1), 1000);
+    //     return () => clearInterval(t);
+    // });
 
     const handleSubmit = (entered?: string) => {
         const value = (entered ?? code).trim();
@@ -51,7 +51,7 @@ export default function OtpForm({ email }: { email: string }) {
     const onResend = async () => {
         setError(undefined);
         await resendOtp(email);
-        setCooldown(120); // 120 ms
+        // setCooldown(120); // 120 ms
         inputRef.current?.focus();
     };
     return (
@@ -91,10 +91,11 @@ export default function OtpForm({ email }: { email: string }) {
                         <Button
                             className="w-full"
                             onClick={onResend}
-                            disabled={cooldown > 0 || isPending}
+                            // disabled={cooldown > 0 || isPending}
                             aria-live="polite"
                         >
-                            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+                            {/* {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"} */}
+                            Resend
                         </Button>
                     </div>
                 </div>
