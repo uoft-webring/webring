@@ -16,7 +16,13 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { programs } from "@/utils/programs";
 
-export default function ProgramInput({ program, onProgramChange }) {
+export default function ProgramInput({
+    program,
+    onProgramChange,
+}: {
+    program: string;
+    onProgramChange: (program: string) => void;
+}) {
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState(program);
 

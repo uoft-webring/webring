@@ -326,7 +326,7 @@ export const programsArray: string[] = [
     "Yiddish, Al and Malka Green Program in",
 ];
 
-export const programs = programsArray.map((program) => {
+export const programs: Record<string, string>[] = programsArray.map((program) => {
     return {
         value: program,
         label: program,
