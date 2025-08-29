@@ -181,20 +181,8 @@ export default function EditForm({
                     }}
                     error={errors.github_url}
                 />
-                <Label htmlFor="image_url">Profile picture link</Label>
-                <Input
-                    name="image_url"
-                    type="url"
-                    placeholder="https://yourdomain.com/profile.jpg"
-                    required
-                    defaultValue={formData.image_url ?? ""}
-                    onChange={(e) => {
-                        saveToForm({
-                            image_url: e.target.value,
-                        });
-                    }}
-                    error={errors.image_url}
-                />
+                <Label htmlFor="image_url">Profile picture</Label>
+                <ImageInput errors={errors} setErrors={setErrors} saveToForm={saveToForm} />
                 <Label htmlFor="tags">Tags</Label>
                 <TagInputComponent
                     tags={formData.tags ?? []}
