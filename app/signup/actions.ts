@@ -6,7 +6,7 @@ import { createAdminClient } from "@/utils/supabase/server";
 export const signUpAction = async (name: string, email: string) => {
     const supabase = await createAdminClient();
 
-    const { data, error: search_error } = await supabase.from("profile").select("*").eq("email", email);
+    const { data } = await supabase.from("profile").select("*").eq("email", email);
 
     console.log("data found for user email on signup", data);
     if (data?.length) {

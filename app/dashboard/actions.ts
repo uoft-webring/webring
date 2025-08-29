@@ -54,7 +54,7 @@ export const getDomainVerification = async (): Promise<boolean> => {
  * @throws {Error} If the secret key is not set in the environment variables.
  * @param {string} userId - The ID of the user to generate the TXT record value for.
  */
-export const getTXTRecordValue = async (seed: any): Promise<string> => {
+export const getTXTRecordValue = async (seed: string): Promise<string> => {
     // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
     // Increases security by preventing spoofing through ensuring only we can generate valid values
     if (!process.env.DOMAIN_VALIDATION_SECRET_KEY) {
@@ -86,7 +86,7 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     const baseDomain = new URL(user.domain).hostname;
     const expectedKey = `uoft-webring`;
     const fullRecordDomain = `${expectedKey}.${baseDomain}`;
-    const expectedValue = await getTXTRecordValue(user.ring_id);
+    const expectedValue = await getTXTRecordValue(String(user.ring_id));
     try {
         console.log("Expected Domain: " + fullRecordDomain);
         console.log("Expected Value: " + expectedValue);

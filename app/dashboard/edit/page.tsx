@@ -41,10 +41,10 @@ export default function Edit() {
                     </p>
                     <EditForm formData={data} setFormData={setData} />
                 </div>
-                <div>
+                <div className="flex flex-col justify-left items-start">
                     <h2>Preview</h2>
                     <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data} />
+                    <ProfileCard user={data} className="m-0" />
                 </div>
             </section>
         </>

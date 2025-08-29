@@ -28,7 +28,6 @@ export default function FallbackImage({
 }: FallbackImageProps) {
     const [imageError, setImageError] = useState(false);
     // Instead of using a dynamic fallback image, we use a local one
-    console.log("navbar profile seed", seed);
     const avatarDataUri = useMemo(() => {
         return createAvatar(personas, {
             size: 128,
@@ -38,7 +37,6 @@ export default function FallbackImage({
 
     useEffect(() => {
         if (!src) {
-            console.warn("[FallbackImage] No src provided, using fallback image.");
             setImageError(true);
             return;
         }

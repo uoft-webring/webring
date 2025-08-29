@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Form from "next/form";
-import ImageInput from "@/components/ImageInput";
+import ProgramInput from "@/components/ProgramInput";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
@@ -38,8 +38,6 @@ export default function EditForm({
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
-
-    console.log("Rendering Parent with tags:", formData.tags);
 
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
@@ -133,7 +131,7 @@ export default function EditForm({
                         >
                             Program
                         </Label>
-                        <Input
+                        {/* <Input
                             name="program"
                             type="text"
                             placeholder="Computer Science"
@@ -143,6 +141,12 @@ export default function EditForm({
                                 saveToForm({ program: value === "" ? null : value });
                             }}
                             error={errors.program}
+                        /> */}
+                        <ProgramInput
+                            program={formData.program ?? ""}
+                            onProgramChange={(program: string) => {
+                                saveToForm({ program: program === "" ? null : program });
+                            }}
                         />
                     </div>
                 </div>
@@ -199,6 +203,7 @@ export default function EditForm({
                     onChange={(e) => {
                         saveToForm({ tagline: e.target.value });
                     }}
+                    className="rounded-xl"
                     error={errors.tagline}
                 />
             </div>

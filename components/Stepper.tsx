@@ -4,12 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import React, { useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { cn } from "@/lib/utils";
+type Step = {
+    id: string;
+    title: string;
+    description: string;
+};
 
-export default function Stepper({ steps, className }: { steps: any[]; className?: string }) {
+export default function Stepper({ steps, className }: { steps: Step[]; className?: string }) {
     const pathname = usePathname();
-    const { useStepper, steps: _, utils } = useMemo(() => defineStepper(...steps), [steps]);
+    const { useStepper, utils } = useMemo(() => defineStepper(...steps), [steps]);
     const stepper = useStepper();
     const currentIndex = utils.getIndex(stepper.current.id);
 
@@ -26,7 +31,7 @@ export default function Stepper({ steps, className }: { steps: any[]; className?
         <nav aria-label="" className={cn(className)}>
             <ol className="flex flex-row md:flex-col ">
                 {stepper.all.map((step, index, array) => (
-                    <React.Fragment key={step.id}>
+                    <Fragment key={step.id}>
                         <Link href={`/dashboard/${step.id}`} className="cursor-pointer">
                             <li className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
                                 <Button
@@ -68,7 +73,7 @@ export default function Stepper({ steps, className }: { steps: any[]; className?
                                 ></Separator>
                             </>
                         )}
-                    </React.Fragment>
+                    </Fragment>
                 ))}
             </ol>
         </nav>

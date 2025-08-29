@@ -1,5 +1,7 @@
 {
     "name": "UofT Webring",
+    "short_name": "UofT Webring",
+    "description": "A community for University of Toronto students to connect and share their web presence.",
     "start_url": "/",
     "theme_color": "#010414",
     "background_color": "#010414",
@@ -10,7 +12,8 @@
         {
             "url": "/favicon.ico",
             "sizes": "16x16",
-            "type": "image/png"
+            "type": "image/x-icon"
         }
-    ]
+    ],
+    "categories": ["social", "community", "university", "university of toronto", "webring"]
 }

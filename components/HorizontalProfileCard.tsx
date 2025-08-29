@@ -2,7 +2,6 @@ import Loading from "./LoadingComponent";
 import SkillTag from "./SkillTag";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
-import { Button } from "./ui/button";
 import { ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Avatar from "./Avatar";
@@ -23,7 +22,7 @@ export default function HorizontalProfileCard({
             type="single"
             collapsible
             className={cn(
-                "w-full z-50 bg-card rounded-2xl shadow-md p-6 flex flex-row flex-wrap items-center justify-between gap-4 h-fit border",
+                "w-full z-50 bg-card rounded-xl shadow-md p-6 flex flex-row flex-wrap items-center justify-between gap-4 h-fit border",
                 className
             )}
         >
@@ -113,7 +112,7 @@ export function LinkButton({
     text: string;
     shortText: string;
 } & React.ComponentPropsWithoutRef<"button">) {
-    const label = text.length <= 30 ? text : shortText ?? text;
+    const label = text.length <= 30 ? text : (shortText ?? text);
     return (
         <a
             href={url}

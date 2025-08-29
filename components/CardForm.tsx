@@ -5,13 +5,12 @@ export default function CardForm({
     cardTitle,
     cardDescription,
     children,
-    ...props
 }: {
     cardTitle?: string;
     cardDescription?: string;
 } & React.ComponentPropsWithoutRef<"div">) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10 rounded-xl">
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <div className="flex flex-col gap-6">
                     <Card className="gap-4">

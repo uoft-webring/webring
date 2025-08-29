@@ -1,49 +1,75 @@
 "use server";
-import { getUserProfile } from "@/app/actions";
-import Navbar from "@/components/Navbar";
+import { getUserProfile } from "@/app/actions"; // ensure this is a server-side util (not a 'use server' action)
+import Navbar from "@/components/Navbar"; // can be a Client Component
 import ProfileCard from "@/components/ProfileCard";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 /**
  * This page is experimental
- *
  */
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const { data } = await getUserProfile(slug);
+    if (!data) return { title: "User not found" };
+
+    const pageUrl = `https://uoftwebring.com/u/${slug}`;
+
+    return {
+        title: `${data.name} - UofT Webring`,
+        description: data.tagline || undefined,
+        openGraph: {
+            title: data.name,
+            description: data.tagline || undefined,
+            images: data.image_url ? [data.image_url] : undefined,
+            url: pageUrl,
+        },
+        twitter: {
+            title: data.name,
+            description: data.tagline || undefined,
+            images: data.image_url ? [data.image_url] : undefined,
+            card: "summary_large_image",
+        },
+        robots: { index: true, follow: true },
+        alternates: { canonical: pageUrl },
+    };
+}
+
 export default async function User({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
     const { data, error } = await getUserProfile(slug);
-    const mockUserProfile = {
-        ring_id: 123,
-        name: "Mock User",
-        tagline: "This is a mock user profile",
-        domain: "mohammadanwar.dev",
-        valid: true,
-        github_url: "mh-anwar",
-        image_url: "https://avatars.githubusercontent.com/u/12345678?v=4",
-        is_verified: true,
-        validated_user_component: "disconnected",
-        tags: ["web", "developer", "mock"],
-        subdomain: slug,
-        graduation_year: 2024,
-        program: "Computer Science",
+    if (error || !data) notFound();
+
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        dateModified: new Date().toISOString(),
+        mainEntity: {
+            "@type": "Person",
+            name: data.name,
+            identifier: data.ring_id,
+            ...(data.tagline && { description: data.tagline }),
+            ...(data.image_url && { image: data.image_url }),
+            sameAs: [
+                ...(data.github_url ? [`https://github.com/${data.github_url}`] : []),
+                ...(data.domain ? [data.domain] : []),
+            ],
+        },
+        ...(data.domain && { relatedLink: data.domain }),
     };
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+            />
             <Navbar />
-
-            <div className="flex flex-col md:flex-row max-w-[70rem] mx-auto w-full flex-1  place-items-start">
+            <div className="flex flex-col md:flex-row max-w-[70rem] mx-auto w-full flex-1 place-items-start">
                 <div className="max-w-[70rem] mx-auto w-full px-6 mt-12 sm:mt-6">
-                    {mockUserProfile ? (
-                        <ProfileCard user={mockUserProfile} />
-                    ) : (
-                        <>
-                            <h2 className="text-2xl font-semibold text-center mt-6">
-                                {error || "User not found"}
-                            </h2>
-                            <p className="text-center mt-4">
-                                The user profile you are looking for does not exist or has been removed.
-                            </p>
-                        </>
-                    )}
+                    <ProfileCard user={data} />
                 </div>
             </div>
         </div>

@@ -104,40 +104,46 @@ export default function DirectoryPage() {
             </h1>
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <Input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search by name, domain, tags, program…"
-                        className="bg-card rounded-xl flex-1"
-                    />
-                    <div className="flex gap-3 w-full sm:w-auto h-full">
-                        <Filter
-                            label="Tags"
-                            options={filterMetrics?.tags ?? []}
-                            value={selected.tags}
-                            onChange={(v) => setSelectedFilter("tags", v)}
-                        />
-                        <Filter
-                            label="Programs"
-                            options={filterMetrics?.programs ?? []}
-                            value={selected.programs}
-                            onChange={(v) => setSelectedFilter("programs", v)}
-                        />
-                        <Filter
-                            label="Graduation Years"
-                            options={filterMetrics?.["Graduation Years"] ?? []}
-                            value={selected["Graduation Years"]}
-                            onChange={(v) => setSelectedFilter("Graduation Years", v)}
+                    <div className="flex-1">
+                        <span className="text-sm text-muted-foreground">Search</span>
+                        <Input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search by name, domain, tags, program…"
+                            className="bg-card rounded-xl flex-1"
                         />
                     </div>
-                    <Button variant="secondary" onClick={clearAll} className="rounded-xl">
+                    {/*                     <div className="flex gap-3 w-full sm:w-auto h-full items-center justify-around">
+                     */}{" "}
+                    <Filter
+                        label="Tags"
+                        options={filterMetrics?.tags ?? []}
+                        value={selected.tags}
+                        onChange={(v) => setSelectedFilter("tags", v)}
+                    />
+                    <Filter
+                        label="Programs"
+                        options={filterMetrics?.programs ?? []}
+                        value={selected.programs}
+                        onChange={(v) => setSelectedFilter("programs", v)}
+                    />
+                    <Filter
+                        label="Graduation Years"
+                        options={filterMetrics?.["Graduation Years"] ?? []}
+                        value={selected["Graduation Years"]}
+                        onChange={(v) => setSelectedFilter("Graduation Years", v)}
+                    />
+                    {/*                     </div>
+                     */}{" "}
+                    <Button variant="secondary" onClick={clearAll} className="rounded-xl sm:self-end h-10">
                         Clear
                     </Button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
                     {filtered.map((p: any) => (
-                        <HorizontalProfileCard key={String(p.domain ?? p.id ?? p.ring_id)} user={p} />
+                        /* TODO: after domain is made unique this wont matter */
+                        <HorizontalProfileCard key={String(p.domain + p.ring_id)} user={p} />
                     ))}
                     {filtered.length === 0 && (
                         <div className="mt-6 flex flex-col items-center text-center gap-2 text-muted-foreground">

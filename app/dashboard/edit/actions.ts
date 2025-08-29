@@ -35,7 +35,7 @@ export const saveData = async (formData: UserType) => {
         }
 
         return result;
-    } catch (e) {
+    } catch (e: any) {
         return { error: "Network error" };
     }
 };
