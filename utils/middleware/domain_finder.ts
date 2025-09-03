@@ -1,29 +1,29 @@
-import { createAdminClient } from "@/utils/supabase/server";
-import random_domain from "@/utils/middleware/random_query";
-import query from "@/utils/middleware/query_db";
 
-export default async function domain_from_id(initial_id: number, direction: string) {
+"use server";
+import { createAdminClient } from "@/utils/supabase/server";
+
+export default async function domain_from_id(initialId: number, direction: "next" | "prev") {
     // querying db "profile" for "domain" whose row id is "index"
-    const supabase = await createAdminClient(); // TODO: check this later
+    const supabase = createAdminClient();
 
     // get number of rows in db
     const { count } = await supabase.from("profile").select("ring_id", { count: "exact", head: true });
-    console.log("count", count);
 
-    // make sure count is not null and initial_id is in range of ids
-    if (count == null || !(0 <= initial_id && initial_id <= count - 1)) {
+    // make sure count is not null and initialId is in range of ids
+    if (count == null || initialId < 0 || initialId >= count) {
         return null;
     }
 
     // change id depending on direction
-    const index = direction === "next" ? initial_id + 1 : initial_id - 1;
+    const offset = direction === "next" ? 1 : -1;
+    const index = (initialId + offset + count) % count;
 
-    // get domain based on index
-    const domain = await query(supabase, (index + count) % count);
-    // console.log("number", (index + count) % count);
-    if (!domain) {
+    // Get domain from database based on index
+    const { data, error } = await supabase.from("profile").select("domain").eq("ring_id", index).single();
+
+    if (!data || !data.domain || error) {
         return null;
     }
 
-    return domain ?? null;
+    return data.domain ?? null;
 }
