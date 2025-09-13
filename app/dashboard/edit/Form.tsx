@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Form from "next/form";
 import ProgramInput from "@/components/ProgramInput";
+import ImageInput from "@/components/ImageInput";
 
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
@@ -38,6 +39,8 @@ export default function EditForm({
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
+
+    console.log("Rendering Parent with tags:", formData.tags);
 
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
@@ -131,17 +134,6 @@ export default function EditForm({
                         >
                             Program
                         </Label>
-                        {/* <Input
-                            name="program"
-                            type="text"
-                            placeholder="Computer Science"
-                            defaultValue={formData.program ?? ""}
-                            onChange={(e) => {
-                                const value = e.currentTarget.value.trim();
-                                saveToForm({ program: value === "" ? null : value });
-                            }}
-                            error={errors.program}
-                        /> */}
                         <ProgramInput
                             program={formData.program ?? ""}
                             onProgramChange={(program: string) => {
@@ -181,20 +173,8 @@ export default function EditForm({
                     }}
                     error={errors.github_url}
                 />
-                <Label htmlFor="image_url">Profile picture link</Label>
-                <Input
-                    name="image_url"
-                    type="url"
-                    placeholder="https://yourdomain.com/profile.jpg"
-                    required
-                    defaultValue={formData.image_url ?? ""}
-                    onChange={(e) => {
-                        saveToForm({
-                            image_url: e.target.value,
-                        });
-                    }}
-                    error={errors.image_url}
-                />
+                <Label htmlFor="image_url">Profile picture</Label>
+                <ImageInput errors={errors} setErrors={setErrors} saveToForm={saveToForm} />
                 <Label htmlFor="tags">Tags</Label>
                 <TagInputComponent
                     tags={formData.tags ?? []}
