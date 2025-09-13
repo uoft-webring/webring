@@ -12,7 +12,3 @@ A Webring environment providing a unified space for UofT students to gather and 
 ## Developer Quickstart
 
 Refer to our [contributing guide](CONTRIBUTING.md)!
-
-## Acknowledgements
-
-Special shout out to all the UWaterloo webrings ([CS](https://cs.uwatering.com/), [SE](https://se-webring.xyz/)) for the inspiration! Go check them out and meet all the cool people from there!
