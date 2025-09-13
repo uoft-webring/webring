@@ -4,9 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
 import sharp from "sharp";
-import { Crop, PixelCrop } from "react-image-crop";
+import { PixelCrop } from "react-image-crop";
 import { WithImplicitCoercion } from "buffer";
-import fetch, { RequestInfo } from "node-fetch";
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -104,11 +103,6 @@ export const saveCroppedImaged = async (
         })
         .avif({ quality: 30 })
         .toBuffer();
-    // TODO-K: HERE SHOULD RETURN AWS S3 LINK
-
-    // return generateUploadUrl
-
-    //return "data:image/avif;base64," + croppedBuffer.toString("base64");
 
     // Get presigned URL and public URL
     const { presignedUrl, publicUrl } = await generateUploadUrl();
