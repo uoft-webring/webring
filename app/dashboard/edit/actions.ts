@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 import { PixelCrop } from "react-image-crop";
 import { WithImplicitCoercion } from "buffer";
+import fetch from "node-fetch";
 
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
