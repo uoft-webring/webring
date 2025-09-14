@@ -4,7 +4,7 @@ import { ProfileProvider } from "./ProfileProvider";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: "Directory",
+    title: "The Directory",
     metadataBase: new URL("https://uoftwebring.com/directory"),
     description: "Explore the UofT Webring community directory.",
     keywords: ["UofT Webring", "Directory", "University of Toronto", "Student Profiles"],

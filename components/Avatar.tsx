@@ -14,7 +14,7 @@ type AvatarProps = {
 export default function Avatar({ user, className, verifiedSize = "size-9", width, height }: AvatarProps) {
     return (
         <div className="relative">
-            <FallbackImage
+            {/*  <FallbackImage
                 key={user.image_url + user.ring_id}
                 src={user.image_url}
                 seed={user.ring_id}
@@ -26,7 +26,8 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
                 )}
                 width={width}
                 height={height}
-            />
+            /> */}
+
             {user.is_verified && (
                 <Image
                     src={verifiedIcon}
