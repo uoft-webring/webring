@@ -109,7 +109,8 @@ export const saveCroppedImaged = async (
     const { presignedUrl, publicUrl } = await generateUploadUrl();
 
     await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
-    return publicUrl;
+    // We return the object key, no point in storing the entire URL, esp since we don't access S3, we access CloudFront
+    return publicUrl.split("/avatars/")[1]!;
 };
 
 const uploadToS3 = async (

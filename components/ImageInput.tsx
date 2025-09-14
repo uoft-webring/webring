@@ -95,10 +95,13 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
         console.log("natural dimensions", image.naturalWidth, image.naturalHeight);
-        const croppedImage = await saveCroppedImaged(imageSrc, completedCrop!, scaleX, scaleY);
-        console.log(croppedImage);
+        const imageAccessKey = await saveCroppedImaged(imageSrc, completedCrop!, scaleX, scaleY);
+        console.log(imageAccessKey);
+        // imageAccessKey is the S3 object key, we store that in the DB
+        // When we want to access the image, we prepend the CloudFront URL to it
+        // e.g. https://--------.cloudfront.net/{imageAccessKey}
         saveToForm({
-            image_url: croppedImage,
+            image_url: imageAccessKey,
         });
         setOpen(false);
     };
