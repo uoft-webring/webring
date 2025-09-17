@@ -15,11 +15,11 @@ import { createAvatar } from "@dicebear/core";
 import { personas } from "@dicebear/collection";
 
 export default function Avatar({ user, className, verifiedSize = "size-9", width, height }: AvatarProps) {
-    const key = user.image_url + user.ring_id;
-    // We assume that if a user.image_url doesn't exist then we have to switch to a fallback, otherwise it's valid
+    const key = user.image_key + user.ring_id;
+    // We assume that if a user.image_key doesn't exist then we have to switch to a fallback, otherwise it's valid
 
-    const src = user.image_url
-        ? "https://" + process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN + "/" + user.image_url
+    const src = user.image_key
+        ? "https://" + process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN + "/" + user.image_key
         : null;
     console.log("[Avatar} This is the CF src: " + src);
     const seed = user.ring_id;

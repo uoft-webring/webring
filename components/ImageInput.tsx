@@ -86,7 +86,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         if (imageRef.current === null) {
             setErrors({
                 ...errors,
-                image_url: `Unexpected image upload error`,
+                image_key: `Unexpected image upload error`,
             });
             return;
         }
@@ -99,8 +99,8 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         // When we want to access the image, we prepend the CloudFront URL to it
         // e.g. https://--------.cloudfront.net/{imageAccessKey}
         saveToForm({
-            // TODO: change DB image_url to image_key or something
-            image_url: objectKey,
+            // TODO: change DB image_key to image_key or something
+            image_key: objectKey,
         });
         setOpen(false);
     };
@@ -108,7 +108,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setErrors({
             ...errors,
-            image_url: "",
+            image_key: "",
         });
 
         // Check if an image is uploaded
@@ -121,7 +121,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
+                    image_key: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
                 });
             }
 
@@ -142,7 +142,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url:
+                    image_key:
                         reason === "min"
                             ? `Min image width and height ${minAllowedImageDimensions}`
                             : `Max image width and height ${maxAllowedImageDimensions}`,
@@ -172,13 +172,13 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         <Dialog open={open}>
             <DialogTrigger asChild>
                 <Input
-                    name="image_url"
+                    name="image_key"
                     type="file"
                     accept="image/*"
                     required
                     onChange={handleOnChange}
                     className="hover:bg-input/50"
-                    error={errors.image_url}
+                    error={errors.image_key}
                 />
             </DialogTrigger>
             <DialogContent showCloseButton={false} className="">

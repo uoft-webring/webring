@@ -177,8 +177,8 @@ export default function EditForm({
                         />
                     </div>
                     <div className="flex flex-col gap-2 w-full">
-                        {/* TODO: rename subdomain accross everything to slug */}
-                        <Label htmlFor="subdomain" className="flex justify-between">
+                        {/* TODO: rename slug accross everything to slug */}
+                        <Label htmlFor="slug" className="flex justify-between">
                             Slug
                             <Tooltip>
                                 <TooltipTrigger>
@@ -193,21 +193,21 @@ export default function EditForm({
                         </Label>
                         <Input
                             /* Data type is named github_url but it's a username */
-                            name="subdomain"
+                            name="slug"
                             type="text"
                             placeholder="johndoe"
                             required
                             maxLength={39}
-                            defaultValue={formData.subdomain ?? ""}
+                            defaultValue={formData.slug ?? ""}
                             onChange={(e) => {
-                                saveToForm({ subdomain: e.target.value });
+                                saveToForm({ slug: e.target.value });
                             }}
-                            error={errors.subdomain}
+                            error={errors.slug}
                         />
                     </div>
                 </div>
 
-                <Label htmlFor="image_url">Profile picture</Label>
+                <Label htmlFor="image_key">Profile picture</Label>
                 <ImageInput errors={errors} setErrors={setErrors} saveToForm={saveToForm} />
                 <Label htmlFor="tags">Tags</Label>
                 <TagInputComponent

@@ -22,13 +22,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         openGraph: {
             title: data.name,
             description: data.tagline || undefined,
-            images: data.image_url ? [data.image_url] : undefined,
+            images: data.image_key ? [data.image_key] : undefined,
             url: pageUrl,
         },
         twitter: {
             title: data.name,
             description: data.tagline || undefined,
-            images: data.image_url ? [data.image_url] : undefined,
+            images: data.image_key ? [data.image_key] : undefined,
             card: "summary_large_image",
         },
         robots: { index: true, follow: true },
@@ -51,7 +51,7 @@ export default async function User({ params }: { params: Promise<{ slug: string 
             name: data.name,
             identifier: data.ring_id,
             ...(data.tagline && { description: data.tagline }),
-            ...(data.image_url && { image: data.image_url }),
+            ...(data.image_key && { image: data.image_key }),
             sameAs: [
                 ...(data.github_url ? [`https://github.com/${data.github_url}`] : []),
                 ...(data.domain ? [data.domain] : []),
