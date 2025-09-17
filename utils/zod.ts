@@ -6,9 +6,15 @@ export const parseEmail = (email: any) => {
         .string()
         .email({ message: "Please enter an email address." })
         .transform((val) => val.toLowerCase())
-        .refine((email) => email.toLowerCase().endsWith("@mail.utoronto.ca") || email.toLowerCase().endsWith("@alum.utoronto.ca") || email.toLowerCase().endsWith("@alumni.utoronto.ca"), {
-            message: 'Please use an "@mail.utoronto.ca" email or an alumni email.',
-        });
+        .refine(
+            (email) =>
+                email.toLowerCase().endsWith("@mail.utoronto.ca") ||
+                email.toLowerCase().endsWith("@alum.utoronto.ca") ||
+                email.toLowerCase().endsWith("@alumni.utoronto.ca"),
+            {
+                message: 'Please use an "@mail.utoronto.ca" email or an alumni email.',
+            }
+        );
     return emailSchema.safeParse(email);
 };
 
@@ -53,7 +59,12 @@ export const User = z.object({
             { message: "Invalid host format in URL." }
         )
         .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
-    image_url: z.string().url({ message: "Please enter a valid URL." }).or(z.literal("")),
+    image_url: z
+        .string()
+        .regex(/^[a-zA-Z0-9_-]+\.avif$/, {
+            message: "Must be an .avif file.",
+        })
+        .or(z.literal("")),
     is_verified: z.boolean(),
     validated_user_component: z.string(),
     github_url: z.string().nullable(),
@@ -75,14 +86,13 @@ export const User = z.object({
     subdomain: z
         .string()
         .min(2, { message: "Subdomain must be at least 2 characters." })
-        .max(30, { message: "Subdomain must be at most 30 characters." })
+        .max(50, { message: "Subdomain must be at most 30 characters." })
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
             message: "Subdomain can only contain lowercase letters, numbers, and hyphens.",
         })
         .refine((val) => !val.startsWith("-") && !val.endsWith("-"), {
             message: "Subdomain cannot start or end with a hyphen.",
-        })
-        .nullable(),
+        }),
 });
 
 export const SafeUser = User.omit({
