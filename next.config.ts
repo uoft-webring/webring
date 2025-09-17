@@ -5,9 +5,12 @@ const withMDX = createMDX({
     extension: /\.mdx?$/,
 });
 
+const cloudfrontDomain = process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN;
+if (!cloudfrontDomain) {
+    throw new Error("Missing env var: NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN");
+}
 const nextConfig: NextConfig = {
     pageExtensions: ["js", "jsx", "md", "mdx", "ts", "tsx"],
-    productionBrowserSourceMaps: true,
     reactStrictMode: true,
     eslint: {
         ignoreDuringBuilds: true,
@@ -29,6 +32,17 @@ const nextConfig: NextConfig = {
                 ],
             },
         ];
+    },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: cloudfrontDomain,
+                pathname: "/**",
+                //port: "",
+                //search: "",
+            },
+        ],
     },
 };
 

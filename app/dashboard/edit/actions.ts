@@ -27,13 +27,14 @@ export const saveData = async (formData: UserType) => {
                 domain: formData.domain,
                 program: formData.program,
                 graduation_year: formData.graduation_year,
+                subdomain: formData.subdomain,
             })
             .eq("id", formData.id);
 
         if (!result.error) {
             revalidatePath("/");
         }
-
+        // TODO make subdomain unique and check for violations
         return result;
     } catch (e: any) {
         return { error: "Network error" };
@@ -65,14 +66,11 @@ export const generateUploadUrl = async () => {
         expiresIn: 3600, // 1 hour
     });
 
-    const publicUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
-
-    return { presignedUrl, publicUrl };
+    const objectKey = `${uniqueId}.avif`;
+    return { presignedUrl, objectKey };
 };
 
 /**
- * TODO-K: add AWS S3 Uploading
- *
  * Saves user cropped profile avatar into AWS S3 Bucket
  *
  * provision presigned url - change john code
@@ -83,7 +81,7 @@ export const generateUploadUrl = async () => {
  * @param {completedCrop} completedCrop based on PixelCrop from react-easy-crop
  * @param {scaleX} scale of client side image width to actual image width
  * @param {scaleY}scale of client side image height to actual image height
- * @returns cropped image represented in base64 format
+ * @returns uploaded image object key
  */
 export const saveCroppedImaged = async (
     imageSrc: string,
@@ -106,10 +104,11 @@ export const saveCroppedImaged = async (
         .toBuffer();
 
     // Get presigned URL and public URL
-    const { presignedUrl, publicUrl } = await generateUploadUrl();
+    const { presignedUrl, objectKey } = await generateUploadUrl();
 
     await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
-    return publicUrl;
+    // We return the object key, no point in storing the entire URL, esp since we don't access S3, we access CloudFront
+    return objectKey;
 };
 
 const uploadToS3 = async (

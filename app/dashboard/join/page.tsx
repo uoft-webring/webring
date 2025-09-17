@@ -46,23 +46,9 @@ export default async function Join() {
     <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
 </div>`;
 
-    const next_and_tailwind = `<div className="flex items-center gap-2">
-    <Link href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</Link>
-    <Link href='https://uoftwebring.com' target='_blank'>
-        <Image
-            src='https://uoftwebring.com/ring_logo.svg'
-            alt='UofT Webring'
-            height={24}
-            width={24}
-        />
-    </Link>
-    <Link href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</Link>
-</div>`;
-
     const codeStringMap = {
         "HTML & CSS": html,
         "React & Tailwind": react_and_tailwind,
-        "Nextjs & Tailwind": next_and_tailwind,
     };
 
     const action = async () => {

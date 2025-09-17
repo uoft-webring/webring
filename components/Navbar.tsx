@@ -33,13 +33,16 @@ export default function Navbar({
             {user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger className="outline-none focus:outline-none">
-                        <Avatar user={user} className="w-16" verifiedSize="size-6" width={8} height={8} />
+                        <Avatar user={user} className="w-12" verifiedSize="size-6" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="text-md">
                         <Link href="/">
                             <DropdownMenuItem>Home</DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
+                        <Link href="/u/[slug]" as={`/u/${user.subdomain}`}>
+                            <DropdownMenuItem>My Profile</DropdownMenuItem>
+                        </Link>
                         <Link href="/dashboard">
                             <DropdownMenuItem>Dashboard</DropdownMenuItem>
                         </Link>

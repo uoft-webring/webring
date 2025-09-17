@@ -80,19 +80,29 @@ export default async function Home() {
                     </div>
                 </section>
             )}
-            <section className="m-4 ">
-                <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
-                    <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                        View The Directory of UofT Webring Members
-                    </h1>
+            <section className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[30svh]">
+                <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                    Curious to Know Our Mission?{" "}
+                </h1>
 
-                    <Link href="/directory">
-                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
-                            Go to The Directory!
-                        </Button>
-                        <Button className="lg:hidden">Go to The Directory!</Button>
-                    </Link>
-                </div>
+                <Link href="/manifesto">
+                    <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                        Read Our Manifesto
+                    </Button>
+                    <Button className="lg:hidden"> Read Our Manifesto</Button>
+                </Link>
+            </section>
+            <section className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[30svh]">
+                <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                    View The Directory of UofT Webring Members
+                </h1>
+
+                <Link href="/directory">
+                    <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                        Go to The Directory!
+                    </Button>
+                    <Button className="lg:hidden">Go to The Directory!</Button>
+                </Link>
             </section>
             <footer className="max-w-[85rem] mx-auto w-full px-6 py-4 flex justify-between items-center">
                 &copy; {new Date().getFullYear()} | UofT Webring
