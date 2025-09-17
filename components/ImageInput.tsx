@@ -10,6 +10,11 @@ import { z } from "zod";
 import { saveCroppedImaged } from "@/app/dashboard/edit/actions";
 import { User } from "@/utils/zod";
 
+type CheckImageDimensionReturn = {
+    success: boolean;
+    image: string | ArrayBuffer | null | undefined;
+};
+
 /*
  * Checks if an uploaded image fulfills dimension requirements
  *
@@ -21,17 +26,9 @@ import { User } from "@/utils/zod";
  * @returns success status for image dimension check and "reason" for checkImageDimension
  *          to fail, or empty string if check is successful
  */
-type CheckImageDimensionReturn = {
-    reason: string;
-    success: boolean;
-    image: string | ArrayBuffer | null | undefined;
-};
 function checkImageDimensions(
     file: Blob,
-    minWidth: number,
-    minHeight: number,
-    maxWidth: number,
-    maxHeight: number
+    maxDimensionRatio: number
 ): Promise<CheckImageDimensionReturn> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -39,16 +36,14 @@ function checkImageDimensions(
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const isMaxWithinLimits = img.width < maxWidth && img.height < maxHeight;
-                const isMinWithinLimits = img.width >= minWidth && img.height >= minHeight;
-                if (!isMinWithinLimits) {
-                    resolve({ reason: "min", success: false, image: e.target?.result });
+                const dimensionRatio = Math.max(img.width, img.height) / Math.min(img.width, img.height);
+
+                if (dimensionRatio > maxDimensionRatio)
+                {
+                    resolve({ success: false, image: e.target?.result})
                 }
-                if (!isMaxWithinLimits) {
-                    resolve({ reason: "max", success: false, image: e.target?.result });
-                }
-                // console.log("within limits", isWithinLimits);
-                resolve({ reason: "", success: true, image: null }); // resolve returns value for Promise
+
+                resolve({ success: true, image: null }); // resolve returns value for Promise
             };
             img.onerror = () => {
                 reject(new Error("Failed to load image."));
@@ -79,14 +74,11 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     const imageRef = useRef(null);
 
     const saveImage = async (imageSrc: string, completedCrop: PixelCrop | undefined) => {
-        console.log("subbed form", imageSrc);
-        console.log("complete crop", completedCrop);
-
         // Null check for imageRef
         if (imageRef.current === null) {
             setErrors({
                 ...errors,
-                image_url: `Unexpected image upload error`,
+                image_key: `Unexpected image upload error`,
             });
             return;
         }
@@ -94,11 +86,9 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         const image: HTMLImageElement = imageRef.current;
         const scaleX = image.naturalWidth / image.width;
         const scaleY = image.naturalHeight / image.height;
-        console.log("natural dimensions", image.naturalWidth, image.naturalHeight);
         const croppedImage = await saveCroppedImaged(imageSrc, completedCrop!, scaleX, scaleY);
-        console.log(croppedImage);
         saveToForm({
-            image_url: croppedImage,
+            image_key: croppedImage,
         });
         setOpen(false);
     };
@@ -106,7 +96,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setErrors({
             ...errors,
-            image_url: "",
+            image_key: "",
         });
 
         // Check if an image is uploaded
@@ -119,31 +109,24 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
+                    image_key: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
                 });
             }
 
             // Enforce image dimensions
-            const minAllowedImageDimensions = 100;
-            const maxAllowedImageDimensions = 2048;
+            const maxDimensionRatio = 2.3;
 
             // Check if image uploaded passes image dimension check
-            const { reason, success } = await checkImageDimensions(
+            const { success } = await checkImageDimensions(
                 e.target.files[0],
-                minAllowedImageDimensions,
-                minAllowedImageDimensions,
-                maxAllowedImageDimensions,
-                maxAllowedImageDimensions
+                maxDimensionRatio
             );
 
             if (!success) {
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url:
-                        reason === "min"
-                            ? `Min image width and height ${minAllowedImageDimensions}`
-                            : `Max image width and height ${maxAllowedImageDimensions}`,
+                    image_key: "Image exceeded allowed dimensions"
                 });
             }
 
@@ -160,8 +143,6 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
             });
 
             reader.readAsDataURL(e.target.files[0]);
-
-            console.log("user uploaded image", e.target.value);
             setOpen(true);
         }
     };
@@ -170,13 +151,13 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         <Dialog open={open}>
             <DialogTrigger asChild>
                 <Input
-                    name="image_url"
+                    name="image_key"
                     type="file"
                     accept="image/*"
                     required
                     onChange={handleOnChange}
                     className="hover:bg-input/50"
-                    error={errors.image_url}
+                    error={errors.image_key}
                 />
             </DialogTrigger>
             <DialogContent showCloseButton={false} className="">
