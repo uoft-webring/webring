@@ -6,7 +6,7 @@ import { PostgrestError } from "@supabase/supabase-js";
 import { UserType } from "@/utils/zod";
 
 const PROFILE_COLUMNS =
-    "ring_id, tagline, domain, name, validated_user_component, github_url, image_key, is_verified, tags, graduation_year, program, slug";
+    "ring_id, tagline, domain, name, validated_user_component, github_url, image_url, is_verified, tags, graduation_year, program, subdomain";
 
 // Generic response type for uniform handling
 export type ApiResponse<T> = { data: T; error: null } | { data: null; error: string };
@@ -70,10 +70,10 @@ export const getAuthUserProfile = async (): Promise<GetAuthUserProfileResponse> 
 };
 
 /**
- * Fetches a single user profile by its associated `slug`.
+ * Fetches a single user profile by its associated `subdomain` slug.
  * Intended for server use, as it bypasses Row Level Security (RLS) using an admin client.
  *
- * @param {string} slug - The `slug` identifier corresponding to the user profile.
+ * @param {string} slug - The `subdomain` identifier corresponding to the user profile.
  * @returns {Promise<GetUserProfileResponse>}
  * An object containing the matching user profile in `data` if found,
  * or an error message in `error` if the profile is not found or the query fails.
@@ -84,7 +84,7 @@ export const getUserProfile = async (slug: string): Promise<GetUserProfileRespon
     const { data, error } = await supabase
         .from("profile")
         .select(PROFILE_COLUMNS)
-        .eq("slug", slug)
+        .eq("subdomain", slug)
         .single();
 
     if (error) {

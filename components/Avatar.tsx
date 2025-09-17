@@ -15,8 +15,8 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
     return (
         <div className="relative">
             <FallbackImage
-                key={user.image_key + user.ring_id}
-                src={user.image_key}
+                key={user.image_url + user.ring_id}
+                src={user.image_url}
                 seed={user.ring_id}
                 alt={`${user.name}'s profile picture`}
                 className={cn(

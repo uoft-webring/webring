@@ -20,7 +20,7 @@ export const saveData = async (formData: UserType) => {
             .update({
                 name: formData.name,
                 github_url: formData.github_url,
-                image_key: formData.image_key,
+                image_url: formData.image_url,
                 is_verified: formData.is_verified,
                 tagline: formData.tagline,
                 tags: formData.tags,

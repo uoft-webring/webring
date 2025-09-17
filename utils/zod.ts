@@ -53,7 +53,7 @@ export const User = z.object({
             { message: "Invalid host format in URL." }
         )
         .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
-    image_key: z.string().url({ message: "Please enter a valid URL." }).or(z.literal("")),
+    image_url: z.string().url({ message: "Please enter a valid URL." }).or(z.literal("")),
     is_verified: z.boolean(),
     validated_user_component: z.string(),
     github_url: z.string().nullable(),
@@ -72,15 +72,15 @@ export const User = z.object({
         .max(60, { message: "Program name must be at most 60 characters." })
         .regex(/^[a-zA-Z0-9\s&(),.-]+$/, { message: "Program name contains invalid characters." })
         .nullable(),
-    slug: z
+    subdomain: z
         .string()
-        .min(2, { message: "Slug must be at least 2 characters." })
-        .max(30, { message: "Slug must be at most 30 characters." })
+        .min(2, { message: "Subdomain must be at least 2 characters." })
+        .max(30, { message: "Subdomain must be at most 30 characters." })
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-            message: "Slug can only contain lowercase letters, numbers, and hyphens.",
+            message: "Subdomain can only contain lowercase letters, numbers, and hyphens.",
         })
         .refine((val) => !val.startsWith("-") && !val.endsWith("-"), {
-            message: "Slug cannot start or end with a hyphen.",
+            message: "Subdomain cannot start or end with a hyphen.",
         })
         .nullable(),
 });
