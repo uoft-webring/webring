@@ -1,5 +1,5 @@
+"use client";
 import Image from "next/image";
-import FallbackImage from "./FallbackImage";
 import verifiedIcon from "@/icons/verified.svg";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
@@ -10,24 +10,57 @@ type AvatarProps = {
     width?: number;
     height?: number;
 };
+import { useMemo } from "react";
+import { createAvatar } from "@dicebear/core";
+import { personas } from "@dicebear/collection";
 
 export default function Avatar({ user, className, verifiedSize = "size-9", width, height }: AvatarProps) {
+    const key = user.image_url + user.ring_id;
+    // We assume that if a user.image_url doesn't exist then we have to switch to a fallback, otherwise it's valid
+
+    const src = user.image_url
+        ? "https://" + process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN + "/" + user.image_url
+        : null;
+    console.log("[Avatar} This is the CF src: " + src);
+    const seed = user.ring_id;
+    const alt = `${user.name}'s profile picture`;
+
+    const avatarDataUri = useMemo(() => {
+        return createAvatar(personas, {
+            size: 128,
+            seed: seed.toString(),
+        }).toDataUri();
+    }, [src]);
+
+    console.log("[Avatar] Rendering image for ringId:", seed, "with src:", src);
+    const classList = cn(
+        "aspect-square object-cover pointer-events-none select-none rounded-full",
+        className
+    );
+
     return (
         <div className="relative">
-            {/*  <FallbackImage
-                key={user.image_url + user.ring_id}
-                src={user.image_url}
-                seed={user.ring_id}
-                alt={`${user.name}'s profile picture`}
-                className={cn(
-                    "rounded-full w-20",
-                    user.is_verified && "border-4 border-card outline outline-white",
-                    className
-                )}
-                width={width}
-                height={height}
-            /> */}
-
+            {src ? (
+                <Image
+                    alt={alt || "Avatar"}
+                    src={src}
+                    width={width || 100}
+                    height={height || 100}
+                    draggable={false}
+                    className={classList}
+                />
+            ) : (
+                <Image
+                    draggable={false}
+                    priority={false}
+                    fetchPriority="low"
+                    width="50"
+                    height="50"
+                    src={avatarDataUri}
+                    alt={alt || "Avatar"}
+                    className={classList}
+                />
+            )}
             {user.is_verified && (
                 <Image
                     src={verifiedIcon}

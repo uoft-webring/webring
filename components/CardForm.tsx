@@ -18,7 +18,7 @@ export default function CardForm({
                             {cardTitle && (
                                 <CardTitle>
                                     {/* For semanticity */}
-                                    <h1 className="leading-normal text-2xl p-0 m-0">{cardTitle}</h1>
+                                    <h1 className="leading-normal text-3xl p-0 m-0">{cardTitle}</h1>
                                 </CardTitle>
                             )}
                             {cardDescription && (

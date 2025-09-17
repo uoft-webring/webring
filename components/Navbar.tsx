@@ -33,7 +33,7 @@ export default function Navbar({
             {user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger className="outline-none focus:outline-none">
-                        <Avatar user={user} className="w-16" verifiedSize="size-6" width={8} height={8} />
+                        <Avatar user={user} className="w-12" verifiedSize="size-6" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="text-md">
                         <Link href="/">
