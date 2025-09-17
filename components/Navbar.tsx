@@ -40,7 +40,7 @@ export default function Navbar({
                             <DropdownMenuItem>Home</DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <Link href="/u/[slug]" as={`/u/${user.subdomain}`}>
+                        <Link href="/u/[slug]" as={`/u/${user.slug}`}>
                             <DropdownMenuItem>My Profile</DropdownMenuItem>
                         </Link>
                         <Link href="/dashboard">

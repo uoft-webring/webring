@@ -10,11 +10,11 @@ async function getPublicUserSlugs(): Promise<PublicProfile[]> {
     const res = await getAllUserProfiles();
     const rows: SafeUserType[] = res?.data ?? [];
 
-    // subdomain is unique - just need to filter out any user's without it and format the slug
+    // slug is unique - just need to filter out any user's without it and format the slug
     return rows
-        .filter((u) => u?.subdomain)
+        .filter((u) => u?.slug)
         .map((u) => {
-            const slug = String(u.subdomain).trim().toLowerCase();
+            const slug = String(u.slug).trim().toLowerCase();
             return { slug };
         });
 }

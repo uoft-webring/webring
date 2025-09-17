@@ -9,13 +9,13 @@ create table public.profile (
     ring_id serial, -- id to identify user domain on the webring
     validated_user_component validation_state default 'disconnected', -- check if user domain is "valid", contains either "disconnected", "pending" or "connected"
     tagline text default '',
-    image_url text default '',
+    image_key text default '',
     is_verified boolean default false,
     github_url text default '',
     tags text[3] default array[]::text[],
     graduation_year int,
     program text,
-    subdomain text
+    slug text
 );
 comment on table public.profile is 'Table to store user data';
 

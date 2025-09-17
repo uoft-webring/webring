@@ -20,21 +20,21 @@ export const saveData = async (formData: UserType) => {
             .update({
                 name: formData.name,
                 github_url: formData.github_url,
-                image_url: formData.image_url,
+                image_key: formData.image_key,
                 is_verified: formData.is_verified,
                 tagline: formData.tagline,
                 tags: formData.tags,
                 domain: formData.domain,
                 program: formData.program,
                 graduation_year: formData.graduation_year,
-                subdomain: formData.subdomain,
+                slug: formData.slug,
             })
             .eq("id", formData.id);
 
         if (!result.error) {
             revalidatePath("/");
         }
-        // TODO make subdomain unique and check for violations
+        // TODO make slug unique and check for violations
         return result;
     } catch (e: any) {
         return { error: "Network error" };

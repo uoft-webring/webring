@@ -59,7 +59,7 @@ export const User = z.object({
             { message: "Invalid host format in URL." }
         )
         .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
-    image_url: z
+    image_key: z
         .string()
         .regex(/^[a-zA-Z0-9_-]+\.avif$/, {
             message: "Must be an .avif file.",
@@ -83,15 +83,15 @@ export const User = z.object({
         .max(60, { message: "Program name must be at most 60 characters." })
         .regex(/^[a-zA-Z0-9\s&(),.-]+$/, { message: "Program name contains invalid characters." })
         .nullable(),
-    subdomain: z
+    slug: z
         .string()
-        .min(2, { message: "Subdomain must be at least 2 characters." })
-        .max(50, { message: "Subdomain must be at most 30 characters." })
+        .min(2, { message: "Slug must be at least 2 characters." })
+        .max(50, { message: "Slug must be at most 30 characters." })
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
-            message: "Subdomain can only contain lowercase letters, numbers, and hyphens.",
+            message: "Slug can only contain lowercase letters, numbers, and hyphens.",
         })
         .refine((val) => !val.startsWith("-") && !val.endsWith("-"), {
-            message: "Subdomain cannot start or end with a hyphen.",
+            message: "Slug cannot start or end with a hyphen.",
         }),
 });
 

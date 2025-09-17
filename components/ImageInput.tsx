@@ -22,33 +22,24 @@ import { User } from "@/utils/zod";
  *          to fail, or empty string if check is successful
  */
 type CheckImageDimensionReturn = {
-    reason: string;
     success: boolean;
     image: string | ArrayBuffer | null | undefined;
 };
-function checkImageDimensions(
-    file: Blob,
-    minWidth: number,
-    minHeight: number,
-    maxWidth: number,
-    maxHeight: number
-): Promise<CheckImageDimensionReturn> {
+function checkImageDimensions(file: Blob, maxDimensionRatio: number): Promise<CheckImageDimensionReturn> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
 
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const isMaxWithinLimits = img.width < maxWidth && img.height < maxHeight;
-                const isMinWithinLimits = img.width >= minWidth && img.height >= minHeight;
-                if (!isMinWithinLimits) {
-                    resolve({ reason: "min", success: false, image: e.target?.result });
+                const dimensionRatio = Math.max(img.width, img.height) / Math.min(img.width, img.height);
+
+                if (dimensionRatio > maxDimensionRatio) {
+                    resolve({ success: false, image: e.target?.result });
                 }
-                if (!isMaxWithinLimits) {
-                    resolve({ reason: "max", success: false, image: e.target?.result });
-                }
+
                 // console.log("within limits", isWithinLimits);
-                resolve({ reason: "", success: true, image: null }); // resolve returns value for Promise
+                resolve({ success: true, image: null }); // resolve returns value for Promise
             };
             img.onerror = () => {
                 reject(new Error("Failed to load image."));
@@ -86,7 +77,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         if (imageRef.current === null) {
             setErrors({
                 ...errors,
-                image_url: `Unexpected image upload error`,
+                image_key: `Unexpected image upload error`,
             });
             return;
         }
@@ -99,8 +90,8 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         // When we want to access the image, we prepend the CloudFront URL to it
         // e.g. https://--------.cloudfront.net/{imageAccessKey}
         saveToForm({
-            // TODO: change DB image_url to image_key or something
-            image_url: objectKey,
+            // TODO: change DB image_key to image_key or something
+            image_key: objectKey,
         });
         setOpen(false);
     };
@@ -108,44 +99,34 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     const handleOnChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setErrors({
             ...errors,
-            image_url: "",
+            image_key: "",
         });
 
         // Check if an image is uploaded
         if (e.target.files && e.target.files.length > 0) {
             // Enforce hard cap on image size
-            const maxAllowedMBSize = 5;
+            const maxAllowedMBSize = 1;
             const maxAllowedSize = maxAllowedMBSize * 1024 * 1024;
             // Get file size and compare
             if (e.target.files[0].size > maxAllowedSize) {
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
+                    image_key: `Please upload an image smaller than ${maxAllowedMBSize}MB`,
                 });
             }
 
             // Enforce image dimensions
-            const minAllowedImageDimensions = 100;
-            const maxAllowedImageDimensions = 2048;
+            const maxDimensionRatio = 2.3;
 
             // Check if image uploaded passes image dimension check
-            const { reason, success } = await checkImageDimensions(
-                e.target.files[0],
-                minAllowedImageDimensions,
-                minAllowedImageDimensions,
-                maxAllowedImageDimensions,
-                maxAllowedImageDimensions
-            );
+            const { success } = await checkImageDimensions(e.target.files[0], maxDimensionRatio);
 
             if (!success) {
                 e.target.value = "";
                 setErrors({
                     ...errors,
-                    image_url:
-                        reason === "min"
-                            ? `Min image width and height ${minAllowedImageDimensions}`
-                            : `Max image width and height ${maxAllowedImageDimensions}`,
+                    image_key: "Image uploaded exceeded max image dimensions allowed",
                 });
             }
 
@@ -172,13 +153,13 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         <Dialog open={open}>
             <DialogTrigger asChild>
                 <Input
-                    name="image_url"
+                    name="image_key"
                     type="file"
                     accept="image/*"
                     required
                     onChange={handleOnChange}
                     className="hover:bg-input/50"
-                    error={errors.image_url}
+                    error={errors.image_key}
                 />
             </DialogTrigger>
             <DialogContent showCloseButton={false} className="">
