@@ -32,7 +32,7 @@ export default function SigninForm() {
                     router.push(`/auth/confirm?email=${email}`);
                 }
             } else {
-                setEmailError(emailParseResult.error!.errors[0].message || "");
+                setEmailError(emailParseResult.error!.message || "");
             }
         }
         setIsFormDisabled(false);

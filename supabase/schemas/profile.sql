@@ -15,7 +15,7 @@ create table public.profile (
     tags text[3] default array[]::text[],
     graduation_year int,
     program text,
-    slug text unique
+    slug text
 );
 comment on table public.profile is 'Table to store user data';
 

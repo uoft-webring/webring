@@ -8,11 +8,12 @@ export const signUpAction = async (name: string, email: string) => {
 
     const { data } = await supabase.from("profile").select("*").eq("email", email);
 
-    console.log("data found for user email on signup", data);
+    console.log("data found for user email on signup", data, data?.length);
     if (data?.length) {
         return { error: 1 };
     }
 
+    console.log("hihi got here!");
     const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
