@@ -1,7 +1,7 @@
 "use client";
 
 import ReactCrop, { Crop, PercentCrop, centerCrop, makeAspectCrop, PixelCrop } from "react-image-crop";
-import "react-image-crop/dist/ReactCrop.css"; // IMPORTANT: Needed for styling ReactCrop component
+import "react-image-crop/dist/ReactCrop.css"; // Needed for styling ReactCrop component
 
 function createAspectCrop(
     mediaWidth: number,
@@ -14,7 +14,8 @@ function createAspectCrop(
         return { unit: "%", height: minimumValue };
     }
 }
-
+// This is to demonstate how to make and center a % aspect crop
+// which is a bit trickier so we use some helper functions.
 function centerAspectCrop(
     mediaWidth: number,
     mediaHeight: number,
@@ -47,7 +48,7 @@ export default function ImageCropper({
 
     function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
         const { width, height } = e.currentTarget;
-        console.log("image width, height:", width, height);
+        console.log(width, height);
         setCrop(centerAspectCrop(width, height, ASPECT_RATIO));
     }
 

@@ -173,7 +173,7 @@ export default function EditForm({
                     }}
                     error={errors.github_url}
                 />
-                <Label htmlFor="image_key">Profile picture</Label>
+                <Label htmlFor="image_url">Profile picture</Label>
                 <ImageInput errors={errors} setErrors={setErrors} saveToForm={saveToForm} />
                 <Label htmlFor="tags">Tags</Label>
                 <TagInputComponent
