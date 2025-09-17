@@ -15,7 +15,8 @@ import Link from "next/link";
 import Form from "next/form";
 import ProgramInput from "@/components/ProgramInput";
 import ImageInput from "@/components/ImageInput";
-
+import { Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
     UserKeys,
@@ -104,7 +105,23 @@ export default function EditForm({
                     }}
                     error={errors.name}
                 />
-
+                <Label htmlFor="domain" className="after:content-['*'] after:text-destructive after:ml-1">
+                    Portfolio Link
+                </Label>
+                <Input
+                    name="domain"
+                    type="url"
+                    placeholder="https://yourdomain.com"
+                    required
+                    defaultValue={formData.domain}
+                    onChange={(e) => {
+                        saveToForm({
+                            domain: e.target.value,
+                            is_verified: false,
+                        });
+                    }}
+                    error={errors.domain}
+                />
                 <div className="flex flex-row gap-2 justify-evenly">
                     <div className="flex flex-col gap-2 w-full">
                         <Label
@@ -142,37 +159,54 @@ export default function EditForm({
                         />
                     </div>
                 </div>
-                <Label htmlFor="domain" className="after:content-['*'] after:text-destructive after:ml-1">
-                    Portfolio Link
-                </Label>
-                <Input
-                    name="domain"
-                    type="url"
-                    placeholder="https://yourdomain.com"
-                    required
-                    defaultValue={formData.domain}
-                    onChange={(e) => {
-                        saveToForm({
-                            domain: e.target.value,
-                            is_verified: false,
-                        });
-                    }}
-                    error={errors.domain}
-                />
-                <Label htmlFor="github_url">GitHub Username</Label>
-                <Input
-                    /* Data type is named github_url but it's a username */
-                    name="github_url"
-                    type="text"
-                    placeholder="torvalds"
-                    required
-                    maxLength={39}
-                    defaultValue={formData.github_url ?? ""}
-                    onChange={(e) => {
-                        saveToForm({ github_url: e.target.value });
-                    }}
-                    error={errors.github_url}
-                />
+                <div className="flex flex-row gap-2 justify-evenly">
+                    <div className="flex flex-col gap-2 w-full">
+                        <Label htmlFor="github_url">GitHub Username</Label>
+                        <Input
+                            /* Data type is named github_url but it's a username */
+                            name="github_url"
+                            type="text"
+                            placeholder="torvalds"
+                            required
+                            maxLength={39}
+                            defaultValue={formData.github_url ?? ""}
+                            onChange={(e) => {
+                                saveToForm({ github_url: e.target.value });
+                            }}
+                            error={errors.github_url}
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2 w-full">
+                        {/* TODO: rename subdomain accross everything to slug */}
+                        <Label htmlFor="subdomain" className="flex justify-between">
+                            Slug
+                            <Tooltip>
+                                <TooltipTrigger>
+                                    <Info className="" size={16} />
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>
+                                        This slug is used for your public profile, ex. uoftwebring.com/johndoe
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </Label>
+                        <Input
+                            /* Data type is named github_url but it's a username */
+                            name="subdomain"
+                            type="text"
+                            placeholder="johndoe"
+                            required
+                            maxLength={39}
+                            defaultValue={formData.subdomain ?? ""}
+                            onChange={(e) => {
+                                saveToForm({ subdomain: e.target.value });
+                            }}
+                            error={errors.subdomain}
+                        />
+                    </div>
+                </div>
+
                 <Label htmlFor="image_url">Profile picture</Label>
                 <ImageInput errors={errors} setErrors={setErrors} saveToForm={saveToForm} />
                 <Label htmlFor="tags">Tags</Label>
