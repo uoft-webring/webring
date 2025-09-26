@@ -81,7 +81,7 @@ const SkillTag: React.FC<SkillTagProps> = ({
     return (
         <div
             className={cn(
-                { "flex items-center justify-center": deleteButton },
+                { "flex items-center justify-center mx-1": deleteButton },
                 tagContainerStyles,
                 mapSkillToColor(tagName)
             )} // Apply variant styles and dynamic color

@@ -37,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <div className="min-h-screen bg-background flex flex-col">
                 <Navbar user={userData} />
                 <section className="max-w-[85rem] mx-auto w-full px-6">
-                    <h1 className="mb-4">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
+                    <h1 className="mb-4 capitalize">{`Welcome, ${authUser.user_metadata.name}.`}</h1>
                 </section>
                 <div className="flex flex-col md:flex-row max-w-[85rem] mx-auto w-full flex-1  place-items-start">
                     <Stepper

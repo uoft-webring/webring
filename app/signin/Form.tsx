@@ -39,35 +39,31 @@ export default function SigninForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="grid gap-6">
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            name="email"
-                            ref={emailRef}
-                            type="text"
-                            placeholder="your.email@mail.utoronto.ca"
-                            error={emailError}
-                            disabled={isFormDisabled}
-                            onChange={() => {
-                                if (emailError) {
-                                    setEmailError(undefined);
-                                }
-                            }}
-                        />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isFormDisabled}>
-                        Continue
-                    </Button>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                        name="email"
+                        ref={emailRef}
+                        type="text"
+                        placeholder="your.email@mail.utoronto.ca"
+                        error={emailError}
+                        disabled={isFormDisabled}
+                        onChange={() => emailError && setEmailError(undefined)}
+                    />
                 </div>
-                <div className="text-center text-sm">
-                    New to the ring?{" "}
-                    <Link href="/signup" className="underline underline-offset-4">
-                        Sign up here.
-                    </Link>
-                </div>
+
+                <Button type="submit" className="w-full" disabled={isFormDisabled}>
+                    Continue
+                </Button>
+            </div>
+
+            <div className="text-center text-sm">
+                New to the ring?{" "}
+                <Link href="/signup" className="underline underline-offset-4">
+                    Sign up here.
+                </Link>
             </div>
         </form>
     );

@@ -19,10 +19,6 @@ export default async function Home() {
         console.error("[Home] Error fetching profiles:", ringProfilesError);
         return <p>Error loading profiles.</p>;
     }
-    // if (!userData || userError) {
-    //     console.error("[Home] Error fetching user profile:", userError);
-    //     return redirect("/signup");
-    // }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
@@ -80,33 +76,35 @@ export default async function Home() {
                     </div>
                 </section>
             )}
-            <section className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[30svh]">
-                <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                    Curious to Know Our Mission?{" "}
-                </h1>
+            <section className="py-16 w-full max-w-[85rem] mx-auto text-center flex flex-row flex-wrap items-center justify-between min-h-[40svh]">
+                <div className="flex flex-col flex-1 items-center">
+                    <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                        Curious to Know Our Mission?
+                    </h1>
 
-                <Link href="/manifesto">
-                    <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
-                        Read Our Manifesto
-                    </Button>
-                    <Button className="lg:hidden"> Read Our Manifesto</Button>
-                </Link>
-            </section>
-            <section className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[30svh]">
-                <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                    View The Directory of UofT Webring Members
-                </h1>
+                    <Link href="/manifesto">
+                        <Button className="hidden lg:block text-lg h-12  font-semibold">
+                            Read Our Manifesto
+                        </Button>
+                        <Button className="lg:hidden"> Read Our Manifesto</Button>
+                    </Link>
+                </div>
 
-                <Link href="/directory">
-                    <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
-                        Go to The Directory!
-                    </Button>
-                    <Button className="lg:hidden">Go to The Directory!</Button>
-                </Link>
+                <div className="flex flex-col flex-1 items-center">
+                    <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                        View The Directory of UofT Webring Members
+                    </h1>
+                    <Link href="/directory">
+                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                            Go to The Directory!
+                        </Button>
+                        <Button className="lg:hidden">Go to The Directory!</Button>
+                    </Link>
+                </div>
             </section>
             <footer className="max-w-[85rem] mx-auto w-full px-6 py-4 flex justify-between items-center">
                 &copy; {new Date().getFullYear()} | UofT Webring
-                <Link href={"https://github.com/uoft-webring/webring"}>View on GitHub</Link>
+                <Link href="https://github.com/uoft-webring/webring">View on GitHub</Link>
             </footer>
         </div>
     );

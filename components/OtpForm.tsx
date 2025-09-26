@@ -12,19 +12,12 @@ export default function OtpForm({ email }: { email: string }) {
     const [code, setCode] = useState("");
     const [error, setError] = useState<string | undefined>(undefined);
     const [isPending, startTransition] = useTransition();
-    // const [cooldown, setCooldown] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         // autofocus on load
         inputRef.current?.focus();
     }, []);
-
-    // useEffect(() => {
-    //     if (cooldown <= 0) return;
-    //     const t = setInterval(() => setCooldown((c) => c - 1), 1000);
-    //     return () => clearInterval(t);
-    // });
 
     const handleSubmit = (entered?: string) => {
         const value = (entered ?? code).trim();
