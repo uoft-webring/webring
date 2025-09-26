@@ -1,10 +1,10 @@
+"use client";
 import Loading from "./LoadingComponent";
-import SkillTag from "./SkillTag";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
 import { ExternalLink } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Avatar from "./Avatar";
+import { useRouter } from "next/navigation";
 
 export default function HorizontalProfileCard({
     user,
@@ -16,89 +16,53 @@ export default function HorizontalProfileCard({
     if (!user) return <Loading />;
 
     const hostname = user.domain?.replace(/^https?:\/\/(www\.)?/i, "");
+    const router = useRouter();
 
     return (
-        <Accordion
-            type="single"
-            collapsible
+        <div
+            onClick={() => {
+                router.push(`/u/${user.slug}`);
+            }}
             className={cn(
-                "w-full z-50 bg-card rounded-xl shadow-md p-6 flex flex-row flex-wrap items-center justify-between gap-4 h-fit border",
+                "w-full z-50 bg-card cursor-pointer hover:underline rounded-xl shadow-md p-6 flex flex-row flex-wrap items-center justify-between gap-4 h-fit border",
                 className
             )}
         >
-            <AccordionItem value={String(user.ring_id)} className="w-full">
-                <AccordionTrigger className="flex flex-row gap-6 w-full">
-                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full justify-between">
-                        <div className="flex flex-row gap-6 items-center flex-wrap ">
-                            <Avatar user={user} className="w-20 h-20" />
+            <div className="flex flex-row gap-6 items-center flex-wrap ">
+                <Avatar user={user} className="w-20 h-20" />
 
-                            <div className="text-left">
-                                <h2 className="font-semibold [font-size:clamp(1.5rem,2vw+1rem,2.25rem)]">
-                                    {user.name}
-                                </h2>
-                                {user.graduation_year && user.program && (
-                                    <p className="[font-size:clamp(0.875rem,1vw+0.5rem,1rem)]">
-                                        {user.program} • {user.graduation_year}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Right side: buttons */}
-                        <div className="hidden sm:flex sm:flex-col flex-row gap-2 sm:gap-4 sm:items-center">
-                            {user.domain && (
-                                <LinkButton
-                                    url={user.domain}
-                                    text={hostname ?? user.domain}
-                                    shortText="Portfolio"
-                                    aria-label={`Open ${user.name}'s website`}
-                                />
-                            )}
-                            {user.github_url && (
-                                <LinkButton
-                                    url={`https://github.com/${user.github_url}`}
-                                    text={user.github_url}
-                                    shortText="GitHub"
-                                    aria-label={`Open ${user.name}'s GitHub`}
-                                />
-                            )}
-                        </div>
-                    </div>
-                </AccordionTrigger>
-
-                <AccordionContent className="flex flex-col gap-6">
-                    {user.tagline && (
-                        <p className="text-pretty [font-size:clamp(0.875rem,1vw+0.5rem,1rem)]">
-                            {user.tagline}
+                <div className="text-left">
+                    <h2 className="font-semibold capitalize [font-size:clamp(1.5rem,2vw+1rem,2.25rem)]">
+                        {user.name}
+                    </h2>
+                    {user.graduation_year && user.program && (
+                        <p className="[font-size:clamp(0.875rem,1vw+0.5rem,1rem)]">
+                            {user.program} • {user.graduation_year}
                         </p>
                     )}
+                </div>
+            </div>
 
-                    <div className="flex flex-row gap-2">
-                        {user.tags?.map((tagName: string) => (
-                            <SkillTag key={tagName} tagName={tagName} />
-                        ))}
-                    </div>
-                    <div className="flex flex-row w-full m-0 sm:hidden gap-6">
-                        {user.domain && (
-                            <LinkButton
-                                url={user.domain}
-                                text={hostname ?? user.domain}
-                                shortText="Portfolio"
-                                aria-label={`Open ${user.name}'s website`}
-                            />
-                        )}
-                        {user.github_url && (
-                            <LinkButton
-                                url={`https://github.com/${user.github_url}`}
-                                text={user.github_url}
-                                shortText="GitHub"
-                                aria-label={`Open ${user.name}'s GitHub`}
-                            />
-                        )}
-                    </div>
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
+            {/* Right side: buttons */}
+            <div className="hidden sm:flex sm:flex-col flex-row gap-2 sm:gap-4 sm:items-center">
+                {user.domain && (
+                    <LinkButton
+                        url={user.domain}
+                        text={hostname ?? user.domain}
+                        shortText="Portfolio"
+                        aria-label={`Open ${user.name}'s website`}
+                    />
+                )}
+                {user.github_url && (
+                    <LinkButton
+                        url={`https://github.com/${user.github_url}`}
+                        text={user.github_url}
+                        shortText="GitHub"
+                        aria-label={`Open ${user.name}'s GitHub`}
+                    />
+                )}
+            </div>
+        </div>
     );
 }
 
