@@ -12,6 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Avatar from "./Avatar";
+import { BookOpenText, Contact, Home, LayoutDashboard, LogOut, User } from "lucide-react";
 
 export default function Navbar({
     user,
@@ -35,19 +36,44 @@ export default function Navbar({
                     <DropdownMenuTrigger className="outline-none focus:outline-none">
                         <Avatar user={user} className="w-12" verifiedSize="size-6" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="text-md">
+                    <DropdownMenuContent className="text-md rounded-xl">
                         <Link href="/">
-                            <DropdownMenuItem>Home</DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Home className="mr-2 h-4 w-4" />
+                                Home
+                            </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
+                        <Link href="/dashboard" prefetch={true}>
+                            <DropdownMenuItem>
+                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                Dashboard
+                            </DropdownMenuItem>
+                        </Link>
                         <Link href="/u/[slug]" as={`/u/${user.slug}`}>
-                            <DropdownMenuItem>My Profile</DropdownMenuItem>
-                        </Link>
-                        <Link href="/dashboard">
-                            <DropdownMenuItem>Dashboard</DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <User className="mr-2 h-4 w-4" />
+                                Profile
+                            </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={signOutAction}>Sign out</DropdownMenuItem>
+                        <Link href="/directory" prefetch={false}>
+                            <DropdownMenuItem>
+                                <Contact className="mr-2 h-4 w-4" />
+                                Directory
+                            </DropdownMenuItem>
+                        </Link>
+                        <Link href="/manifesto">
+                            <DropdownMenuItem>
+                                <BookOpenText className="mr-2 h-4 w-4" />
+                                Manifesto
+                            </DropdownMenuItem>
+                        </Link>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={signOutAction}>
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Sign Out
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
