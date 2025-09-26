@@ -24,22 +24,22 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "min-w-[18rem] w-[20rem] md:w-[22rem] lg:w-[26.5rem] max-w-md mx-auto mt-6 bg-card rounded-2xl shadow-lg p-6 flex flex-col items-center gap-4 h-[40rem] min-h-fit sm:h-[32rem] border transition hover:shadow-xl",
+                "bg-card mx-auto mt-6 flex h-[40rem] min-h-fit w-[20rem] max-w-md min-w-[18rem] flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl sm:h-[32rem] md:w-[22rem] lg:w-[26.5rem]",
                 className
             )}
         >
-            <Avatar user={user} className="w-26 h-26 ring-primary/20 rounded-full" />
+            <Avatar user={user} className="ring-primary/20 h-26 w-26 rounded-full" />
 
-            <h2 className="text-2xl font-bold capitalize text-center">{user.name}</h2>
+            <h2 className="text-center text-2xl font-bold capitalize">{user.name}</h2>
 
-            <div className="flex flex-wrap gap-2 text-muted-foreground text-sm justify-center">
+            <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
                 {user.program && <span>{user.program}</span>}
                 {user.program && user.graduation_year && <p>·</p>}
                 {user.graduation_year && <span>{user.graduation_year}</span>}
             </div>
 
             {!!user.tags?.length && (
-                <div className="flex flex-row flex-wrap gap-2 justify-center">
+                <div className="flex flex-row flex-wrap justify-center gap-2">
                     {user.tags.map((tagName: string) => (
                         <SkillTag key={tagName} tagName={tagName} />
                     ))}
@@ -47,18 +47,18 @@ export default function ProfileCard({
             )}
 
             {user.tagline && (
-                <p className="text-center text-sm text-muted-foreground flex-1 px-4 text-pretty normal-case break-all hyphens-auto ">
+                <p className="text-muted-foreground flex-1 px-4 text-center text-sm text-pretty break-all hyphens-auto normal-case">
                     {user.tagline}
                 </p>
             )}
 
-            <div className="flex flex-row flex-wrap justify-center gap-4 items-center mb-2">
+            <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
                 {user.github_url && (
                     <a
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        className="flex items-center px-3 py-2.5 rounded-full bg-popover hover:bg-secondary/80 text-sm transition"
+                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={gitHubIcon}
@@ -77,7 +77,7 @@ export default function ProfileCard({
                         href={user.domain}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        className="flex items-center px-3 py-2.5 rounded-full bg-popover hover:bg-secondary/80 text-sm transition"
+                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={portfolioIcon}

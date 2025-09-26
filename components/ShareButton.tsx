@@ -36,7 +36,7 @@ export default function ShareButton({ title, url }: { title: string; url: string
         <Button
             onClick={handleShare}
             type="button"
-            className="flex items-center px-3 py-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary/50 flex items-center rounded-full px-3 py-2.5 text-sm transition focus:ring-2 focus:outline-none"
         >
             <Share2 className="mr-2 h-4 w-4" />
             Share

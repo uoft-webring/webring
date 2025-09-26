@@ -18,7 +18,7 @@ export default function Edit() {
     return (
         <>
             <Tabs defaultValue="edit" className="w-full lg:hidden">
-                <TabsList className="grid w-full grid-cols-2 mb-2">
+                <TabsList className="mb-2 grid w-full grid-cols-2">
                     <TabsTrigger value="edit">Edit</TabsTrigger>
                     <TabsTrigger value="preview">Preview</TabsTrigger>
                 </TabsList>
@@ -33,7 +33,7 @@ export default function Edit() {
                     <ProfileCard user={data} />
                 </TabsContent>
             </Tabs>
-            <section className="hidden lg:flex items-start justify-center gap-12 [&>*]:grow [&>*]:shrink [&>*]:basis-0">
+            <section className="hidden items-start justify-center gap-12 lg:flex [&>*]:shrink [&>*]:grow [&>*]:basis-0">
                 <div>
                     <h2>Edit your profile</h2>
                     <p className="mb-6 lg:text-base">
@@ -41,7 +41,7 @@ export default function Edit() {
                     </p>
                     <EditForm formData={data} setFormDataAction={setData} />
                 </div>
-                <div className="flex flex-col justify-left items-start h-full">
+                <div className="justify-left flex h-full flex-col items-start">
                     <h2>Preview</h2>
                     <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
                     <ProfileCard user={data} className="m-0" />

@@ -103,7 +103,7 @@ export default function RootLayout({
     };
     return (
         <html lang="en" className={oxanium.variable}>
-            <body className="scroll-smooth dark antialiased">
+            <body className="dark scroll-smooth antialiased">
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{

@@ -72,7 +72,7 @@ export default function OtpForm({ email }: { email: string }) {
                     </InputOTPGroup>
                 </InputOTP>
 
-                <div className="flex mt-4 gap-4">
+                <div className="mt-4 flex gap-4">
                     <div className="flex-1">
                         <Link href="/signin" className="block">
                             <Button variant="outline" className="w-full" disabled={isPending}>

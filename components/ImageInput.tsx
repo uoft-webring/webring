@@ -246,7 +246,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     aria-invalid={!!errors.image_key}
                 />
                 {errors.image_key ? (
-                    <p role="alert" className="text-sm text-destructive mt-1" aria-live="polite">
+                    <p role="alert" className="text-destructive mt-1 text-sm" aria-live="polite">
                         {errors.image_key}
                     </p>
                 ) : null}
@@ -262,17 +262,17 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                 }}
             >
                 <DialogContent showCloseButton={true} className="max-img.width-3xl">
-                    <div className="space-y-4 flex flex-col">
+                    <div className="flex flex-col space-y-4">
                         <DialogHeader className="flex flex-col justify-center text-center">
                             <DialogTitle
-                                className="text-lg font-medium text-center"
+                                className="text-center text-lg font-medium"
                                 aria-describedby="dialog-description"
                             >
                                 Crop image {selectedFileName ? `— ${selectedFileName}` : ""}
                             </DialogTitle>
                             <DialogDescription
                                 id="dialog-description"
-                                className="text-sm text-muted-foreground text-center"
+                                className="text-muted-foreground text-center text-sm"
                             >
                                 Drag to select crop area.
                             </DialogDescription>
@@ -289,7 +289,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                             <p>No image selected.</p>
                         )}
 
-                        <DialogFooter className="flex justify-around items-center">
+                        <DialogFooter className="flex items-center justify-around">
                             <Button
                                 variant="destructive"
                                 onClick={() => {

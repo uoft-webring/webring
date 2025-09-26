@@ -13,14 +13,14 @@ export default function Filter({
     const ANY = "__any__";
 
     return (
-        <div className="flex flex-col gap-1 h-full">
-            <span className="text-sm text-muted-foreground">{label}</span>
+        <div className="flex h-full flex-col gap-1">
+            <span className="text-muted-foreground text-sm">{label}</span>
             <Select value={value ?? ANY} onValueChange={(val) => onChange(val === ANY ? null : val)}>
-                <SelectTrigger className="bg-card rounded-xl w-full !h-10">
+                <SelectTrigger className="bg-card !h-10 w-full rounded-xl">
                     <SelectValue placeholder="(Any)" />
                 </SelectTrigger>
 
-                <SelectContent className="text-md rounded-xl bg-card">
+                <SelectContent className="text-md bg-card rounded-xl">
                     <SelectItem value={ANY}>(Any)</SelectItem>
                     {options.map((opt) => (
                         <SelectItem key={opt} value={opt} className="hover:bg-accent rounded-xl px-2">

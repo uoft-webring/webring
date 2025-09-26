@@ -24,15 +24,15 @@ export default function HorizontalProfileCard({
                 router.push(`/u/${user.slug}`);
             }}
             className={cn(
-                "w-full z-50 bg-card cursor-pointer hover:underline rounded-xl shadow-md p-6 flex flex-row flex-wrap items-center justify-between gap-4 h-fit border",
+                "bg-card z-50 flex h-fit w-full cursor-pointer flex-row flex-wrap items-center justify-between gap-4 rounded-xl border p-6 shadow-md hover:underline",
                 className
             )}
         >
-            <div className="flex flex-row gap-6 items-center flex-wrap ">
-                <Avatar user={user} className="w-20 h-20" />
+            <div className="flex flex-row flex-wrap items-center gap-6">
+                <Avatar user={user} className="h-20 w-20" />
 
                 <div className="text-left">
-                    <h2 className="font-semibold capitalize [font-size:clamp(1.5rem,2vw+1rem,2.25rem)]">
+                    <h2 className="[font-size:clamp(1.5rem,2vw+1rem,2.25rem)] font-semibold capitalize">
                         {user.name}
                     </h2>
                     {user.graduation_year && user.program && (
@@ -44,7 +44,7 @@ export default function HorizontalProfileCard({
             </div>
 
             {/* Right side: buttons */}
-            <div className="hidden sm:flex sm:flex-col flex-row gap-2 sm:gap-4 sm:items-center">
+            <div className="hidden flex-row gap-2 sm:flex sm:flex-col sm:items-center sm:gap-4">
                 {user.domain && (
                     <LinkButton
                         url={user.domain}
@@ -83,13 +83,13 @@ export function LinkButton({
             target="_blank"
             rel="noopener noreferrer nofollow"
             className={cn(
-                "w-max text-lg p-0",
+                "w-max p-0 text-lg",
                 className,
                 "text-primary underline-offset-4 hover:underline sm:hover:no-underline",
                 "flex flex-row items-center justify-center gap-2"
             )}
         >
-            <span className="sm:hidden capitalize">{shortText}</span>
+            <span className="capitalize sm:hidden">{shortText}</span>
             <span className="hidden sm:inline">{label}</span>
             <ExternalLink aria-hidden />
         </a>

@@ -29,7 +29,7 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
     return (
         <div
             className={cn(
-                "relative max-w-svw w-full flex flex-col items-center justify-center mb-8 transition-all",
+                "relative mb-8 flex w-full max-w-svw flex-col items-center justify-center transition-all",
                 { "h-[calc(100svh-6rem)]": fullSize },
                 { "h-[calc(100svh-36rem)]": !fullSize }
             )}
@@ -39,9 +39,9 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
             <Canvas gl={{ antialias: true, alpha: true }} className="h-full w-full">
                 <Scene data={data} />
             </Canvas>
-            <div className="max-h-fit w-full items-center justify-center flex flex-col mt-2">
+            <div className="mt-2 flex max-h-fit w-full flex-col items-center justify-center">
                 <Button
-                    className="sm:px-6 px-8 rounded-xl py-2"
+                    className="rounded-xl px-8 py-2 sm:px-6"
                     size="icon"
                     variant="outline"
                     onClick={toggleSize}

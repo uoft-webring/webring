@@ -29,7 +29,7 @@ export default async function ManifestoLayout({ children }: { children: React.Re
     const { data: userData } = await getAuthUserProfile();
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="bg-background flex min-h-screen flex-col">
             <Navbar user={userData} />
             {children}
         </div>

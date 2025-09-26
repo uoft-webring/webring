@@ -8,5 +8,6 @@
     "endOfLine": "lf",
     "printWidth": 110,
     "proseWrap": "preserve",
-    "htmlWhitespaceSensitivity": "css"
+    "htmlWhitespaceSensitivity": "css",
+    "plugins": ["prettier-plugin-tailwindcss"]
 }

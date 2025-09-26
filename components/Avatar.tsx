@@ -37,7 +37,7 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
     );
 
     return (
-        <div className="relative ring-2 rounded-full aspect-square object-cover">
+        <div className="relative aspect-square rounded-full object-cover ring-2">
             {src ? (
                 <img
                     alt={alt || "Avatar"}

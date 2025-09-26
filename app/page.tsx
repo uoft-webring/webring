@@ -21,32 +21,32 @@ export default async function Home() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="bg-background flex min-h-screen flex-col">
             <Navbar user={userData} />
             <div className="overflow-clip">
                 <WebRing data={ringProfiles} />
-                <div className="px-4 w-full">
-                    <div className="w-full flex flex-row justify-center items-center">
-                        <h2 className="w-min text-xl text-center sm:text-3xl md:text-3xl lg:text-4xl">
+                <div className="w-full px-4">
+                    <div className="flex w-full flex-row items-center justify-center">
+                        <h2 className="w-min text-center text-xl sm:text-3xl md:text-3xl lg:text-4xl">
                             Preview
                         </h2>
                         <h3>
                             <Link
                                 href="/directory"
-                                className="text-md ml-2 text-center text-primary hover:underline"
+                                className="text-md text-primary ml-2 text-center hover:underline"
                             >
                                 (or view the full directory)
                             </Link>
                         </h3>
                     </div>
 
-                    <div className="max-w-[85rem] mx-auto overflow-clip items-center">
+                    <div className="mx-auto max-w-[85rem] items-center overflow-clip">
                         {ringProfiles ? <ProfileCarousel data={ringProfiles} /> : <p>No data</p>}
                     </div>
                 </div>
             </div>
 
-            <section className="py-12 max-w-[85rem] mx-auto">
+            <section className="mx-auto max-w-[85rem] py-12">
                 <ScrollText
                     content={[
                         "We're bringing our digital portfolios together into a single, connected ecosystem.",
@@ -56,9 +56,9 @@ export default async function Home() {
                 />
             </section>
             {!userData && (
-                <section className="m-4 bg-card">
-                    <div className="p-6 w-full max-w-[85rem] mx-auto [&>*]:text-center flex flex-col items-center justify-center min-h-[60svh]">
-                        <p className="mb-1 uppercase text-white/40 md:text-xl">guess what</p>
+                <section className="bg-card m-4">
+                    <div className="mx-auto flex min-h-[60svh] w-full max-w-[85rem] flex-col items-center justify-center p-6 [&>*]:text-center">
+                        <p className="mb-1 text-white/40 uppercase md:text-xl">guess what</p>
                         <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
                             Getting yourself RING-ed up has never been easier!
                         </h1>
@@ -68,7 +68,7 @@ export default async function Home() {
                         </p>
 
                         <Link href="/signup">
-                            <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                            <Button className="hidden h-12 px-6 text-lg font-semibold lg:block">
                                 Join now!
                             </Button>
                             <Button className="lg:hidden">Join now!</Button>
@@ -76,33 +76,33 @@ export default async function Home() {
                     </div>
                 </section>
             )}
-            <section className="py-16 w-full max-w-[85rem] mx-auto text-center flex flex-row flex-wrap items-center justify-between min-h-[40svh]">
-                <div className="flex flex-col flex-1 items-center">
+            <section className="mx-auto flex min-h-[40svh] w-full max-w-[85rem] flex-row flex-wrap items-center justify-between py-16 text-center">
+                <div className="flex flex-1 flex-col items-center">
                     <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
                         Curious to Know Our Mission?
                     </h1>
 
                     <Link href="/manifesto">
-                        <Button className="hidden lg:block text-lg h-12  font-semibold">
+                        <Button className="hidden h-12 text-lg font-semibold lg:block">
                             Read Our Manifesto
                         </Button>
                         <Button className="lg:hidden"> Read Our Manifesto</Button>
                     </Link>
                 </div>
 
-                <div className="flex flex-col flex-1 items-center">
+                <div className="flex flex-1 flex-col items-center">
                     <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
                         View The Directory of UofT Webring Members
                     </h1>
                     <Link href="/directory">
-                        <Button className="hidden lg:block text-lg h-12 px-6 font-semibold">
+                        <Button className="hidden h-12 px-6 text-lg font-semibold lg:block">
                             Go to The Directory!
                         </Button>
                         <Button className="lg:hidden">Go to The Directory!</Button>
                     </Link>
                 </div>
             </section>
-            <footer className="max-w-[85rem] mx-auto w-full px-6 py-4 flex justify-between items-center">
+            <footer className="mx-auto flex w-full max-w-[85rem] items-center justify-between px-6 py-4">
                 &copy; {new Date().getFullYear()} | UofT Webring
                 <Link href="https://github.com/uoft-webring/webring">View on GitHub</Link>
             </footer>

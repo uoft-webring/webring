@@ -10,7 +10,7 @@ export default function CardForm({
     cardDescription?: string;
 } & React.ComponentPropsWithoutRef<"div">) {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10 rounded-xl">
+        <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 rounded-xl p-6 md:p-10">
             <div className="flex w-full max-w-sm flex-col gap-6">
                 <div className="flex flex-col gap-6">
                     <Card className="gap-4">
@@ -18,7 +18,7 @@ export default function CardForm({
                             {cardTitle && (
                                 <CardTitle>
                                     {/* For semanticity */}
-                                    <h1 className="leading-normal text-3xl p-0 m-0">{cardTitle}</h1>
+                                    <h1 className="m-0 p-0 text-3xl leading-normal">{cardTitle}</h1>
                                 </CardTitle>
                             )}
                             {cardDescription && (

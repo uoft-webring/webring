@@ -26,14 +26,14 @@ function Textarea({
                 />
                 <p
                     className={cn(
-                        "absolute bottom-3 right-3 text-muted",
+                        "text-muted absolute right-3 bottom-3",
                         remaining < 16 ? "text-destructive" : ""
                     )}
                 >
                     {remaining.toString()}
                 </p>
             </div>
-            {error && <p className="text-destructive mb-2 mt-2">{error}</p>}
+            {error && <p className="text-destructive mt-2 mb-2">{error}</p>}
         </>
     );
 }

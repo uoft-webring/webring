@@ -29,11 +29,11 @@ export default function Stepper({ steps, className }: { steps: Step[]; className
 
     return (
         <nav aria-label="" className={cn(className)}>
-            <ol className="flex flex-row md:flex-col ">
+            <ol className="flex flex-row md:flex-col">
                 {stepper.all.map((step, index, array) => (
                     <Fragment key={step.id}>
                         <Link href={`/dashboard/${step.id}`} className="cursor-pointer">
-                            <li className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
+                            <li className="flex flex-shrink-0 flex-col items-center gap-2 sm:flex-row">
                                 <Button
                                     type="button"
                                     role="tab"
@@ -42,7 +42,7 @@ export default function Stepper({ steps, className }: { steps: Step[]; className
                                     aria-posinset={index + 1}
                                     aria-setsize={stepper.all.length}
                                     aria-selected={stepper.current.id === step.id}
-                                    className="rounded-full md:text-lg cursor-pointer"
+                                    className="cursor-pointer rounded-full md:text-lg"
                                     onClick={() => stepper.goTo(step.id)}
                                 >
                                     {index + 1}
@@ -55,19 +55,19 @@ export default function Stepper({ steps, className }: { steps: Step[]; className
                             <>
                                 <Separator
                                     /* TODO: find a better vertical height center'er on mobile than `my-4` */
-                                    className={`flex-1 h-8 my-4 md:hidden ${
+                                    className={`my-4 h-8 flex-1 md:hidden ${
                                         index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                                 <Separator
                                     orientation="vertical"
-                                    className={`hidden md:flex mx-5  ${
+                                    className={`mx-5 hidden md:flex ${
                                         index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                                 <Separator
                                     orientation="vertical"
-                                    className={`hidden md:flex mx-5  ${
+                                    className={`mx-5 hidden md:flex ${
                                         index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>

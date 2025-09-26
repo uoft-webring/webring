@@ -33,7 +33,7 @@ export default function ProgramInput({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="h-10 flex flex-row justify-between"
+                    className="flex h-10 flex-row justify-between"
                 >
                     {value
                         ? programs.find((program) => program.value === value)?.label

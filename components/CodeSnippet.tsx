@@ -49,10 +49,10 @@ export default function CodeSnippet({ codeString, width = "100%" }: { codeString
     return (
         <figure
             style={{ width }}
-            className={cn("flex rounded-xl border bg-card text-card-foreground shadow-sm")}
+            className={cn("bg-card text-card-foreground flex rounded-xl border shadow-sm")}
         >
             {/* We expect a hydration warning, because SSR'd client component */}
-            <pre suppressHydrationWarning className="flex-1 rounded-l-xl p-4 text-md overflow-x-scroll">
+            <pre suppressHydrationWarning className="text-md flex-1 overflow-x-scroll rounded-l-xl p-4">
                 <code className="language-html" dangerouslySetInnerHTML={{ __html: html }} />
             </pre>
 
@@ -60,7 +60,7 @@ export default function CodeSnippet({ codeString, width = "100%" }: { codeString
                 <Button
                     size="icon"
                     onClick={handleCopy}
-                    className="rounded-xl text-md !bg-slate-900 !opacity-100"
+                    className="text-md rounded-xl !bg-slate-900 !opacity-100"
                 >
                     {copied ? (
                         <Image src={checkIcon} alt="Check" className="size-6 invert" width={25} height={25} />

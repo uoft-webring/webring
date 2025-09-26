@@ -12,13 +12,13 @@ function Input({ error, className, type, ...props }: { error?: string } & React.
             <input
                 type={type}
                 className={cn(
-                    "flex h-10 w-full rounded-xl border border-input bg-transparent-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                    "border-input bg-transparent-input ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-xl border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50",
                     error && "border-destructive", // Add error border color className
                     className
                 )}
                 {...props}
             />
-            {error && <p className="text-destructive mb-2 -mt-2">{error}</p>}
+            {error && <p className="text-destructive -mt-2 mb-2">{error}</p>}
         </>
         // <input
         //   type={type}

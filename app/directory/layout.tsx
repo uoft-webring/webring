@@ -69,7 +69,7 @@ export default async function DirectoryLayout({ children }: { children: React.Re
 
     return (
         <ProfileProvider profiles={ringProfiles as any} filterMetrics={filterMetrics as any}>
-            <div className="min-h-screen bg-background flex flex-col">
+            <div className="bg-background flex min-h-screen flex-col">
                 <Navbar user={userData} />
                 {children}
             </div>

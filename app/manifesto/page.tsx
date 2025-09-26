@@ -4,8 +4,8 @@ import "./manifesto.css";
 
 export default function Page() {
     return (
-        <section className="max-w-[85rem] w-full mx-auto mb-4">
-            <section className="max-w-[45rem] w-full mx-auto px-4 mt-8">
+        <section className="mx-auto mb-4 w-full max-w-[85rem]">
+            <section className="mx-auto mt-8 w-full max-w-[45rem] px-4">
                 <Manifesto />
             </section>
         </section>
