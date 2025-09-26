@@ -25,7 +25,7 @@ export default function Edit() {
                 <TabsContent value="edit">
                     <h2>Edit your profile</h2>
                     <p className="mb-6">Complete the information below to complete your profile.</p>
-                    <EditForm formData={data} setFormData={setData} />
+                    <EditForm formData={data} setFormDataAction={setData} />
                 </TabsContent>
                 <TabsContent value="preview">
                     <h2>Preview</h2>
@@ -39,9 +39,9 @@ export default function Edit() {
                     <p className="mb-6 lg:text-base">
                         Complete the information below to complete your profile.
                     </p>
-                    <EditForm formData={data} setFormData={setData} />
+                    <EditForm formData={data} setFormDataAction={setData} />
                 </div>
-                <div className="flex flex-col justify-left items-start">
+                <div className="flex flex-col justify-left items-start h-full">
                     <h2>Preview</h2>
                     <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
                     <ProfileCard user={data} className="m-0" />

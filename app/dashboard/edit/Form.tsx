@@ -33,21 +33,17 @@ const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, und
  */
 export default function EditForm({
     formData,
-    setFormData,
+    setFormDataAction,
 }: {
     formData: UserType;
-    setFormData: React.Dispatch<React.SetStateAction<UserType | null>>;
+    setFormDataAction: React.Dispatch<React.SetStateAction<UserType | null>>;
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
 
-    console.log("Rendering Parent with tags:", formData.tags);
-
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
-        console.log(parseResult);
         if (parseResult.success) {
-            console.log("Saving data!!!");
             // Save to DB here through actions.ts
             const saveResult = await saveData(parseResult.data);
             if (saveResult.error) {
@@ -75,7 +71,7 @@ export default function EditForm({
 
     const saveToForm = (data: Record<string, any>) => {
         const newData = { ...formData, ...data };
-        setFormData(newData);
+        setFormDataAction(newData);
         debounceCallback(newData);
     };
 
@@ -177,7 +173,6 @@ export default function EditForm({
                         />
                     </div>
                     <div className="flex flex-col gap-2 w-full">
-                        {/* TODO: rename slug accross everything to slug */}
                         <Label htmlFor="slug" className="flex justify-between">
                             Slug
                             <Tooltip>

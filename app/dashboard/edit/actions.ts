@@ -3,14 +3,12 @@
 import { createClient } from "@/utils/supabase/server";
 import { UserType } from "@/utils/zod";
 import { revalidatePath } from "next/cache";
-import sharp from "sharp";
-import { PixelCrop } from "react-image-crop";
-import { WithImplicitCoercion } from "buffer";
-import fetch from "node-fetch";
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v4 } from "uuid";
+import { redirect } from "next/navigation";
+import { getAuthUserProfile } from "@/app/actions";
 
 export const saveData = async (formData: UserType) => {
     try {
@@ -41,8 +39,6 @@ export const saveData = async (formData: UserType) => {
     }
 };
 
-//KRISH CODE BELOW
-
 const s3Client = new S3Client({
     region: process.env.AWS_REGION!,
     credentials: {
@@ -51,7 +47,7 @@ const s3Client = new S3Client({
     },
 });
 
-export const generateUploadUrl = async () => {
+export const requestPresignedUrl = async () => {
     const uniqueId = v4();
     const s3Key = `avatars/${uniqueId}.avif`;
 
@@ -63,70 +59,32 @@ export const generateUploadUrl = async () => {
     });
 
     const presignedUrl = await getSignedUrl(s3Client, command, {
-        expiresIn: 3600, // 1 hour
+        expiresIn: 300, // 5 minutes
     });
 
     const objectKey = `${uniqueId}.avif`;
     return { presignedUrl, objectKey };
 };
 
-/**
- * Saves user cropped profile avatar into AWS S3 Bucket
- *
- * provision presigned url - change john code
- *
- *
- *
- * @param {imageSrc} image source represented in base64 format
- * @param {completedCrop} completedCrop based on PixelCrop from react-easy-crop
- * @param {scaleX} scale of client side image width to actual image width
- * @param {scaleY}scale of client side image height to actual image height
- * @returns uploaded image object key
- */
-export const saveCroppedImaged = async (
-    imageSrc: string,
-    completedCrop: PixelCrop,
-    scaleX: number,
-    scaleY: number
-) => {
-    // Only take the base64 data portion from client side base64 encoded string
-    // Since FileReader returns a string that looks like data:image/png;base64,{image data}
-    // We only want image data part of encoded string
-    const uri: WithImplicitCoercion<string> = imageSrc.split(";base64,").pop() || "";
-    const croppedBuffer = await sharp(Buffer.from(uri, "base64"))
-        .extract({
-            left: Math.floor(completedCrop.x * scaleX),
-            top: Math.floor(completedCrop.y * scaleY),
-            width: Math.floor(completedCrop.width * scaleX),
-            height: Math.floor(completedCrop.height * scaleY),
-        })
-        .avif({ quality: 30 })
-        .toBuffer();
-
-    // Get presigned URL and public URL
-    const { presignedUrl, objectKey } = await generateUploadUrl();
-
-    await uploadToS3(presignedUrl, croppedBuffer, "image/avif");
-    // We return the object key, no point in storing the entire URL, esp since we don't access S3, we access CloudFront
-    return objectKey;
-};
-
-const uploadToS3 = async (
-    presignedUrl: string,
-    file: Buffer<ArrayBufferLike>,
-    contentType: string = "image/avif"
-): Promise<void> => {
-    const response = await fetch(presignedUrl, {
-        method: "PUT",
-        headers: {
-            "Content-Type": contentType,
-        },
-        body: file,
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+export const deletePreviousImage = async () => {
+    // Obtain current user
+    const { data, error } = await getAuthUserProfile();
+    if (error || !data) {
+        console.error("[deletePreviousImage] Error fetching authenticated user:", error);
+        redirect("/login");
     }
-    console.log("Upload successful!");
+    if (!data?.image_key) {
+        // No previous image to delete
+        return;
+    }
+    const command = new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME!,
+        Key: `avatars/${data.image_key}`,
+    });
+    try {
+        await s3Client.send(command);
+        console.log("[deletePreviousImage] Previous image deleted successfully");
+    } catch (e) {
+        console.error("[deletePreviousImage] Error deleting previous image:", e);
+    }
 };
