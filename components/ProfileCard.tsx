@@ -46,12 +46,9 @@ export default function ProfileCard({
                 </div>
             )}
 
-            {user.tagline && (
-                <p className="text-muted-foreground flex-1 px-4 text-center text-sm text-pretty break-all hyphens-auto normal-case">
-                    {user.tagline}
-                </p>
-            )}
-
+            <p className="text-muted-foreground flex-1 px-4 text-center text-sm text-pretty break-all hyphens-auto normal-case">
+                {user.tagline && user.tagline}
+            </p>
             <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
                 {user.github_url && (
                     <a
