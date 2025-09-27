@@ -6,7 +6,7 @@ import domain_from_id from "./utils/middleware/domain_finder";
 
 export async function middleware(request: NextRequest) {
     // Our domain differs depending on localhost vs prod
-    const home_domain = process.env.HOME_DOMAIN!;
+    const home_domain = process.env.NEXT_PUBLIC_HOME_DOMAIN!;
 
     const redirect = () =>
         home_domain != null ? NextResponse.redirect(new URL(home_domain)) : NextResponse.next();
