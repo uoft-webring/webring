@@ -90,7 +90,7 @@ export default function ProfileCard({
 
                 <ShareButton
                     title={`${user.name}'s Profile`}
-                    url={`https://${process.env.HOME_DOMAIN}/u/${user.slug}`}
+                    url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}u/${user.slug}`}
                 />
             </div>
         </div>
