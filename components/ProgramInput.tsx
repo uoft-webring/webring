@@ -29,7 +29,12 @@ export default function ProgramInput({
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <Button variant="outline" role="combobox" aria-expanded={open} className="h-10">
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="flex h-10 flex-row justify-between"
+                >
                     {value
                         ? programs.find((program) => program.value === value)?.label
                         : "Select Programs..."}

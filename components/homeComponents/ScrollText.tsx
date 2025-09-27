@@ -19,7 +19,7 @@ export const ScrollText = ({ content }: { content: string[] }) => {
     return (
         <div className="px-8 py-16">
             <div className="[&_h2]:inline">
-                <h2 ref={contentRef} className=" text-white/80">
+                <h2 ref={contentRef} className="text-white/80">
                     {content.map((item, index) => {
                         const start = index / content.length;
                         const end = start + 1 / content.length;

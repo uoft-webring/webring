@@ -21,7 +21,6 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
     const src = user.image_key
         ? "https://" + process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN + "/" + user.image_key
         : null;
-    console.log("[Avatar} This is the CF src: " + src);
     const seed = user.ring_id;
     const alt = `${user.name}'s profile picture`;
 
@@ -32,20 +31,19 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
         }).toDataUri();
     }, [src]);
 
-    console.log("[Avatar] Rendering image for ringId:", seed, "with src:", src);
     const classList = cn(
         "aspect-square object-cover pointer-events-none select-none rounded-full",
         className
     );
 
     return (
-        <div className="relative">
+        <div className="relative aspect-square rounded-full object-cover ring-2">
             {src ? (
-                <Image
+                <img
                     alt={alt || "Avatar"}
                     src={src}
-                    width={width || 100}
-                    height={height || 100}
+                    width={width || 90}
+                    height={height || 90}
                     draggable={false}
                     className={classList}
                 />

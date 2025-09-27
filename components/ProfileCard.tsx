@@ -6,6 +6,9 @@ import portfolioIcon from "@/icons/portfolio.svg";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
 import Avatar from "./Avatar";
+import { Share2 } from "lucide-react";
+import { Button } from "./ui/button";
+import ShareButton from "./ShareButton";
 
 export default function ProfileCard({
     user,
@@ -21,41 +24,44 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                /* 26.5 is the perfect width to contain maximum content within a good size */
-                "min-w-[18rem] w-[20rem] md:w-[22rem] lg:w-[26.5rem] max-w-md mx-auto mt-6 bg-card rounded-xl shadow-md p-6 flex flex-col items-center gap-4 h-[35rem] sm:h-[30rem]  border",
+                "bg-card mx-auto mt-6 flex h-[40rem] min-h-fit w-[20rem] max-w-md min-w-[18rem] flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl sm:h-[32rem] md:w-[22rem] lg:w-[26.5rem]",
                 className
             )}
         >
-            {/* Ensure Avatar provides intrinsic size (or pass width/height via its API) */}
-            <Avatar user={user} className="w-32 h-32" />
+            <Avatar user={user} className="ring-primary/20 h-26 w-26 rounded-full" />
 
-            <h2 className="text-2xl font-semibold capitalize text-center">{user.name}</h2>
+            <h2 className="text-center text-2xl font-bold capitalize">{user.name}</h2>
+
+            <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
+                {user.program && <span>{user.program}</span>}
+                {user.program && user.graduation_year && <p>·</p>}
+                {user.graduation_year && <span>{user.graduation_year}</span>}
+            </div>
 
             {!!user.tags?.length && (
-                <div className="flex flex-row flex-wrap gap-2 justify-center">
+                <div className="flex flex-row flex-wrap justify-center gap-2">
                     {user.tags.map((tagName: string) => (
                         <SkillTag key={tagName} tagName={tagName} />
                     ))}
                 </div>
             )}
 
-            {user.tagline && (
-                <p className="text-center normal-case break-all hyphens-auto text-pretty">{user.tagline}</p>
-            )}
-
-            <div className="flex flex-row flex-wrap justify-center gap-4 items-center mt-auto">
+            <p className="text-muted-foreground flex-1 px-4 text-center text-sm text-pretty break-all hyphens-auto normal-case">
+                {user.tagline && user.tagline}
+            </p>
+            <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
                 {user.github_url && (
                     <a
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        className="flex items-center text-wrap normal-case"
+                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={gitHubIcon}
                             alt="GitHub"
-                            width={32}
-                            height={32}
+                            width={20}
+                            height={20}
                             decoding="async"
                             className="mr-2"
                         />
@@ -68,19 +74,24 @@ export default function ProfileCard({
                         href={user.domain}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        className="flex items-center normal-case"
+                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={portfolioIcon}
                             alt="Website"
-                            width={32}
-                            height={32}
+                            width={20}
+                            height={20}
                             decoding="async"
                             className="mr-2"
                         />
                         {domainLabel && domainLabel.length <= 30 ? domainLabel : "Portfolio"}
                     </a>
                 )}
+
+                <ShareButton
+                    title={`${user.name}'s Profile`}
+                    url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}u/${user.slug}`}
+                />
             </div>
         </div>
     );

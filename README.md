@@ -6,8 +6,8 @@ A Webring environment providing a unified space for UofT students to gather and 
 
 ## Technologies
 
--   Frontend: Next.JS
--   DB / pseudo-backend: Supabase, Supabase SDK
+- Frontend: Next.JS
+- DB / pseudo-backend: Supabase, Supabase SDK
 
 ## Developer Quickstart
 

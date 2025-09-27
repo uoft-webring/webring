@@ -13,7 +13,7 @@ export type ApiResponse<T> = { data: T; error: null } | { data: null; error: str
 
 // Specific aliases for clarity
 type GetAllUserProfilesResponse = ApiResponse<SafeUserType[]>;
-type GetUserProfileResponse = ApiResponse<SafeUserType>;
+type GetUserProfileResponse = ApiResponse<UserType>;
 type GetAuthUserProfileResponse = ApiResponse<UserType>;
 
 /**
@@ -81,11 +81,7 @@ export const getAuthUserProfile = async (): Promise<GetAuthUserProfileResponse> 
 export const getUserProfile = async (slug: string): Promise<GetUserProfileResponse> => {
     // To fetch an arbitrary user (not the curr user), we need an admin client to bypass RLS
     const supabase = createAdminClient();
-    const { data, error } = await supabase
-        .from("profile")
-        .select(PROFILE_COLUMNS)
-        .eq("slug", slug)
-        .single();
+    const { data, error } = await supabase.from("profile").select(PROFILE_COLUMNS).eq("slug", slug).single();
 
     if (error) {
         return {
@@ -93,5 +89,5 @@ export const getUserProfile = async (slug: string): Promise<GetUserProfileRespon
             error: `Error: ${(error as PostgrestError).message}`,
         };
     }
-    return data ? { data, error: null } : { data: null, error: "Error: No data returned." };
+    return data ? { data: data as UserType, error: null } : { data: null, error: "Error: No data returned." };
 };

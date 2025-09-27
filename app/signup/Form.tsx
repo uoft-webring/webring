@@ -51,51 +51,44 @@ export default function SignupForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="grid gap-6">
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            name="name"
-                            type="text"
-                            ref={nameRef}
-                            placeholder="John Doe"
-                            error={nameError}
-                            disabled={isFormDisabled}
-                            onChange={() => {
-                                if (nameError) {
-                                    setNameError(undefined);
-                                }
-                            }}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                            name="email"
-                            type="text"
-                            ref={emailRef}
-                            placeholder="your.email@mail.utoronto.ca"
-                            error={emailError}
-                            disabled={isFormDisabled}
-                            onChange={() => {
-                                if (emailError) {
-                                    setEmailError(undefined);
-                                }
-                            }}
-                        />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isFormDisabled}>
-                        Continue
-                    </Button>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                        name="name"
+                        type="text"
+                        ref={nameRef}
+                        placeholder="John Doe"
+                        error={nameError}
+                        disabled={isFormDisabled}
+                        onChange={() => nameError && setNameError(undefined)}
+                    />
                 </div>
-                <div className="text-center text-sm">
-                    Already ring-ed?{" "}
-                    <Link href="/signin" className="underline underline-offset-4">
-                        Sign in instead.
-                    </Link>
+
+                <div className="flex flex-col gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                        name="email"
+                        type="text"
+                        ref={emailRef}
+                        placeholder="your.email@mail.utoronto.ca"
+                        error={emailError}
+                        disabled={isFormDisabled}
+                        onChange={() => emailError && setEmailError(undefined)}
+                    />
                 </div>
+
+                <Button type="submit" className="w-full" disabled={isFormDisabled}>
+                    Continue
+                </Button>
+            </div>
+
+            <div className="text-center text-sm">
+                Already ring-ed?{" "}
+                <Link href="/signin" className="underline underline-offset-4">
+                    Sign in instead.
+                </Link>
             </div>
         </form>
     );

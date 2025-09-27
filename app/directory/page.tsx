@@ -98,19 +98,19 @@ export default function DirectoryPage() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-6 max-w-[75rem]">
-            <h1 className="text-center text-5xl font-black mb-6 tracking-widest decoration-wavy decoration-pink-500 underline cursor-crosshair skew-y-2 drop-shadow-lg">
+        <div className="container mx-auto max-w-[75rem] px-4 py-6">
+            <h1 className="mb-6 skew-y-2 cursor-crosshair text-center text-5xl font-black tracking-widest underline decoration-pink-500 decoration-wavy drop-shadow-lg">
                 The Directory
             </h1>
             <div className="flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row">
                     <div className="flex-1">
-                        <span className="text-sm text-muted-foreground">Search</span>
+                        <span className="text-muted-foreground text-sm">Search</span>
                         <Input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Search by name, domain, tags, program…"
-                            className="bg-card rounded-xl flex-1"
+                            className="bg-card flex-1 rounded-xl"
                         />
                     </div>
                     {/*                     <div className="flex gap-3 w-full sm:w-auto h-full items-center justify-around">
@@ -135,7 +135,7 @@ export default function DirectoryPage() {
                     />
                     {/*                     </div>
                      */}{" "}
-                    <Button variant="secondary" onClick={clearAll} className="rounded-xl sm:self-end h-10">
+                    <Button variant="secondary" onClick={clearAll} className="h-10 rounded-xl sm:self-end">
                         Clear
                     </Button>
                 </div>
@@ -146,8 +146,8 @@ export default function DirectoryPage() {
                         <HorizontalProfileCard key={String(p.domain + p.ring_id)} user={p} />
                     ))}
                     {filtered.length === 0 && (
-                        <div className="mt-6 flex flex-col items-center text-center gap-2 text-muted-foreground">
-                            <div className="flex items-center justify-center size-12 rounded-full border border-dashed">
+                        <div className="text-muted-foreground mt-6 flex flex-col items-center gap-2 text-center">
+                            <div className="flex size-12 items-center justify-center rounded-full border border-dashed">
                                 <span className="text-lg">😕</span>
                             </div>
                             <p className="text-sm">No profiles match your search or filters.</p>

@@ -64,11 +64,11 @@ export default async function Join() {
 
             <Tabs defaultValue="HTML & CSS" className="relative mr-auto flex w-full flex-col gap-6">
                 {/* Height is needed to handle mobile responsiveness */}
-                <TabsList className="w-full flex flex-row flex-wrap items-center h-[10rem] sm:h-min rounded-none border-b bg-transparent p-0">
+                <TabsList className="flex h-[10rem] w-full flex-row flex-wrap items-center rounded-none border-b bg-transparent p-0 sm:h-min">
                     {Object.keys(codeStringMap).map((value, index) => {
                         return (
                             <TabsTrigger
-                                className="relative h-min border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-semibold text-muted-foreground shadow-none transition-none focus-visible:ring-0 data-[state=active]:border-b-primary data-[state=active]:text-foreground data-[state=active]:shadow-none "
+                                className="text-muted-foreground data-[state=active]:border-b-primary data-[state=active]:text-foreground relative h-min border-b-2 border-b-transparent bg-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none focus-visible:ring-0 data-[state=active]:shadow-none"
                                 key={index}
                                 value={value}
                             >

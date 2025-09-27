@@ -59,10 +59,10 @@ const statusDescriptionsWithoutCTA: Record<Status, string> = {
 };
 
 const statusIcons: Record<Status, React.JSX.Element> = {
-    connected: <Success className="size-5 mb-1 md:size-8" color="var(--color-green-400)" />,
-    unverified: <Warning className="size-5 mb-1 md:size-8" color="var(--color-yellow-400)" />,
-    pending: <Warning className="size-5 mb-1 md:size-8" color="var(--color-yellow-400)" />,
-    disconnected: <Error className="size-5 mb-1 md:size-8" color="var(--color-red-400)" />,
+    connected: <Success className="mb-1 size-5 md:size-8" color="var(--color-green-400)" />,
+    unverified: <Warning className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" />,
+    pending: <Warning className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" />,
+    disconnected: <Error className="mb-1 size-5 md:size-8" color="var(--color-red-400)" />,
 };
 
 type StatusCardProps = {
@@ -87,8 +87,8 @@ export default function StatusCard({
             <p>{showCTA ? statusDescriptions[status] : statusDescriptionsWithoutCTA[status]}</p>
 
             {status !== "connected" && showButton && (
-                <Button className={`w-full mt-4 ${statusButtonColor[status]}`}>
-                    <p className="text-lg font-semibold color-white">{statusButtonLabel[status]}</p>
+                <Button className={`mt-4 w-full ${statusButtonColor[status]}`}>
+                    <p className="color-white text-lg font-semibold">{statusButtonLabel[status]}</p>
                 </Button>
             )}
         </div>

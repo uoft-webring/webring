@@ -74,7 +74,7 @@ const TagInputComponent = ({
                     </TagsList>
                 </TagsContent>
             </Tags>
-            {error && <p className="text-destructive mb-2 mt-2">{error}</p>}
+            {error && <p className="text-destructive mt-2 mb-2">{error}</p>}
         </>
     );
 };

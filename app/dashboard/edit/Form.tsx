@@ -33,21 +33,17 @@ const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, und
  */
 export default function EditForm({
     formData,
-    setFormData,
+    setFormDataAction,
 }: {
     formData: UserType;
-    setFormData: React.Dispatch<React.SetStateAction<UserType | null>>;
+    setFormDataAction: React.Dispatch<React.SetStateAction<UserType | null>>;
 }) {
     // const [formData, setFormData] = useState<UserType>(data);
     const [errors, setErrors] = useState<Record<UserKeys, string | undefined>>(structuredClone(NO_ERRORS));
 
-    console.log("Rendering Parent with tags:", formData.tags);
-
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
-        console.log(parseResult);
         if (parseResult.success) {
-            console.log("Saving data!!!");
             // Save to DB here through actions.ts
             const saveResult = await saveData(parseResult.data);
             if (saveResult.error) {
@@ -75,7 +71,7 @@ export default function EditForm({
 
     const saveToForm = (data: Record<string, any>) => {
         const newData = { ...formData, ...data };
-        setFormData(newData);
+        setFormDataAction(newData);
         debounceCallback(newData);
     };
 
@@ -90,8 +86,8 @@ export default function EditForm({
             }}
             className="flex flex-col"
         >
-            <div className="grname gap-2 [&>*:not(label)]:mb-4 [&>*:not(label)]:mt-1">
-                <Label htmlFor="name" className="after:content-['*'] after:text-destructive after:ml-1">
+            <div className="grname gap-2 [&>*:not(label)]:mt-1 [&>*:not(label)]:mb-4">
+                <Label htmlFor="name" className="after:text-destructive after:ml-1 after:content-['*']">
                     Name
                 </Label>
                 <Input
@@ -105,7 +101,7 @@ export default function EditForm({
                     }}
                     error={errors.name}
                 />
-                <Label htmlFor="domain" className="after:content-['*'] after:text-destructive after:ml-1">
+                <Label htmlFor="domain" className="after:text-destructive after:ml-1 after:content-['*']">
                     Portfolio Link
                 </Label>
                 <Input
@@ -122,11 +118,11 @@ export default function EditForm({
                     }}
                     error={errors.domain}
                 />
-                <div className="flex flex-row gap-2 justify-evenly">
-                    <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-row justify-evenly gap-2">
+                    <div className="flex w-full flex-col gap-2">
                         <Label
                             htmlFor="graduation_year"
-                            className="after:content-['*'] after:text-destructive after:ml-1"
+                            className="after:text-destructive after:ml-1 after:content-['*']"
                         >
                             Graduation Year
                         </Label>
@@ -144,10 +140,10 @@ export default function EditForm({
                             error={errors.graduation_year}
                         />
                     </div>
-                    <div className="flex flex-col gap-2 w-full">
+                    <div className="flex w-full flex-col gap-2">
                         <Label
                             htmlFor="program"
-                            className="after:content-['*'] after:text-destructive after:ml-1"
+                            className="after:text-destructive after:ml-1 after:content-['*']"
                         >
                             Program
                         </Label>
@@ -159,8 +155,8 @@ export default function EditForm({
                         />
                     </div>
                 </div>
-                <div className="flex flex-row gap-2 justify-evenly">
-                    <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-row justify-evenly gap-2">
+                    <div className="flex w-full flex-col gap-2">
                         <Label htmlFor="github_url">GitHub Username</Label>
                         <Input
                             /* Data type is named github_url but it's a username */
@@ -176,8 +172,7 @@ export default function EditForm({
                             error={errors.github_url}
                         />
                     </div>
-                    <div className="flex flex-col gap-2 w-full">
-                        {/* TODO: rename slug accross everything to slug */}
+                    <div className="flex w-full flex-col gap-2">
                         <Label htmlFor="slug" className="flex justify-between">
                             Slug
                             <Tooltip>
@@ -234,7 +229,7 @@ export default function EditForm({
                 />
             </div>
 
-            <div className="flex justify-start items-center gap-4">
+            <div className="flex items-center justify-start gap-4">
                 {/* TODO-A allow saving or smth */}
                 <Button variant="secondary" type="submit">
                     Save

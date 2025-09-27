@@ -125,7 +125,7 @@ export const TagsTrigger = ({ className, children, ...props }: TagsTriggerProps)
         >
             <div className="flex flex-wrap items-center gap-1">
                 {children}
-                <span className="px-2 py-px text-muted-foreground">Select a tag...</span>
+                <span className="text-muted-foreground px-2 py-px">Select a tag...</span>
             </div>
         </Button>
     </PopoverTrigger>
@@ -151,7 +151,7 @@ export const TagsValue = ({
             {onRemove && (
                 // biome-ignore lint/a11y/noStaticElementInteractions: "This is a clickable badge"
                 // biome-ignore lint/a11y/useKeyWithClickEvents: "This is a clickable badge"
-                <div className="size-auto cursor-pointer hover:text-muted-foreground" onClick={handleRemove}>
+                <div className="hover:text-muted-foreground size-auto cursor-pointer" onClick={handleRemove}>
                     <XIcon size={12} />
                 </div>
             )}

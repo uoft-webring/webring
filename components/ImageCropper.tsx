@@ -33,14 +33,14 @@ function centerAspectCrop(
 
 export default function ImageCropper({
     crop,
-    setCrop,
-    setCompletedCrop,
+    setCropAction,
+    setCompletedCropAction,
     imageSrc,
     imageRef,
 }: {
     crop: Crop | undefined;
-    setCrop: React.Dispatch<React.SetStateAction<Crop | undefined>>;
-    setCompletedCrop: React.Dispatch<React.SetStateAction<PixelCrop | undefined>>;
+    setCropAction: React.Dispatch<React.SetStateAction<Crop | undefined>>;
+    setCompletedCropAction: React.Dispatch<React.SetStateAction<PixelCrop | undefined>>;
     imageSrc: string;
     imageRef: React.Ref<HTMLImageElement>;
 }) {
@@ -48,20 +48,20 @@ export default function ImageCropper({
 
     function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
         const { width, height } = e.currentTarget;
-        console.log(width, height);
-        setCrop(centerAspectCrop(width, height, ASPECT_RATIO));
+        setCropAction(centerAspectCrop(width, height, ASPECT_RATIO));
     }
 
     return (
         <ReactCrop
             crop={crop}
             onChange={(crop, percentageCrop) => {
-                setCrop(percentageCrop);
+                setCropAction(percentageCrop);
             }}
-            onComplete={(c) => setCompletedCrop(c)}
+            onComplete={(c) => setCompletedCropAction(c)}
             aspect={ASPECT_RATIO}
             minHeight={100}
             circularCrop
+            className="self-center"
         >
             <img ref={imageRef} src={imageSrc} alt="Crop avatar" onLoad={onImageLoad} />
         </ReactCrop>
