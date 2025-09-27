@@ -76,9 +76,9 @@ export default async function Home() {
                     </div>
                 </section>
             )}
-            <section className="mx-auto flex min-h-[40svh] w-full max-w-[85rem] flex-row flex-wrap items-center justify-between py-16 text-center">
+            <section className="mx-auto flex min-h-[40svh] w-full max-w-[85rem] flex-col flex-wrap items-center justify-between gap-10 text-center md:flex-row md:gap-0">
                 <div className="flex flex-1 flex-col items-center">
-                    <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                    <h1 className="mb-6 text-2xl/8 md:text-2xl/8 lg:text-4xl/14">
                         Curious to Know Our Mission?
                     </h1>
 
@@ -91,8 +91,8 @@ export default async function Home() {
                 </div>
 
                 <div className="flex flex-1 flex-col items-center">
-                    <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
-                        View The Directory of UofT Webring Members
+                    <h1 className="mb-6 text-2xl/8 md:text-2xl/8 lg:text-4xl/14">
+                        Check out The Webring Directory
                     </h1>
                     <Link href="/directory">
                         <Button className="hidden h-12 px-6 text-lg font-semibold lg:block">
@@ -102,7 +102,7 @@ export default async function Home() {
                     </Link>
                 </div>
             </section>
-            <footer className="mx-auto flex w-full max-w-[85rem] items-center justify-between px-6 py-4">
+            <footer className="text-md mx-auto flex w-full max-w-[85rem] items-center justify-between px-6 py-4 pb-8">
                 &copy; {new Date().getFullYear()} | UofT Webring
                 <Link href="https://github.com/uoft-webring/webring">View on GitHub</Link>
             </footer>
