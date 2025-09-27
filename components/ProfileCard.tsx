@@ -46,7 +46,7 @@ export default function ProfileCard({
                 </div>
             )}
 
-            <p className="text-muted-foreground flex-1 px-4 text-center text-sm text-pretty break-all hyphens-auto normal-case">
+            <p className="text-muted-foreground max-w-md flex-1 px-4 text-center text-sm text-pretty break-words hyphens-auto normal-case">
                 {user.tagline && user.tagline}
             </p>
             <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
@@ -90,7 +90,7 @@ export default function ProfileCard({
 
                 <ShareButton
                     title={`${user.name}'s Profile`}
-                    url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}u/${user.slug}`}
+                    url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${user.slug}`}
                 />
             </div>
         </div>
