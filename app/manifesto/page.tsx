@@ -1,6 +1,5 @@
-import Manifesto from "./manifesto.mdx";
-
-import "./manifesto.css";
+// import Manifesto from "./manifesto.mdx";
+import Manifesto from "./manifesto";
 
 export default function Page() {
     return (
