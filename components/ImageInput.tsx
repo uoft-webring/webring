@@ -101,7 +101,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         const file = e.target.files?.[0];
         if (!file) return;
 
-        const maxAllowedMBSize = 1;
+        const maxAllowedMBSize = 4;
         const maxAllowedSize = maxAllowedMBSize * 1024 * 1024;
 
         if (file.size > maxAllowedSize) {
