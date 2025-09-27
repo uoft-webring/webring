@@ -165,7 +165,7 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                                     )}
                                     <ShareButton
                                         title={`${data.name}'s UofT Webring Profile`}
-                                        url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}u/${data.slug}`}
+                                        url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${data.slug}`}
                                     />
                                 </div>
                             </div>
