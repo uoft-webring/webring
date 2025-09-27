@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import "prismjs/themes/prism-tomorrow.css"; // has to be applied globally
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
     subsets: ["latin"],
+    display: "swap",
 });
 
 const description =
@@ -103,6 +103,10 @@ export default function RootLayout({
     };
     return (
         <html lang="en" className={oxanium.variable}>
+            <head>
+                <link rel="preload" as="style" href="prismjs/themes/prism-tomorrow.css" />
+                {/* // has to be applied globally */}
+            </head>
             <body className="dark scroll-smooth antialiased">
                 <script
                     type="application/ld+json"

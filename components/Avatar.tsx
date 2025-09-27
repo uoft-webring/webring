@@ -46,6 +46,8 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
                     height={height || 90}
                     draggable={false}
                     className={classList}
+                    loading="lazy"
+                    fetchPriority="high" /* https://web.dev/articles/image-cdns#lcp-effects */
                 />
             ) : (
                 <Image

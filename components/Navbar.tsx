@@ -44,7 +44,7 @@ export default function Navbar({
                             </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <Link href="/dashboard" prefetch={true}>
+                        <Link href="/dashboard/edit" prefetch={true}>
                             <DropdownMenuItem>
                                 <LayoutDashboard className="mr-2 h-4 w-4" />
                                 Dashboard
