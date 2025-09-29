@@ -22,7 +22,9 @@ function cloudfrontLoader({ src, width }: ImageLoaderProps) {
     const url = new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${src}`);
     url.searchParams.set("format", "avif");
     url.searchParams.set("width", width.toString());
-    url.searchParams.set("quality", (40).toString());
+    url.searchParams.set("quality", Math.min(50, Math.max(30, width / 20)).toString()); // adaptive quality
+    url.searchParams.set("fit", "max"); // avoid scaling artifacts
+    url.searchParams.set("metadata", "none"); // strip metadata
     return url.href;
 }
 

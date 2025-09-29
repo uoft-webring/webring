@@ -22,7 +22,7 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "bg-card mx-auto mt-6 flex w-full max-w-[25rem] flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl",
+                "bg-card mx-auto mt-6 flex h-full w-full max-w-[25rem] flex-1 flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl",
                 className
             )}
         >
