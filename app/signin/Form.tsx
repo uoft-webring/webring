@@ -24,7 +24,6 @@ export default function SigninForm() {
             const emailParseResult = parseEmail(email);
             // Parsing success or faliure
             if (emailParseResult.success) {
-                console.log("Success");
                 const { error } = await signInAction(email);
                 if (error) {
                     setEmailError("Email not registered");

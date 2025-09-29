@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import "prismjs/themes/prism-tomorrow.css"; // has to be applied globally
+import "prismjs/themes/prism-tomorrow.css"; //find solution to this blocking thread
+import Footer from "@/components/Footer";
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
     subsets: ["latin"],
+    display: "swap",
 });
 
 const description =
@@ -17,7 +19,7 @@ export const metadata: Metadata = {
     title: "UofT Webring",
     description,
     keywords: ["UofT Webring", "University of Toronto", "Webring", "Student Community"],
-    /* OG and Twitter Images are auto-added by Next.js */
+    // OG and Twitter Images are auto-added by Next.js
     openGraph: {
         title: "UofT Webring",
         type: "website",
@@ -110,7 +112,7 @@ export default function RootLayout({
                         __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
                     }}
                 />
-                {children}
+                {children} <Footer />
                 <Toaster richColors />
             </body>
         </html>

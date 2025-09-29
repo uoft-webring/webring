@@ -88,9 +88,6 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     const fullRecordDomain = `${expectedKey}.${baseDomain}`;
     const expectedValue = await getTXTRecordValue(String(user.ring_id));
     try {
-        console.log("Expected Domain: " + fullRecordDomain);
-        console.log("Expected Value: " + expectedValue);
-
         const records = await dns.resolveTxt(fullRecordDomain);
         const flatRecords = records.map((entry) => entry.join(""));
 

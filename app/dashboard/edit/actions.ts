@@ -83,7 +83,6 @@ export const deletePreviousImage = async () => {
     });
     try {
         await s3Client.send(command);
-        console.log("[deletePreviousImage] Previous image deleted successfully");
     } catch (e) {
         console.error("[deletePreviousImage] Error deleting previous image:", e);
     }

@@ -30,7 +30,6 @@ export default async function SignUp() {
     const { data: user } = await getAuthUser();
 
     if (user) {
-        console.log("[Signup] User session exists at sign up");
         redirect("/dashboard/edit");
     }
 

@@ -18,7 +18,6 @@ export default async function Join() {
         redirect("/signup");
     }
     const validPortfolioStatus: Status = await getDomainValidity(); // Returns
-    console.log("status", validPortfolioStatus);
 
     const id: number = userData.ring_id;
 

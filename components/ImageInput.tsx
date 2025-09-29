@@ -141,7 +141,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
     };
 
     // Converts cropped image to blob/avif for upload
-    const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> => {
+    const canvasToBlob = (canvas: HTMLCanvasElement, type: string): Promise<Blob> => {
         return new Promise((resolve, reject) => {
             canvas.toBlob(
                 (blob) => {
@@ -149,12 +149,12 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     else reject(new Error("Canvas toBlob failed"));
                 },
                 type,
-                quality
+                0.2 //quality
             );
         });
     };
 
-    const cropImage = async (imageEl: HTMLImageElement, cropDef: PixelCrop, quality = 0.5): Promise<File> => {
+    const cropImage = async (imageEl: HTMLImageElement, cropDef: PixelCrop): Promise<File> => {
         const scaleX = imageEl.naturalWidth / (imageEl.width || imageEl.naturalWidth);
         const scaleY = imageEl.naturalHeight / (imageEl.height || imageEl.naturalHeight);
 
@@ -180,7 +180,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
             height
         );
 
-        const blob = await canvasToBlob(canvas, "image/avif", quality);
+        const blob = await canvasToBlob(canvas, "image/avif");
 
         return new File([blob], "cropped.avif", { type: "image/avif" });
     };
@@ -212,7 +212,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         setLoading(true);
         try {
             // Crop image, degrade quality and convert to avif
-            const file = await cropImage(imageRef.current, completedCropArg, 0.5);
+            const file = await cropImage(imageRef.current, completedCropArg);
 
             // Request presignedUrl from server and get object key to save
             const { presignedUrl, objectKey } = await requestPresignedUrl();

@@ -16,7 +16,6 @@ export default async function Home() {
     const { data: userData } = await getAuthUserProfile();
 
     if (!ringProfiles || ringProfilesError) {
-        console.error("[Home] Error fetching profiles:", ringProfilesError);
         return <p>Error loading profiles.</p>;
     }
 
@@ -102,10 +101,6 @@ export default async function Home() {
                     </Link>
                 </div>
             </section>
-            <footer className="text-md mx-auto flex w-full max-w-[85rem] items-center justify-between px-6 py-4 pb-8">
-                &copy; {new Date().getFullYear()} | UofT Webring
-                <Link href="https://github.com/uoft-webring/webring">View on GitHub</Link>
-            </footer>
         </div>
     );
 }

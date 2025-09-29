@@ -44,7 +44,7 @@ export default function Edit() {
                 <div className="justify-left flex h-full flex-col items-start">
                     <h2>Preview</h2>
                     <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data} className="m-0" />
+                    <ProfileCard user={data} />
                 </div>
             </section>
         </>
