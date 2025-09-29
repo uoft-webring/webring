@@ -16,7 +16,6 @@ export default async function Home() {
     const { data: userData } = await getAuthUserProfile();
 
     if (!ringProfiles || ringProfilesError) {
-        console.error("[Home] Error fetching profiles:", ringProfilesError);
         return <p>Error loading profiles.</p>;
     }
 

@@ -32,14 +32,12 @@ export default function SignupForm() {
 
             // Parsing success or faliure
             if (emailParseResult.success && nameParseResult.success) {
-                console.log("Success");
                 const { error } = await signUpAction(name, email);
                 if (error) {
                     setEmailError("Email registered");
                 } else {
                     router.push(`/auth/confirm?email=${email}`);
                 }
-                console.log("Finished");
             } else {
                 setIsFormDisabled(false);
                 setEmailError(emailParseResult?.error?.errors[0]?.message || "");

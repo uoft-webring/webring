@@ -29,7 +29,6 @@ const TagInputComponent = ({
             return;
         }
 
-        console.log(`removed: ${value}`);
         onTagsChange(tags.filter((tag) => tag !== value));
     };
 
@@ -38,8 +37,6 @@ const TagInputComponent = ({
             handleRemove(value);
             return;
         }
-
-        console.log(`selected: ${value}`);
         onTagsChange([...tags, value]);
     };
 
