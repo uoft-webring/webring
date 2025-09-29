@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
             fullUrl: true,
         },
     },
+    poweredByHeader: false,
     async headers() {
         return [
             {
@@ -27,7 +28,7 @@ const nextConfig: NextConfig = {
                 ],
             },
             {
-                source: "/:all*(svg|jpg|png|css|js|woff2)",
+                source: "/:all*(svg|jpg|png|css|js|woff2|avif)",
                 headers: [
                     {
                         key: "Cache-Control",
@@ -41,10 +42,8 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {
                 protocol: "https",
-                hostname: cloudfrontDomain,
+                hostname: "d37ovd1colvcou.cloudfront.net", //cloudfrontDomain,
                 pathname: "/**",
-                //port: "",
-                //search: "",
             },
         ],
     },

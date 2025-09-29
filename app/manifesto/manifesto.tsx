@@ -1,6 +1,5 @@
 import TypingAnimation from "./components/TypingAnimation";
 import Image from "next/image";
-import resume from "./assets/resume.png";
 
 export default function Manifesto() {
     return (
@@ -35,10 +34,12 @@ export default function Manifesto() {
             </p>
             <div className="my-6">
                 <Image
-                    src={resume}
+                    src="/resume.png"
+                    width={600}
+                    height={328}
                     alt="(Insert your boring resume)"
                     className="rounded-[0.75rem] shadow-md"
-                    style={{ borderRadius: "0.75rem" }}
+                    unoptimized
                 />
             </div>
             <p className="mb-2 text-[1rem] text-white md:text-[1.25rem] md:leading-[1.6] lg:text-[1.375rem]">
@@ -85,14 +86,14 @@ export default function Manifesto() {
                 <TypingAnimation />
             </div>
             <p className="mb-2 text-[1rem] text-white md:text-[1.25rem] md:leading-[1.6] lg:text-[1.375rem]">
-                We’re not here to showcase your work.
+                We're not here to showcase your work.
                 <br />
-                We’re here to unleash your identity.
+                We're here to unleash your identity.
             </p>
             <p className="mb-2 text-[1rem] text-white md:text-[1.25rem] md:leading-[1.6] lg:text-[1.375rem]">
-                The future doesn’t belong to the cookie-cutter developer.
+                The future doesn't belong to the cookie-cutter developer.
                 <br />
-                It belongs to the one who can’t be copied.
+                It belongs to the one who can't be copied.
             </p>
             <p className="mb-2 text-[1rem] text-white md:text-[1.25rem] md:leading-[1.6] lg:text-[1.375rem]">
                 So, show them who you are.

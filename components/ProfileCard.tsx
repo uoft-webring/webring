@@ -6,8 +6,6 @@ import portfolioIcon from "@/icons/portfolio.svg";
 import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
 import Avatar from "./Avatar";
-import { Share2 } from "lucide-react";
-import { Button } from "./ui/button";
 import ShareButton from "./ShareButton";
 
 export default function ProfileCard({
@@ -24,7 +22,7 @@ export default function ProfileCard({
     return (
         <div
             className={cn(
-                "bg-card mx-auto mt-6 flex h-[40rem] min-h-fit w-[20rem] max-w-md min-w-[18rem] flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl sm:h-[32rem] md:w-[22rem] lg:w-[26.5rem]",
+                "bg-card mx-auto mt-6 flex w-full max-w-[25rem] flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl",
                 className
             )}
         >

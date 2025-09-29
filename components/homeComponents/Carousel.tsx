@@ -29,7 +29,11 @@ export default function ProfileCarousel({ data: ringProfiles }: { data: SafeUser
             disableDotsControls={true}
             disableButtonsControls={true}
             items={ringProfiles.map((profile, index) => {
-                return <ProfileCard key={index} user={profile} className="mx-3" />;
+                return (
+                    <div key={index} className="mx-3">
+                        <ProfileCard key={index} user={profile} />
+                    </div>
+                );
             })}
         ></AliceCarousel>
     );
