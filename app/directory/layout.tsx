@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import { getAllUserProfiles, getAuthUserProfile } from "../actions";
-import { ProfileProvider } from "./ProfileProvider";
+import { ProfileProvider } from "../../providers/ProfileProvider";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

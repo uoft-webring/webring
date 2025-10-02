@@ -5,7 +5,7 @@ import HorizontalProfileCard from "@/components/HorizontalProfileCard";
 import Filter from "@/components/Filter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useProfiles } from "./ProfileProvider";
+import { useProfiles } from "../../providers/ProfileProvider";
 import { SafeUserType } from "@/utils/zod";
 
 type SelectedFilters = {

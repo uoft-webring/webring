@@ -1,7 +1,7 @@
 import { getAuthUser } from "@/app/dashboard/actions";
 import { redirect } from "next/navigation";
 import Navbar from "@/components/Navbar";
-import { UserProvider } from "./UserProvider";
+import { UserProvider } from "../../providers/UserProvider";
 import Stepper from "../../components/Stepper";
 import { getAuthUserProfile } from "../actions";
 
