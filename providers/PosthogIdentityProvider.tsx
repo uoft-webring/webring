@@ -2,15 +2,17 @@
 
 import { useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { AuthChangeEvent } from "@supabase/supabase-js";
 import posthog from "posthog-js";
 import { posthogIdentifyUser } from "@/utils/posthog";
+import { PostHogProvider as PHProvider } from "posthog-js/react";
 
 export default function PosthogIdentityProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
             api_host: "/relay-OyIr",
             ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+            defaults: "2025-05-24",
+            person_profiles: "always",
             persistence: "localStorage+cookie",
         });
 
@@ -30,5 +32,5 @@ export default function PosthogIdentityProvider({ children }: { children: React.
         };
     }, []);
 
-    return <>{children}</>;
+    return <PHProvider client={posthog}>{children}</PHProvider>;
 }
