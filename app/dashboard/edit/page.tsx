@@ -5,7 +5,7 @@ import EditForm from "./Form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserType } from "@/utils/zod";
 import ProfileCard from "@/components/ProfileCard";
-import { useUser } from "../UserProvider";
+import { useUser } from "../../../providers/UserProvider";
 
 export default function Edit() {
     const user = useUser();
