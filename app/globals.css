@@ -220,12 +220,9 @@ body {
 
 /* Manifesto styles */
 
-@layer utilities {
-    .pulse-text {
-        animation: pulse 0.8s ease-in-out infinite;
-        font-weight: 600;
-        display: inline-block; /* Ensures the animation works correctly on a span */
-    }
+@theme {
+    --animate-pulse-text: pulse 0.8s ease-in-out infinite;
+    --animate-ghost: ghost-fade 5s ease-in-out infinite;
 
     @keyframes pulse {
         0% {
@@ -237,10 +234,6 @@ body {
         100% {
             color: #ffffff; /* Slowly shift back to white */
         }
-    }
-
-    .ghost {
-        animation: ghost-fade 5s ease-in-out infinite;
     }
 
     @keyframes ghost-fade {

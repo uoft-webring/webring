@@ -13,15 +13,15 @@ export default function Page() {
                 Yes, <span className="font-black">we said it.</span>
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
-                That PDF <span className="ghost">ghost</span>. That templated list. It made you invisible.
-                Another line item in a sea of sameness.
+                That PDF <span className="animate-ghost">ghost</span>. That templated list. It made you
+                invisible. Another line item in a sea of sameness.
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
                 <img src={resume.src} alt="(Insert your boring resume)" className="rounded-2xl" />
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
                 But your work isn't a line item. It's a story. Your portfolio is your{" "}
-                <span className="pulse-text">pulse</span>.
+                <span className="animate-pulse-text font-semibold">pulse</span>.
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">This is a rebellion.</p>
             <br />
