@@ -217,3 +217,34 @@ body {
         -moz-appearance: textfield;
     }
 }
+
+/* Manifesto styles */
+
+@theme {
+    --animate-pulse-text: pulse 0.8s ease-in-out infinite;
+    --animate-ghost: ghost-fade 5s ease-in-out infinite;
+
+    @keyframes pulse {
+        0% {
+            color: #ffffff; /* Start at white */
+        }
+        10% {
+            color: #f88; /* Rapidly shift to red */
+        }
+        100% {
+            color: #ffffff; /* Slowly shift back to white */
+        }
+    }
+
+    @keyframes ghost-fade {
+        0% {
+            opacity: 0.25;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            opacity: 0.25;
+        }
+    }
+}
