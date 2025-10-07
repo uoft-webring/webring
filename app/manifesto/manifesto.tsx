@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export default function Manifesto() {
     return (
-        <div className="flex max-w-2xl flex-col px-4 py-8" style={{ background: "none" }}>
+        <div className="flex max-w-4xl flex-col px-4 py-8" style={{ background: "none" }}>
             <br />
             <p
                 className="tag mb-[1.25ch] text-[1.125rem] font-medium tracking-[0.1em] uppercase opacity-60"
