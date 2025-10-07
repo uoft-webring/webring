@@ -13,9 +13,9 @@ const ExampleComponent = () => {
                 "We are the choice to stand out.",
                 1000,
             ]}
-            wrapper="h2"
+            wrapper="p"
             speed={50}
-            style={{ display: "inline-block", fontSize: "2.25rem", fontWeight: "800" }}
+            style={{ display: "inline-block" }}
             repeat={Infinity}
         />
     );
