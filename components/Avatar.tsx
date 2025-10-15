@@ -14,6 +14,7 @@ type AvatarProps = {
     verifiedSize?: string;
     width?: number;
     height?: number;
+    lazyLoading?: boolean;
 };
 
 // Do not remove until a few months into production
@@ -24,7 +25,14 @@ function cloudfrontLoader({ src }: ImageLoaderProps) {
     return url.href;
 }
 
-export default function Avatar({ user, className, verifiedSize = "size-9", width, height }: AvatarProps) {
+export default function Avatar({
+    user,
+    className,
+    verifiedSize = "size-9",
+    width,
+    height,
+    lazyLoading,
+}: AvatarProps) {
     const alt = `${user.name}'s profile picture`;
     const classList = cn(
         "aspect-square object-cover pointer-events-none select-none rounded-full",
@@ -51,7 +59,7 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
                     height={height || 90}
                     draggable={false}
                     className={classList}
-                    loading="lazy"
+                    loading={lazyLoading ? "lazy" : "eager"}
                     fetchPriority="high" /* https://web.dev/articles/image-cdns#lcp-effects */
                 />
             ) : (
