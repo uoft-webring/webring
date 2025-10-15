@@ -14,21 +14,25 @@ type AvatarProps = {
     verifiedSize?: string;
     width?: number;
     height?: number;
+    lazyLoading?: boolean;
 };
 
+// Do not remove until a few months into production
 // Docs: https://aws.amazon.com/developer/application-security-performance/articles/image-optimization
-function cloudfrontLoader({ src, width }: ImageLoaderProps) {
+function cloudfrontLoader({ src }: ImageLoaderProps) {
     /* I bet not even Guilermo Rauch can figure out how to load cloudfront images without this loader */
     const url = new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${src}`);
-    url.searchParams.set("format", "avif");
-    url.searchParams.set("width", width.toString());
-    url.searchParams.set("quality", Math.min(50, Math.max(30, width / 20)).toString()); // adaptive quality
-    url.searchParams.set("fit", "max"); // avoid scaling artifacts
-    url.searchParams.set("metadata", "none"); // strip metadata
     return url.href;
 }
 
-export default function Avatar({ user, className, verifiedSize = "size-9", width, height }: AvatarProps) {
+export default function Avatar({
+    user,
+    className,
+    verifiedSize = "size-9",
+    width,
+    height,
+    lazyLoading,
+}: AvatarProps) {
     const alt = `${user.name}'s profile picture`;
     const classList = cn(
         "aspect-square object-cover pointer-events-none select-none rounded-full",
@@ -44,15 +48,18 @@ export default function Avatar({ user, className, verifiedSize = "size-9", width
         <div className="relative aspect-square rounded-full ring-2">
             {user.image_key ? (
                 <Image
-                    loader={cloudfrontLoader}
-                    src={user.image_key}
+                    /*  loader={cloudfrontLoader}*/
+                    src={
+                        new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${user.image_key}`)
+                            .href
+                    }
                     alt={alt}
                     priority={false}
                     width={width || 90}
                     height={height || 90}
                     draggable={false}
                     className={classList}
-                    loading="lazy"
+                    loading={lazyLoading ? "lazy" : "eager"}
                     fetchPriority="high" /* https://web.dev/articles/image-cdns#lcp-effects */
                 />
             ) : (

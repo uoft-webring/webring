@@ -34,7 +34,7 @@ export default function Navbar({
             {user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger className="outline-none focus:outline-none">
-                        <Avatar user={user} className="w-12" verifiedSize="size-5" />
+                        <Avatar user={user} className="w-12" verifiedSize="size-5" lazyLoading={false} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="text-md rounded-xl">
                         <Link href="/">

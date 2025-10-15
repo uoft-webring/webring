@@ -1,5 +1,3 @@
-"use server";
-
 import { getAllUserProfiles } from "./actions";
 
 import Link from "next/link";
