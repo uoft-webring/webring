@@ -29,11 +29,17 @@ export default function Footer() {
                         <div className="flex w-full max-w-md items-center justify-between gap-4">
                             <Logo />
                             <div className="bg-secondary/40 flex items-center justify-center gap-2 rounded-full px-2.5 py-1.5">
-                                <Link href="https://uoftwebring.com/redirect?nav=prev&id=0">
+                                <Link
+                                    href="https://uoftwebring.com/redirect?nav=prev&id=0"
+                                    aria-label="Previous Site"
+                                >
                                     <ArrowLeftIcon />
                                 </Link>
                                 <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
-                                <Link href="https://uoftwebring.com/redirect?nav=next&id=0">
+                                <Link
+                                    href="https://uoftwebring.com/redirect?nav=next&id=0"
+                                    aria-label="Next Site"
+                                >
                                     <ArrowRightIcon />
                                 </Link>
                             </div>
@@ -49,9 +55,9 @@ export default function Footer() {
                     <div className="hidden md:col-span-2 md:grid md:grid-cols-2 md:gap-8">
                         {/* Profile Section */}
                         <div>
-                            <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase dark:text-white">
+                            <h4 className="text-sm font-semibold tracking-wider text-gray-900 uppercase dark:text-white">
                                 Profile
-                            </h3>
+                            </h4>
                             <ul className="mt-4 space-y-3">
                                 <li>
                                     <Link
@@ -66,9 +72,9 @@ export default function Footer() {
                         </div>
                         {/* Learn more Section */}
                         <div>
-                            <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase dark:text-white">
+                            <h4 className="text-sm font-semibold tracking-wider text-gray-900 uppercase dark:text-white">
                                 Learn more
-                            </h3>
+                            </h4>
                             <ul className="mt-4 space-y-3">
                                 <li>
                                     <Link
