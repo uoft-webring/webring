@@ -1,8 +1,5 @@
-export const dynamic = "force-dynamic";
+import { redirect } from "next/navigation";
 
-import { notFound } from "next/navigation";
-
-// Catch all garbage routes and trigger a 404
 export default function DashboardCatchAll() {
-    notFound();
+    redirect("/dashboard/edit");
 }
