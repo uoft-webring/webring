@@ -26,7 +26,11 @@ export default function ProfileCard({
                 className
             )}
         >
-            <Avatar user={user} className="ring-primary/20 h-26 w-26 rounded-full" />
+            <Avatar
+                user={user}
+                className="ring-primary/20 h-26 w-26 rounded-full"
+                lazyLoading={user.ring_id < 3 ? false : true}
+            />
 
             <h2 className="text-center text-2xl font-bold capitalize">{user.name}</h2>
 
