@@ -35,7 +35,7 @@ export const User = z.object({
     email: z
         .string()
         .email({ message: "Please enter an email address." })
-        .refine((email) => /@((.+\.)?)mail\.utoronto\.ca$/i.test(email), {
+        .refine((email) => /@((.+\.)?)utoronto\.ca$/i.test(email), {
             message: 'Please use a "@mail.utoronto.ca" or subdomain email.',
         }),
     ring_id: z.number().int().nonnegative(),
