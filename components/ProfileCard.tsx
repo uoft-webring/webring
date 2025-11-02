@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { SafeUserType } from "@/utils/zod";
 import Avatar from "./Avatar";
 import ShareButton from "./ShareButton";
+import Link from "next/link";
 
 export default function ProfileCard({
     user,
@@ -32,7 +33,9 @@ export default function ProfileCard({
                 lazyLoading={user.ring_id < 3 ? false : true}
             />
 
-            <h2 className="text-center text-2xl font-bold capitalize">{user.name}</h2>
+            <h2 className="text-center text-2xl font-bold capitalize hover:underline">
+                <Link href={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${user.slug}`}>{user.name}</Link>
+            </h2>
 
             <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
                 {user.program && <span>{user.program}</span>}
