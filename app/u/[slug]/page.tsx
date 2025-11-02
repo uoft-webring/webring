@@ -78,8 +78,8 @@ export default async function User({ params }: { params: Promise<{ slug: string 
             <div className="container mx-auto max-w-7xl flex-1 px-6 py-5">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
                     {/* Profile Sidebar */}
-                    <aside className="space-y-8 lg:col-span-1">
-                        <div className="bg-card border-border sticky top-8 rounded-3xl border p-8 shadow-lg">
+                    <aside className="space-y-8 self-start lg:sticky lg:top-8 lg:col-span-1">
+                        <div className="bg-card border-border rounded-3xl border p-8 shadow-lg">
                             <div className="flex flex-col items-center text-center">
                                 {data.image_key && <Avatar user={data} className="h-32 w-32" />}
 
