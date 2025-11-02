@@ -10,7 +10,8 @@ export const parseEmail = (email: any) => {
             (email) =>
                 email.toLowerCase().endsWith("@mail.utoronto.ca") ||
                 email.toLowerCase().endsWith("@alum.utoronto.ca") ||
-                email.toLowerCase().endsWith("@alumni.utoronto.ca"),
+                email.toLowerCase().endsWith("@alumni.utoronto.ca") ||
+                email.toLowerCase().endsWith("@utoronto.ca"),
             {
                 message: 'Please use an "@mail.utoronto.ca" email or an alumni email.',
             }
@@ -34,8 +35,8 @@ export const User = z.object({
     email: z
         .string()
         .email({ message: "Please enter an email address." })
-        .refine((email) => email.toLowerCase().endsWith("@mail.utoronto.ca"), {
-            message: 'Please use an "@mail.utoronto.ca" email.',
+        .refine((email) => /@((.+\.)?)mail\.utoronto\.ca$/i.test(email), {
+            message: 'Please use a "@mail.utoronto.ca" or subdomain email.',
         }),
     ring_id: z.number().int().nonnegative(),
     id: z.string(),
