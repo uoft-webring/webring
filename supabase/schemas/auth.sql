@@ -36,7 +36,7 @@ create function check_uoft_email()
 returns trigger as $$
 
 begin
-    if right(new.email, position('@' in reverse(new.email))) like '%utoronto.ca%' then
+    if position(reverse('utoronto.ca') in reverse(new.email)) = 0 then
         return new;
     else
         return null;
