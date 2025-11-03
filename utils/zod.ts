@@ -6,15 +6,9 @@ export const parseEmail = (email: any) => {
         .string()
         .email({ message: "Please enter an email address." })
         .transform((val) => val.toLowerCase())
-        .refine(
-            (email) =>
-                email.toLowerCase().endsWith("@mail.utoronto.ca") ||
-                email.toLowerCase().endsWith("@alum.utoronto.ca") ||
-                email.toLowerCase().endsWith("@alumni.utoronto.ca"),
-            {
-                message: 'Please use an "@mail.utoronto.ca" email or an alumni email.',
-            }
-        );
+        .refine((email) => email.toLowerCase().endsWith("utoronto.ca"), {
+            message: "Please use an utoronto.ca email.",
+        });
     return emailSchema.safeParse(email);
 };
 
@@ -34,8 +28,8 @@ export const User = z.object({
     email: z
         .string()
         .email({ message: "Please enter an email address." })
-        .refine((email) => email.toLowerCase().endsWith("@mail.utoronto.ca"), {
-            message: 'Please use an "@mail.utoronto.ca" email.',
+        .refine((email) => email.toLowerCase().endsWith("utoronto.ca"), {
+            message: "Please use a utoronto.ca.",
         }),
     ring_id: z.number().int().nonnegative(),
     id: z.string(),
