@@ -40,16 +40,13 @@ function checkImageDimensions(
                 if (img.width === 0 || img.height === 0) {
                     return resolve({ success: false, reason: "Invalid image dimensions" });
                 }
-                // Check if img width or height is bigger than page
-                if (typeof window !== "undefined") {
-                    const maxW = window.innerWidth * 2;
-                    const maxH = window.innerHeight * 2;
-                    if (img.width > maxW || img.height > maxH) {
-                        return resolve({
-                            success: false,
-                            reason: `Image is too large (${img.width}×${img.height}px). Max is ${maxW}×${maxH}px. Try resizing it first.`,
-                        });
-                    }
+                // Profile pictures are displayed at 90px but we accept up to 4096px for quality
+                const maxDimension = 4096;
+                if (img.width > maxDimension || img.height > maxDimension) {
+                    return resolve({
+                        success: false,
+                        reason: `Image is too large (${img.width}×${img.height}px). Max is ${maxDimension}×${maxDimension}px.`,
+                    });
                 }
 
                 const dimensionRatio = Math.max(img.width, img.height) / Math.min(img.width, img.height);
