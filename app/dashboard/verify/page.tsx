@@ -5,6 +5,7 @@ import { checkDomainRecords, getDomainVerification, getTXTRecordValue } from "..
 import CodeSnippet from "@/components/CodeSnippet";
 import { getAuthUserProfile } from "@/app/actions";
 import { redirect } from "next/navigation";
+import VerifyResult from "./VerifyResult";
 
 export default async function Verify() {
     const { data: userData, error: userError } = await getAuthUserProfile();
@@ -22,9 +23,9 @@ export default async function Verify() {
         "use server";
         const result = await checkDomainRecords();
         if (result) {
-            // we want to trigger a UI refresh
             redirect("/dashboard/verify");
         }
+        return result;
     };
 
     return (
@@ -47,11 +48,7 @@ export default async function Verify() {
                 showButton={false}
                 showCTA={false}
             />
-            {!isVerified && (
-                <form action={action}>
-                    <RecheckButton />
-                </form>
-            )}
+            {!isVerified && <VerifyResult action={action} />}
         </>
     );
 }

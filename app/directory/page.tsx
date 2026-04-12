@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState, useDeferredValue, useCallback } from "react";
+import { useMemo, useState, useDeferredValue, useCallback, useEffect } from "react";
 import HorizontalProfileCard from "@/components/HorizontalProfileCard";
 import Filter from "@/components/Filter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useProfiles } from "../../providers/ProfileProvider";
 import { SafeUserType } from "@/utils/zod";
+
+const PAGE_SIZE = 20;
 
 type SelectedFilters = {
     tags: string | null;
@@ -92,6 +94,15 @@ export default function DirectoryPage() {
         // Every time the user types, the index is recomputed or the selected filters change, then this filter is run
     }, [index, deferredQuery, selected]);
 
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+    // Reset pagination when filters/search change
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [deferredQuery, selected]);
+
+    const visibleProfiles = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+
     const clearAll = () => {
         setQuery("");
         setSelected({ tags: null, programs: null, "Graduation Years": null });
@@ -141,9 +152,8 @@ export default function DirectoryPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                    {filtered.map((p: any) => (
-                        /* TODO: after domain is made unique this wont matter */
-                        <HorizontalProfileCard key={String(p.domain + p.ring_id)} user={p} />
+                    {visibleProfiles.map((p: any) => (
+                        <HorizontalProfileCard key={p.ring_id} user={p} />
                     ))}
                     {filtered.length === 0 && (
                         <div className="text-muted-foreground mt-6 flex flex-col items-center gap-2 text-center">
@@ -154,6 +164,17 @@ export default function DirectoryPage() {
                             <span className="text-xs italic opacity-70">
                                 Try changing filters or search terms
                             </span>
+                        </div>
+                    )}
+                    {visibleCount < filtered.length && (
+                        <div className="flex justify-center py-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                                className="rounded-xl"
+                            >
+                                Show more ({filtered.length - visibleCount} remaining)
+                            </Button>
                         </div>
                     )}
                 </div>
