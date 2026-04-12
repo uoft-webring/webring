@@ -46,3 +46,4 @@ react-email-starter/node_modules
 .agents/
 .claude/skills/
 skills-lock.json
+supabase/seed.sql
