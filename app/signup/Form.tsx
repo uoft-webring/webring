@@ -30,22 +30,36 @@ export default function SignupForm() {
             const name = nameRef.current.value;
             const nameParseResult = parseName(name);
 
-            // Parsing success or faliure
+            // Parsing success or failure
             if (emailParseResult.success && nameParseResult.success) {
-                const { error } = await signUpAction(name, email);
-                if (error) {
-                    setEmailError("Email registered");
-                } else {
-                    router.push(`/auth/confirm?email=${email}`);
+                try {
+                    const { error } = await signUpAction(name, email);
+                    if (error) {
+                        setEmailError(typeof error === "string" ? error : "Email already registered.");
+                        setIsFormDisabled(false);
+                    } else {
+                        // Keep disabled during navigation to prevent double-submit
+                        router.push(`/auth/confirm?email=${email}`);
+                    }
+                } catch (err: any) {
+                    const isNetwork =
+                        err?.message?.includes("fetch") || err?.message?.includes("network");
+                    console.error("Signup action failed:", err?.message, err);
+                    setEmailError(
+                        isNetwork
+                            ? "Could not reach the server. Please reload and try again."
+                            : "Something went wrong. Please try again."
+                    );
+                    setIsFormDisabled(false);
                 }
             } else {
-                setIsFormDisabled(false);
                 setEmailError(emailParseResult?.error?.errors[0]?.message || "");
                 setNameError(nameParseResult?.error?.errors[0]?.message || "");
+                setIsFormDisabled(false);
             }
+        } else {
             setIsFormDisabled(false);
         }
-        setIsFormDisabled(false);
     };
 
     return (

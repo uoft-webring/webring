@@ -9,7 +9,7 @@ export const signUpAction = async (name: string, email: string) => {
     const { data } = await supabase.from("profile").select("*").eq("email", email);
 
     if (data?.length) {
-        return { error: 1 };
+        return { error: "Email already registered." };
     }
 
     const { error } = await supabase.auth.signInWithOtp({
@@ -26,7 +26,7 @@ export const signUpAction = async (name: string, email: string) => {
 
     if (error) {
         console.error(error.code + " " + error.message);
-        return { error };
+        return { error: error.message };
     } else {
         return {}; // return email in auth/confirm link as a search param
     }
