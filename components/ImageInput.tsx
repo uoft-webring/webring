@@ -42,9 +42,13 @@ function checkImageDimensions(
                 }
                 // Check if img width or height is bigger than page
                 if (typeof window !== "undefined") {
-                    // When we display the image, it's scaled down, so we check against half its size
-                    if (img.width / 2 > window.innerWidth || img.height / 2 > window.innerHeight) {
-                        return resolve({ success: false, reason: "Image dimensions too large" });
+                    const maxW = window.innerWidth * 2;
+                    const maxH = window.innerHeight * 2;
+                    if (img.width > maxW || img.height > maxH) {
+                        return resolve({
+                            success: false,
+                            reason: `Image is too large (${img.width}×${img.height}px). Max is ${maxW}×${maxH}px. Try resizing it first.`,
+                        });
                     }
                 }
 
@@ -52,7 +56,7 @@ function checkImageDimensions(
                 if (dimensionRatio > 2.3) {
                     return resolve({
                         success: false,
-                        reason: "Image aspect ratio too sharp",
+                        reason: "Image is too wide or tall. Use a squarer image (aspect ratio under 2.3:1).",
                     });
                 }
                 displayError("");
