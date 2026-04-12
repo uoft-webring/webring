@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     logging: {
         fetches: {
             fullUrl: true,
+            hmrRefreshes: true,
         },
     },
     poweredByHeader: false,
@@ -46,6 +47,8 @@ const nextConfig: NextConfig = {
                 pathname: "/**",
             },
         ],
+        // Disable Sharp-based optimization in dev to prevent SIGSEGV crashes
+        ...(process.env.NODE_ENV === "development" && { unoptimized: true }),
     },
     async rewrites() {
         return [

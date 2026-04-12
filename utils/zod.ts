@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { validateUrl } from "./zod-fetcher";
 
 export const parseEmail = (email: any) => {
     const emailSchema = z
@@ -51,8 +50,7 @@ export const User = z.object({
                 }
             },
             { message: "Invalid host format in URL." }
-        )
-        .refine(validateUrl, { message: "Please enter a live URL." }), // TODO: change to only fetch on save data
+        ),
     image_key: z
         .string()
         .regex(/^[a-zA-Z0-9_-]+\.avif$/, {
@@ -80,7 +78,7 @@ export const User = z.object({
     slug: z
         .string()
         .min(2, { message: "Slug must be at least 2 characters." })
-        .max(50, { message: "Slug must be at most 30 characters." })
+        .max(30, { message: "Slug must be at most 30 characters." })
         .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, {
             message: "Slug can only contain lowercase letters, numbers, and hyphens.",
         })
