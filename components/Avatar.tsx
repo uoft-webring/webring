@@ -48,19 +48,18 @@ export default function Avatar({
         <div className="relative aspect-square rounded-full ring-2">
             {user.image_key ? (
                 <Image
-                    /*  loader={cloudfrontLoader}*/
                     src={
                         new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${user.image_key}`)
                             .href
                     }
                     alt={alt}
-                    priority={false}
+                    priority={!lazyLoading}
                     width={width || 90}
                     height={height || 90}
                     draggable={false}
                     className={classList}
                     loading={lazyLoading ? "lazy" : "eager"}
-                    fetchPriority="high" /* https://web.dev/articles/image-cdns#lcp-effects */
+                    fetchPriority={lazyLoading ? "low" : "high"}
                 />
             ) : (
                 <Image

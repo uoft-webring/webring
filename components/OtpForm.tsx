@@ -8,16 +8,26 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AuthError } from "@supabase/supabase-js";
 
+const RESEND_COOLDOWN_SECONDS = 60;
+
 export default function OtpForm({ email }: { email: string }) {
     const [code, setCode] = useState("");
     const [error, setError] = useState<string | undefined>(undefined);
     const [isPending, startTransition] = useTransition();
+    const [cooldown, setCooldown] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        // autofocus on load
         inputRef.current?.focus();
     }, []);
+
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const timer = setInterval(() => {
+            setCooldown((prev) => prev - 1);
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [cooldown]);
 
     const handleSubmit = (entered?: string) => {
         const value = (entered ?? code).trim();
@@ -25,8 +35,6 @@ export default function OtpForm({ email }: { email: string }) {
 
         startTransition(async () => {
             try {
-                // Verify token either redirects or throws an error
-                // We expect an error to be thrown otherwise we get nothing
                 const error: AuthError = await verifyToken(email, value);
                 setError(error.message);
             } finally {
@@ -42,11 +50,13 @@ export default function OtpForm({ email }: { email: string }) {
     };
 
     const onResend = async () => {
+        if (cooldown > 0) return;
         setError(undefined);
         await resendOtp(email);
-        // setCooldown(120); // 120 ms
+        setCooldown(RESEND_COOLDOWN_SECONDS);
         inputRef.current?.focus();
     };
+
     return (
         <CardForm
             cardTitle="Verify OTP"
@@ -84,11 +94,10 @@ export default function OtpForm({ email }: { email: string }) {
                         <Button
                             className="w-full"
                             onClick={onResend}
-                            // disabled={cooldown > 0 || isPending}
+                            disabled={cooldown > 0 || isPending}
                             aria-live="polite"
                         >
-                            {/* {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"} */}
-                            Resend
+                            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
                         </Button>
                     </div>
                 </div>

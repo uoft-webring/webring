@@ -35,16 +35,21 @@ export default function HorizontalProfileCard({
                     <h2 className="[font-size:clamp(1.5rem,2vw+1rem,2.25rem)] font-semibold capitalize">
                         {user.name}
                     </h2>
-                    {user.graduation_year && user.program && (
+                    {(user.program || user.graduation_year) && (
                         <p className="[font-size:clamp(0.875rem,1vw+0.5rem,1rem)]">
-                            {user.program} • {user.graduation_year}
+                            {user.program}
+                            {user.program && user.graduation_year && " • "}
+                            {user.graduation_year}
                         </p>
                     )}
                 </div>
             </div>
 
             {/* Right side: buttons */}
-            <div className="hidden flex-row gap-2 sm:flex sm:flex-col sm:items-center sm:gap-4">
+            <div
+                className="hidden flex-row gap-2 sm:flex sm:flex-col sm:items-center sm:gap-4"
+                onClick={(e) => e.stopPropagation()}
+            >
                 {user.domain && (
                     <LinkButton
                         url={user.domain}

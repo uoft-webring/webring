@@ -13,7 +13,9 @@ export default function ShareButton({ title, url }: { title: string; url: string
                     title: title,
                     url: url,
                 });
-            } catch (err) {
+            } catch (err: any) {
+                // User cancelled the share dialog — not an error
+                if (err?.name === "AbortError") return;
                 toast.error("We're sorry! Something went wrong. Please try again later.", {
                     duration: 1000,
                 });
