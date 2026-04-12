@@ -1,13 +1,13 @@
 import { getAllUserProfiles } from "./actions";
 
 import Link from "next/link";
-import ProfileCarousel from "../components/homeComponents/Carousel";
+import LazyCarousel from "../components/homeComponents/LazyCarousel";
 import Navbar from "@/components/Navbar";
 
 import { ScrollText } from "../components/homeComponents/ScrollText";
 import { Button } from "@/components/ui/button";
 import { getAuthUserProfile } from "./actions";
-import { WebRing } from "@/components/Ring/WebRing";
+import { LazyWebRing } from "@/components/Ring/LazyWebRing";
 
 export default async function Home() {
     const { data: ringProfiles, error: ringProfilesError } = await getAllUserProfiles();
@@ -21,7 +21,7 @@ export default async function Home() {
         <div className="bg-background flex min-h-screen flex-col">
             <Navbar user={userData} />
             <div className="overflow-clip">
-                <WebRing data={ringProfiles} />
+                <LazyWebRing data={ringProfiles} />
                 <div className="w-full px-4">
                     <div className="flex w-full flex-row items-center justify-center">
                         <h2 className="w-min text-center text-xl sm:text-3xl md:text-3xl lg:text-4xl">
@@ -38,7 +38,7 @@ export default async function Home() {
                     </div>
 
                     <div className="mx-auto max-w-[85rem] items-center overflow-clip">
-                        {ringProfiles ? <ProfileCarousel data={ringProfiles} /> : <p>No data</p>}
+                        {ringProfiles ? <LazyCarousel data={ringProfiles} /> : <p>No data</p>}
                     </div>
                 </div>
             </div>
@@ -88,9 +88,7 @@ export default async function Home() {
                 </div>
 
                 <div className="flex flex-1 flex-col items-center">
-                    <h1 className="mb-6 text-2xl/8 md:text-2xl/8 lg:text-4xl/14">
-                        Check out The Webring Directory
-                    </h1>
+                    <h1 className="mb-6 text-2xl/8 md:text-2xl/8 lg:text-4xl/14">Check out The Directory</h1>
                     <Link href="/directory">
                         <Button className="hidden h-12 px-6 text-lg font-semibold lg:block">
                             Go to The Directory!

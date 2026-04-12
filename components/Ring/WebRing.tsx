@@ -19,6 +19,55 @@ import { Button } from "../ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+function SpinningSphere({
+    user,
+    index,
+    position,
+}: {
+    user: SafeUserType;
+    index: number;
+    position: [number, number, number];
+}) {
+    const ref = useRef<THREE.Group>(null);
+    const speeds = useMemo(
+        () => ({
+            x: (1 + (index % 5)) * ROTATION_SPEED * 6,
+            y: (1 + (index % 3)) * ROTATION_SPEED * 3,
+            z: (1 + (index % 2)) * ROTATION_SPEED * 9,
+        }),
+        [index]
+    );
+
+    useFrame((_, delta) => {
+        if (ref.current) {
+            ref.current.rotation.x -= delta * speeds.x;
+            ref.current.rotation.y -= delta * speeds.y;
+            ref.current.rotation.z -= delta * speeds.z;
+        }
+    });
+
+    return (
+        <group ref={ref} position={position}>
+            <Sphere
+                args={[1, 8, 8]}
+                scale={1}
+                onPointerOver={() => (document.body.style.cursor = "pointer")}
+                onPointerOut={() => (document.body.style.cursor = "default")}
+                onClick={() => window.open(user.domain, "_blank")}
+            >
+                <meshBasicMaterial color="#fff" wireframe />
+            </Sphere>
+            <Suspense fallback={<></>}>
+                <Billboard>
+                    <Text fontSize={0.4} position={[0, -1.2, 0]}>
+                        {user.domain}
+                    </Text>
+                </Billboard>
+            </Suspense>
+        </group>
+    );
+}
+
 export function WebRing({ data }: { data: SafeUserType[] }) {
     const [fullSize, setFullSize] = useState<boolean>(false);
     const toggleSize = () => {
@@ -31,7 +80,7 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
             className={cn(
                 "relative mb-8 flex w-full max-w-svw flex-col items-center justify-center transition-all",
                 { "h-[calc(100svh-6rem)]": fullSize },
-                { "h-[calc(100svh-36rem)]": !fullSize }
+                { "h-[max(12rem,calc(100svh-36rem))]": !fullSize }
             )}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
@@ -56,12 +105,16 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
 function Scene({ data }: { data: SafeUserType[] }) {
     const planeRef = useRef<THREE.Mesh>(null);
     const groupRef = useRef<THREE.Group>(null);
+    const ringGroupRef = useRef<THREE.Group>(null);
     const simplex = useMemo(() => new SimplexNoise(), []);
-    const [rotation, setRotation] = useState(0);
+    const rotationRef = useRef(0);
 
-    // Animate plane wave and rotation
+    // Animate rotation without triggering React re-renders
     useFrame((_, delta) => {
-        setRotation((prev) => prev - delta * ROTATION_SPEED);
+        rotationRef.current -= delta * ROTATION_SPEED;
+        if (ringGroupRef.current) {
+            ringGroupRef.current.rotation.y = rotationRef.current;
+        }
     });
 
     // Apply noise to plane vertices on mount
@@ -105,33 +158,11 @@ function Scene({ data }: { data: SafeUserType[] }) {
                 <ToneMapping />
             </EffectComposer>
 
-            <group position={[0, -2, 0]} rotation={[0, rotation, 0]}>
+            <group ref={ringGroupRef} position={[0, -2, 0]}>
                 {data.map((user, index) => {
                     const pos = getSpherePosition(index, data.length);
-                    const rot: [x: number, y: number, z: number] = [
-                        (1 + (index % 5)) * rotation * 6,
-                        (1 + (index % 3)) * rotation * 3,
-                        (1 + (index % 2)) * rotation * 9,
-                    ];
                     return (
-                        <group key={index} position={pos} rotation={rot}>
-                            <Sphere
-                                args={[1, 8, 8]}
-                                scale={1}
-                                onPointerOver={() => (document.body.style.cursor = "pointer")}
-                                onPointerOut={() => (document.body.style.cursor = "default")}
-                                onClick={() => window.open(user.domain, "_blank")}
-                            >
-                                <meshBasicMaterial color="#fff" wireframe />
-                            </Sphere>
-                            <Suspense fallback={<></>}>
-                                <Billboard>
-                                    <Text fontSize={0.4} position={[0, -1.2, 0]}>
-                                        {user.domain}
-                                    </Text>
-                                </Billboard>
-                            </Suspense>
-                        </group>
+                        <SpinningSphere key={user.ring_id} user={user} index={index} position={pos} />
                     );
                 })}
             </group>
