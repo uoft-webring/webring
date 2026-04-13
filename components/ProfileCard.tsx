@@ -34,7 +34,7 @@ export default function ProfileCard({
             />
 
             <h2 className="text-center text-2xl font-bold capitalize hover:underline">
-                <Link href={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${user.slug}`}>{user.name}</Link>
+                <Link href={`/u/${user.slug}`}>{user.name}</Link>
             </h2>
 
             <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
@@ -59,12 +59,12 @@ export default function ProfileCard({
                     <a
                         href={`https://github.com/${user.github_url}`}
                         target="_blank"
-                        rel="noopener noreferrer nofollow"
+                        rel="noopener"
                         className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={gitHubIcon}
-                            alt="GitHub"
+                            alt=""
                             width={20}
                             height={20}
                             decoding="async"
@@ -78,12 +78,12 @@ export default function ProfileCard({
                     <a
                         href={user.domain}
                         target="_blank"
-                        rel="noopener noreferrer nofollow"
+                        rel="noopener"
                         className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                     >
                         <Image
                             src={portfolioIcon}
-                            alt="Website"
+                            alt=""
                             width={20}
                             height={20}
                             decoding="async"

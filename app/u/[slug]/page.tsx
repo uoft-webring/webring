@@ -1,4 +1,4 @@
-import { getUserProfile } from "@/app/actions";
+import { getUserProfile, getAuthUserProfile } from "@/app/actions";
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -41,7 +41,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function User({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const { data, error } = await getUserProfile(slug);
+    const [{ data, error }, { data: authUser }] = await Promise.all([
+        getUserProfile(slug),
+        getAuthUserProfile(),
+    ]);
 
     if (error || !data) notFound();
 
@@ -73,13 +76,13 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                 }}
             />
 
-            <Navbar user={data} />
+            <Navbar user={authUser} />
 
             <div className="container mx-auto max-w-7xl flex-1 px-6 py-5">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
                     {/* Profile Sidebar */}
                     <aside className="space-y-8 self-start lg:sticky lg:top-8 lg:col-span-1">
-                        <div className="bg-card border-border rounded-3xl border p-8 shadow-lg">
+                        <div className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-8">
                             <div className="flex flex-col items-center text-center">
                                 {data.image_key && <Avatar user={data} className="h-32 w-32" />}
 
@@ -128,12 +131,12 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                                         <a
                                             href={data.domain}
                                             target="_blank"
-                                            rel="noopener noreferrer nofollow"
+                                            rel="noopener"
                                             className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                                         >
                                             <Image
                                                 src={portfolioIcon}
-                                                alt="Website"
+                                                alt=""
                                                 width={20}
                                                 height={20}
                                                 decoding="async"
@@ -148,12 +151,12 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                                         <a
                                             href={`https://github.com/${data.github_url}`}
                                             target="_blank"
-                                            rel="noopener noreferrer nofollow"
+                                            rel="noopener"
                                             className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
                                         >
                                             <Image
                                                 src={gitHubIcon}
-                                                alt="GitHub"
+                                                alt=""
                                                 width={20}
                                                 height={20}
                                                 decoding="async"
@@ -187,8 +190,8 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                     </aside>
 
                     <main className="space-y-10 lg:col-span-3">
-                        <section className="bg-card border-border rounded-3xl border p-10 shadow-lg">
-                            <h2 className="mb-6 flex items-center gap-3 text-3xl font-bold capitalize">
+                        <section className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-10">
+                            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold capitalize sm:text-3xl">
                                 <UserIcon className="text-primary h-7 w-7" />
                                 About {data.name}
                             </h2>

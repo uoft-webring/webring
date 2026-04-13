@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { createAvatar } from "@dicebear/core";
 import { personas } from "@dicebear/collection";
@@ -31,22 +32,23 @@ export default function Avatar({
     verifiedSize = "size-9",
     width,
     height,
-    lazyLoading,
+    lazyLoading = true,
 }: AvatarProps) {
+    const [imgError, setImgError] = useState(false);
     const alt = `${user.name}'s profile picture`;
     const classList = cn(
         "aspect-square object-cover pointer-events-none select-none rounded-full",
         className
     );
     const seed = user.name || "user";
-    const svg = createAvatar(personas, {
-        seed: seed.toString(),
-        size: width || 90,
-    }).toDataUri();
+    const fallbackSvg = useMemo(
+        () => createAvatar(personas, { seed: seed.toString(), size: width || 90 }).toDataUri(),
+        [seed, width]
+    );
 
     return (
         <div className="relative aspect-square rounded-full ring-2">
-            {user.image_key ? (
+            {user.image_key && !imgError ? (
                 <Image
                     src={
                         new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${user.image_key}`)
@@ -56,15 +58,16 @@ export default function Avatar({
                     priority={!lazyLoading}
                     width={width || 90}
                     height={height || 90}
-                    unoptimized
+                    sizes={`${width || 90}px`}
                     draggable={false}
                     className={classList}
                     loading={lazyLoading ? "lazy" : "eager"}
                     fetchPriority={lazyLoading ? "low" : "high"}
+                    onError={() => setImgError(true)}
                 />
             ) : (
                 <Image
-                    src={svg}
+                    src={fallbackSvg}
                     width={width || 90}
                     height={height || 90}
                     alt={alt}

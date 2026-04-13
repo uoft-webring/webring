@@ -38,41 +38,39 @@ export default function Navbar({
                     <DropdownMenuTrigger className="outline-none focus:outline-none">
                         <Avatar user={user} className="w-12" verifiedSize="size-5" lazyLoading={false} />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="text-md rounded-xl">
+                    <DropdownMenuContent align="end" className="min-w-[10rem] rounded-xl p-2">
                         <Link href="/">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
                                 <Home className="mr-2 h-4 w-4" />
                                 Home
                             </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuSeparator />
                         <Link href="/dashboard/edit" prefetch={true}>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
                                 <LayoutDashboard className="mr-2 h-4 w-4" />
-                                Dashboard
+                                Edit Profile
                             </DropdownMenuItem>
                         </Link>
                         <Link href={`/u/${user.slug}`}>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
                                 <User className="mr-2 h-4 w-4" />
-                                Profile
+                                My Page
                             </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuSeparator />
                         <Link href="/directory" prefetch={false}>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
                                 <Contact className="mr-2 h-4 w-4" />
                                 Directory
                             </DropdownMenuItem>
                         </Link>
                         <Link href="/manifesto">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
                                 <BookOpenText className="mr-2 h-4 w-4" />
                                 Manifesto
                             </DropdownMenuItem>
                         </Link>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={signOutAction}>
+                        <DropdownMenuItem onClick={signOutAction} className="cursor-pointer rounded-lg px-3 py-2.5">
                             <LogOut className="mr-2 h-4 w-4" />
                             Sign Out
                         </DropdownMenuItem>

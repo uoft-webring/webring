@@ -67,9 +67,33 @@ export default async function DirectoryLayout({ children }: { children: React.Re
         "Graduation Years": graduationYears,
     } as const;
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "UofT Webring Directory",
+        description: "A directory of University of Toronto students and their personal websites.",
+        numberOfItems: ringProfiles.length,
+        itemListElement: ringProfiles.slice(0, 50).map((p: any, i: number) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+                "@type": "Person",
+                name: p.name,
+                url: `https://uoftwebring.com/u/${p.slug}`,
+                ...(p.domain && { sameAs: p.domain }),
+            },
+        })),
+    };
+
     return (
         <ProfileProvider profiles={ringProfiles as any} filterMetrics={filterMetrics as any}>
             <div className="bg-background flex min-h-screen flex-col">
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+                    }}
+                />
                 <Navbar user={userData} />
                 {children}
             </div>

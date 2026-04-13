@@ -5,12 +5,11 @@ import Image from "next/image";
 import copyIcon from "@/icons/copy.svg";
 import checkIcon from "@/icons/clipboard-check.svg";
 import Prism from "prismjs";
-import prettier from "prettier/standalone";
-import htmlPlugin from "prettier/plugins/html";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
-import "prismjs/themes/prism-tomorrow.css"; // or prism-okaidia.css, prism.css, etc.
+import "prismjs/themes/prism-tomorrow.css";
 import "prismjs/components/prism-markup";
+import { formatCodeAction } from "@/app/format-code";
 
 export default function CodeSnippet({ codeString, width = "100%" }: { codeString: string; width?: string }) {
     const [copied, setCopied] = useState(false);
@@ -18,22 +17,11 @@ export default function CodeSnippet({ codeString, width = "100%" }: { codeString
 
     useEffect(() => {
         let ignore = false;
-        (async () => {
-            let formatted = codeString;
-
-            formatted = await prettier.format(codeString, {
-                parser: "html",
-                plugins: [htmlPlugin as any],
-                tabWidth: 4,
-                useTabs: false,
-                semi: false,
-                singleQuote: false,
-            });
-
+        formatCodeAction(codeString).then((formatted) => {
             if (ignore) return;
             const highlighted = Prism.highlight(formatted, Prism.languages.markup, "html");
             setHtml(highlighted);
-        })();
+        });
 
         return () => {
             ignore = true;

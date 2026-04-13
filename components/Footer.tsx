@@ -12,7 +12,7 @@ import { getAuthUserProfile } from "@/app/actions";
 function Logo() {
     return (
         <Link href="/" prefetch={false}>
-            <Image src={logo.src} alt="Logo" height={200} width={200} />
+            <Image src={logo} alt="UofT Webring Logo" width={1368} height={230} sizes="200px" className="h-auto w-[200px]" />
         </Link>
     );
 }

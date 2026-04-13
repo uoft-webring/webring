@@ -2,7 +2,7 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { PerspectiveCamera, OrbitControls, Sphere, Billboard, Text } from "@react-three/drei";
-import { useRef, useMemo, useState, useEffect, Suspense } from "react";
+import { useRef, useMemo, useState, useEffect, Suspense, useCallback } from "react";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/Addons.js";
 import { EffectComposer, Bloom, ToneMapping } from "@react-three/postprocessing";
@@ -74,9 +74,24 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
         setFullSize((fullSize) => !fullSize);
     };
 
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsVisible(entry.isIntersecting),
+            { rootMargin: "100px" }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
     if (!data) return <div></div>;
     return (
         <div
+            ref={containerRef}
             className={cn(
                 "relative mb-8 flex w-full max-w-svw flex-col items-center justify-center transition-all",
                 { "h-[calc(100svh-6rem)]": fullSize },
@@ -85,7 +100,11 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
         >
-            <Canvas gl={{ antialias: true, alpha: true }} className="h-full w-full">
+            <Canvas
+                gl={{ antialias: true, alpha: true }}
+                className="h-full w-full"
+                frameloop={isVisible ? "always" : "never"}
+            >
                 <Scene data={data} />
             </Canvas>
             <div className="mt-2 flex max-h-fit w-full flex-col items-center justify-center">
@@ -94,6 +113,7 @@ export function WebRing({ data }: { data: SafeUserType[] }) {
                     size="icon"
                     variant="outline"
                     onClick={toggleSize}
+                    aria-label={fullSize ? "Collapse 3D scene" : "Expand 3D scene"}
                 >
                     {fullSize ? <ChevronUp className="size-8" /> : <ChevronDown className="size-8" />}
                 </Button>

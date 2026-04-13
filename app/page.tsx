@@ -53,15 +53,14 @@ export default async function Home() {
                 />
             </section>
             {!userData && (
-                <section className="bg-card m-4">
-                    <div className="mx-auto flex min-h-[60svh] w-full max-w-[85rem] flex-col items-center justify-center p-6 [&>*]:text-center">
-                        <p className="mb-1 text-white/40 uppercase md:text-xl">guess what</p>
-                        <h1 className="mb-6 text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
+                <section className="m-4 rounded-2xl bg-card">
+                    <div className="mx-auto flex min-h-[40svh] w-full max-w-[85rem] flex-col items-center justify-center p-6 px-8 sm:px-16">
+                        <p className="mb-1 text-center text-white/40 uppercase md:text-xl">guess what</p>
+                        <h1 className="mb-6 text-center text-2xl/8 md:text-3xl/8 lg:text-5xl/14">
                             Getting yourself RING-ed up has never been easier!
                         </h1>
-                        <p className="mb-12 text-base text-white/80 md:text-xl lg:text-2xl">
-                            Get RING-ed up by signing up with your UofT email, entering your domain, and
-                            adding the custom UofT Webring navigation component to your portfolio website!
+                        <p className="mb-12 max-w-3xl text-pretty text-center text-base text-white/80 md:text-xl lg:text-2xl">
+                            Sign up with your UofT email, add your domain, and join the ring.
                         </p>
 
                         <Link href="/signup">

@@ -95,6 +95,7 @@ export const requestPresignedUrl = async () => {
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
         Key: s3Key,
         ContentType: "image/avif",
+        CacheControl: "public, max-age=31536000, immutable",
         StorageClass: "INTELLIGENT_TIERING",
     });
 

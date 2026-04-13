@@ -110,7 +110,7 @@ export default function DirectoryPage() {
 
     return (
         <div className="container mx-auto max-w-[75rem] px-4 py-6">
-            <h1 className="mb-6 skew-y-2 cursor-crosshair text-center text-5xl font-black tracking-widest underline decoration-pink-500 decoration-wavy drop-shadow-lg">
+            <h1 className="mb-6 skew-y-2 cursor-crosshair text-center text-3xl font-black tracking-widest underline decoration-pink-500 decoration-wavy drop-shadow-lg sm:text-5xl">
                 The Directory
             </h1>
             <div className="flex flex-col gap-4">

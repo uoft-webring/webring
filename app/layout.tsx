@@ -69,15 +69,28 @@ export default function RootLayout({
                 "@type": "WebSite",
                 url: "https://uoftwebring.com/",
                 name: "UofT Webring",
+                description,
+                potentialAction: {
+                    "@type": "SearchAction",
+                    target: {
+                        "@type": "EntryPoint",
+                        urlTemplate: "https://uoftwebring.com/directory?q={search_term_string}",
+                    },
+                    "query-input": "required name=search_term_string",
+                },
             },
             {
                 "@type": "Organization",
                 name: "UofT Webring",
                 url: "https://uoftwebring.com/",
+                description:
+                    "A community of University of Toronto students showcasing their personal websites and connecting through a webring.",
                 logo: {
                     "@type": "ImageObject",
                     url: "https://uoftwebring.com/logo.png",
                 },
+                sameAs: ["https://github.com/uoft-webring"],
+                foundingDate: "2025",
             },
             {
                 "@type": "BreadcrumbList",
@@ -106,6 +119,8 @@ export default function RootLayout({
     };
     return (
         <html lang="en" className={oxanium.variable}>
+            <head>
+            </head>
             <body className="dark scroll-smooth antialiased">
                 <script
                     type="application/ld+json"

@@ -1,12 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
-
-/*
- * Read the blog post here:
- * https://letsbuildui.dev/series/scroll-animations-with-framer-motion/highlighting-text-on-scroll
- */
+import { useRef, useCallback } from "react";
+import { useScroll, useTransform, useMotionValueEvent, MotionValue } from "framer-motion";
 
 export const ScrollText = ({ content }: { content: string[] }) => {
     const contentRef = useRef<HTMLHeadingElement | null>(null);
@@ -51,37 +46,35 @@ const ContentLine = ({
     end: number;
 }) => {
     const words = content.split(" ");
-    const lineLength = end - start;
+    const wordsRef = useRef<(HTMLSpanElement | null)[]>([]);
+    const lineProgress = useTransform(progress, [start, end], [0, 1]);
+
+    useMotionValueEvent(lineProgress, "change", (latest) => {
+        const count = words.length;
+        for (let i = 0; i < count; i++) {
+            const el = wordsRef.current[i];
+            if (!el) continue;
+            const wordStart = i / count;
+            const wordEnd = (i + 1) / count;
+            const t = (latest - wordStart) / (wordEnd - wordStart);
+            el.style.opacity = String(0.1 + 0.9 * Math.min(1, Math.max(0, t)));
+        }
+    });
+
+    const setRef = useCallback(
+        (i: number) => (el: HTMLSpanElement | null) => {
+            wordsRef.current[i] = el;
+        },
+        []
+    );
+
     return (
         <span className="flex flex-wrap justify-center font-light not-last:mb-10">
-            {words.map((word, index) => {
-                const w_start = start + lineLength * (index / words.length);
-                const w_end = w_start + lineLength * (1 / words.length);
-                return (
-                    <ContentWord key={index} word={word} start={w_start} end={w_end} progress={progress} />
-                );
-            })}
-        </span>
-    );
-};
-
-const ContentWord = ({
-    word,
-    start,
-    end,
-    progress,
-}: {
-    word: string;
-    start: number;
-    end: number;
-    progress: MotionValue<number>;
-}) => {
-    const opacity = useTransform(progress, [start, end], ["10%", "100%"]);
-    // const clipPathVal = useMotionTemplate`inset(0% ${scrollValue} 0% 0%)`;
-    return (
-        <span className="ml-2">
-            {/* <span className="absolute opacity-10">{word}</span> */}
-            <motion.span style={{ opacity: opacity }}>{word}</motion.span>
+            {words.map((word, i) => (
+                <span key={i} ref={setRef(i)} className="ml-2" style={{ opacity: 0.1 }}>
+                    {word}
+                </span>
+            ))}
         </span>
     );
 };
