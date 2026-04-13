@@ -16,8 +16,10 @@ import { BookOpenText, Contact, Home, LayoutDashboard, LogOut, User } from "luci
 
 export default function Navbar({
     user,
+    authAction,
 }: {
     user?: UserType | null;
+    authAction?: "signin" | "signup";
 } & React.ComponentPropsWithoutRef<"nav">) {
     return (
         <nav className="z-999 flex w-full max-w-[85rem] items-center justify-between self-center px-6 py-4">
@@ -77,8 +79,8 @@ export default function Navbar({
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
-                <Link prefetch={true} href={"/signup"}>
-                    <Button>Sign up</Button>
+                <Link prefetch={true} href={authAction === "signin" ? "/signin" : "/signup"}>
+                    <Button>{authAction === "signin" ? "Sign in" : "Sign up"}</Button>
                 </Link>
             )}
         </nav>

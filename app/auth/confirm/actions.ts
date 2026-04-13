@@ -16,18 +16,18 @@ export const verifyToken = async (email: string, token: string) => {
         console.error(authResponse.error.code + " " + authResponse.error.message);
         return authResponse.error;
     } else {
-        return redirect("/dashboard/edit"); // return email in auth/confirm link as a search param
+        return redirect("/dashboard/edit");
     }
 };
 
 export const resendOtp = async (email: string) => {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
             shouldCreateUser: true,
-            // emailRedirectTo: `${origin}/`,
+            emailRedirectTo: `${process.env.VERCEL_ENV === "preview" ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_HOME_DOMAIN}/auth/callback`,
         },
     });
 

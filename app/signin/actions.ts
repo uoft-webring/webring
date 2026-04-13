@@ -1,9 +1,9 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/server";
 
 export const signInAction = async (email: string) => {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     const { error } = await supabase.auth.signInWithOtp({
         email,

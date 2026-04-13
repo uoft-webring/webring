@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import pkg from "@/package.json";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Image from "next/image";
 import logo from "@/public/logo.png";
@@ -149,6 +150,9 @@ export default async function Footer() {
                 <div className="border-border mt-12 -mb-6 flex flex-col border-t pt-4 text-sm md:flex-row md:items-center md:justify-between">
                     <p className="w-full text-center text-sm leading-6 text-gray-500 md:text-left xl:text-center dark:text-gray-400">
                         Copyright © 2026 The UofT Webring. All rights reserved.
+                    </p>
+                    <p className="mt-1 text-center text-xs text-gray-600 md:mt-0 md:text-right dark:text-gray-600">
+                        v{pkg.version}
                     </p>
                 </div>
             </div>

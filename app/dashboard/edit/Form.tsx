@@ -62,7 +62,7 @@ export default function EditForm({
 
             setErrors(newErrors);
         }
-    }, 3000);
+    }, 1000);
 
     const saveToForm = (data: Record<string, any>) => {
         const newData = { ...formData, ...data };

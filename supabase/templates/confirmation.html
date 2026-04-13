@@ -53,7 +53,7 @@
               <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 16px; margin-bottom: 32px;">
                 <tr>
                   <td align="center">
-                    <a href="{{ .ConfirmationURL }}" style="background-color: #3b82f6; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">
+                    <a href="{{ .SiteURL }}auth/callback?token_hash={{ .TokenHash }}&type=magiclink" style="background-color: #3b82f6; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">
                       Sign In Automatically
                     </a>
                   </td>
@@ -77,7 +77,9 @@
               <p style="margin: 0; margin-top: 24px; color: #a1a1aa; font-size: 14px; line-height: 20px; text-align: center;">
                 UofT Webring |
                 <a href="https://uoftwebring.com" style="text-decoration: none; color: #ffffff;">https://uoftwebring.com</a>
-                | Learn why we do what we do
+              </p>
+              <p style="margin: 0; margin-top: 8px; color: #a1a1aa; font-size: 14px; line-height: 20px; text-align: center;">
+                Learn why we do what we do
                 <a href="https://uoftwebring.com/manifesto" style="color: #ffffff;">here</a>.
               </p>
 

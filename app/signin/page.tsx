@@ -1,4 +1,5 @@
 import CardForm from "@/components/CardForm";
+import Navbar from "@/components/Navbar";
 import SigninForm from "./Form";
 import { getAuthUser } from "../dashboard/actions";
 import { redirect } from "next/navigation";
@@ -36,8 +37,11 @@ export default async function Signin() {
     }
 
     return (
-        <CardForm cardTitle="Welcome back!">
-            <SigninForm />
-        </CardForm>
+        <div className="bg-background flex min-h-screen flex-col">
+            <Navbar authAction="signup" />
+            <CardForm cardTitle="Welcome back!">
+                <SigninForm />
+            </CardForm>
+        </div>
     );
 }
