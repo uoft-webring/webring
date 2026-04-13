@@ -31,7 +31,7 @@ export default function Avatar({
     verifiedSize = "size-9",
     width,
     height,
-    lazyLoading,
+    lazyLoading = true,
 }: AvatarProps) {
     const alt = `${user.name}'s profile picture`;
     const classList = cn(
@@ -39,10 +39,12 @@ export default function Avatar({
         className
     );
     const seed = user.name || "user";
-    const svg = createAvatar(personas, {
-        seed: seed.toString(),
-        size: width || 90,
-    }).toDataUri();
+    const svg = !user.image_key
+        ? createAvatar(personas, {
+              seed: seed.toString(),
+              size: width || 90,
+          }).toDataUri()
+        : null;
 
     return (
         <div className="relative aspect-square rounded-full ring-2">
@@ -64,7 +66,7 @@ export default function Avatar({
                 />
             ) : (
                 <Image
-                    src={svg}
+                    src={svg!}
                     width={width || 90}
                     height={height || 90}
                     alt={alt}

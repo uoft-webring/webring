@@ -150,7 +150,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     else reject(new Error("Canvas toBlob failed"));
                 },
                 type,
-                0.8
+                0.6
             );
         });
     };
