@@ -21,13 +21,13 @@ export default async function Join() {
 
     const id: number = userData.ring_id;
 
-    const html = `<div style="display: 'flex'; align-items: 'center'; gap: '8px'">
+    const html = `<div style="display: flex; align-items: center; gap: 8px">
     <a href='https://uoftwebring.com/redirect?nav=prev&id=${id}'>←</a>
     <a href='https://uoftwebring.com' target='_blank'>
     <img
             src='https://uoftwebring.com/ring_logo.svg'
             alt='UofT Webring'
-            style="width: '24px'; height: 'auto'"
+            style="width: 24px; height: auto"
         />
     </a>
     <a href='https://uoftwebring.com/redirect?nav=next&id=${id}'>→</a>
@@ -58,7 +58,7 @@ export default async function Join() {
 
     return (
         <section>
-            <h2>Join the commmunity</h2>
+            <h2>Join the community</h2>
             <p className="mb-4">Copy the code and paste it into your portfolio to join the community.</p>
 
             <Tabs defaultValue="HTML & CSS" className="relative mr-auto flex w-full flex-col gap-6">

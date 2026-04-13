@@ -34,6 +34,17 @@ export async function middleware(request: NextRequest) {
     if (!domain) {
         return redirect();
     }
+
+    // Validate the domain is a safe URL before redirecting
+    try {
+        const url = new URL(domain);
+        if (!["http:", "https:"].includes(url.protocol)) {
+            return redirect();
+        }
+    } catch {
+        return redirect();
+    }
+
     // redirect to domain from db
     return NextResponse.redirect(new URL(domain));
 }

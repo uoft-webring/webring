@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import useDebounce from "@/hooks/useDebounce";
 import { UserType, User } from "@/utils/zod";
 import { Label } from "@/components/ui/label";
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { z } from "zod";
 import { saveData } from "./actions";
 import { toast } from "sonner";
@@ -44,12 +44,10 @@ export default function EditForm({
     const debounceCallback = useDebounce(async (newData: any) => {
         const parseResult = await User.safeParseAsync(newData);
         if (parseResult.success) {
-            // Save to DB here through actions.ts
             const saveResult = await saveData(parseResult.data);
             if (saveResult.error) {
-                toast.error("We're sorry! Something went wrong.", {
-                    duration: 1000,
-                });
+                const msg = typeof saveResult.error === "string" ? saveResult.error : "Something went wrong.";
+                toast.error(msg, { duration: 2000 });
             } else {
                 toast.success("Your profile has been updated successfully!", {
                     duration: 1000,
@@ -57,9 +55,6 @@ export default function EditForm({
             }
             setErrors(NO_ERRORS);
         } else {
-            // structuredClone produces a deep copy of No_ERRORS, otherwise
-            // error states update after onChange of the next updated text field,
-            // resulting in buggy ui.
             const newErrors = structuredClone(NO_ERRORS);
             parseResult.error.issues.forEach((issue) => {
                 newErrors[issue.path[0] as UserKeys] = issue.message;
@@ -67,13 +62,37 @@ export default function EditForm({
 
             setErrors(newErrors);
         }
-    }, 500);
+    }, 3000);
 
     const saveToForm = (data: Record<string, any>) => {
         const newData = { ...formData, ...data };
         setFormDataAction(newData);
         debounceCallback(newData);
     };
+
+    const handleExplicitSave = useCallback(async () => {
+        const parseResult = await User.safeParseAsync(formData);
+        if (parseResult.success) {
+            const saveResult = await saveData(parseResult.data, true);
+            if (saveResult.error) {
+                toast.error(typeof saveResult.error === "string" ? saveResult.error : "Something went wrong.", {
+                    duration: 2000,
+                });
+            } else {
+                toast.success("Your profile has been saved!", {
+                    duration: 1000,
+                });
+            }
+            setErrors(NO_ERRORS);
+        } else {
+            const newErrors = structuredClone(NO_ERRORS);
+            parseResult.error.issues.forEach((issue) => {
+                newErrors[issue.path[0] as UserKeys] = issue.message;
+            });
+            setErrors(newErrors);
+            toast.error("Please fix the errors before saving.", { duration: 2000 });
+        }
+    }, [formData]);
 
     // TODO-A check if Next Form can use server action for saving or smth
     // https://nextjs.org/docs/app/api-reference/components/form
@@ -95,7 +114,7 @@ export default function EditForm({
                     type="text"
                     placeholder="John Doe"
                     required
-                    defaultValue={formData.name}
+                    value={formData.name}
                     onChange={(e) => {
                         saveToForm({ name: e.target.value });
                     }}
@@ -109,11 +128,10 @@ export default function EditForm({
                     type="url"
                     placeholder="https://yourdomain.com"
                     required
-                    defaultValue={formData.domain}
+                    value={formData.domain}
                     onChange={(e) => {
                         saveToForm({
                             domain: e.target.value,
-                            is_verified: false,
                         });
                     }}
                     error={errors.domain}
@@ -132,7 +150,7 @@ export default function EditForm({
                             placeholder="2029"
                             min={1900}
                             max={2500}
-                            defaultValue={formData.graduation_year ?? ""}
+                            value={formData.graduation_year ?? ""}
                             onChange={(e) => {
                                 const n = e.currentTarget.valueAsNumber;
                                 saveToForm({ graduation_year: Number.isNaN(n) ? null : n });
@@ -165,7 +183,7 @@ export default function EditForm({
                             placeholder="torvalds"
                             required
                             maxLength={39}
-                            defaultValue={formData.github_url ?? ""}
+                            value={formData.github_url ?? ""}
                             onChange={(e) => {
                                 saveToForm({ github_url: e.target.value });
                             }}
@@ -187,13 +205,12 @@ export default function EditForm({
                             </Tooltip>
                         </Label>
                         <Input
-                            /* Data type is named github_url but it's a username */
                             name="slug"
                             type="text"
                             placeholder="johndoe"
                             required
                             maxLength={39}
-                            defaultValue={formData.slug ?? ""}
+                            value={formData.slug ?? ""}
                             onChange={(e) => {
                                 saveToForm({ slug: e.target.value });
                             }}
@@ -220,7 +237,7 @@ export default function EditForm({
                     placeholder="John Doe is a full stack..."
                     required
                     remaining={formData.tagline === null ? 255 : 255 - formData.tagline.length}
-                    defaultValue={formData.tagline ?? ""}
+                    value={formData.tagline ?? ""}
                     onChange={(e) => {
                         saveToForm({ tagline: e.target.value });
                     }}
@@ -230,8 +247,7 @@ export default function EditForm({
             </div>
 
             <div className="flex items-center justify-start gap-4">
-                {/* TODO-A allow saving or smth */}
-                <Button variant="secondary" type="submit">
+                <Button variant="secondary" type="button" onClick={handleExplicitSave}>
                     Save
                 </Button>
 

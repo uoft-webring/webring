@@ -10,7 +10,7 @@ export default function NotFound() {
             </h2>
             <div className="mx-6 max-w-5xl">
                 <p className="text-muted-foreground/40 text-lg font-bold uppercase">PAGE NOT FOUND</p>
-                <h1 className="mt-2">Faliure is the First Step to Success.</h1>
+                <h1 className="mt-2">Failure is the First Step to Success.</h1>
                 <p className="text-muted-foreground/60 mt-8 text-sm md:text-base lg:text-lg">
                     Try retracing your steps, check the URL, or bribe the router with cookies. Alternatively,
                     view our manifesto to learn why we do what we do or head back home to start fresh.

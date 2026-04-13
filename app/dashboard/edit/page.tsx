@@ -3,7 +3,7 @@ import { useState } from "react";
 import EditForm from "./Form";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserType } from "@/utils/zod";
+import { UserType, SafeUserType } from "@/utils/zod";
 import ProfileCard from "@/components/ProfileCard";
 import { useUser } from "../../../providers/UserProvider";
 
@@ -30,7 +30,7 @@ export default function Edit() {
                 <TabsContent value="preview">
                     <h2>Preview</h2>
                     <p className="mb-6">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data} />
+                    <ProfileCard user={data as unknown as SafeUserType} />
                 </TabsContent>
             </Tabs>
             <section className="hidden items-start justify-center gap-12 lg:flex [&>*]:shrink [&>*]:grow [&>*]:basis-0">
@@ -44,7 +44,7 @@ export default function Edit() {
                 <div className="justify-left flex h-full flex-col items-start">
                     <h2>Preview</h2>
                     <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data} />
+                    <ProfileCard user={data as unknown as SafeUserType} />
                 </div>
             </section>
         </>

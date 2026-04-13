@@ -26,6 +26,11 @@ export default function ProgramInput({
     const [open, setOpen] = React.useState(false);
     const [value, setValue] = React.useState(program);
 
+    // Sync local state when prop changes externally
+    React.useEffect(() => {
+        setValue(program);
+    }, [program]);
+
     return (
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -45,7 +50,7 @@ export default function ProgramInput({
                 <Command>
                     <CommandInput placeholder="Search Programs..." className="h-10" />
                     <CommandList>
-                        <CommandEmpty>No framework found.</CommandEmpty>
+                        <CommandEmpty>No program found.</CommandEmpty>
                         <CommandGroup>
                             {programs.map((program) => (
                                 <CommandItem

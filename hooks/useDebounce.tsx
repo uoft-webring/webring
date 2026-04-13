@@ -2,6 +2,12 @@ import { useRef, useEffect, useCallback } from "react";
 
 const useDebounce = <T extends (...args: any[]) => void>(callback: T, wait: number) => {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const callbackRef = useRef<T>(callback);
+
+    // Always keep the ref pointing to the latest callback
+    useEffect(() => {
+        callbackRef.current = callback;
+    }, [callback]);
 
     const debouncedFunc = useCallback(
         (...args: Parameters<T>) => {
@@ -10,10 +16,10 @@ const useDebounce = <T extends (...args: any[]) => void>(callback: T, wait: numb
             }
 
             timerRef.current = setTimeout(() => {
-                callback(...args);
+                callbackRef.current(...args);
             }, wait);
         },
-        [callback, wait]
+        [wait]
     );
 
     useEffect(() => {

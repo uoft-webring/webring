@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 react-email-starter/node_modules
+
+# claude/agent tooling
+.agents/
+.claude/skills/
+skills-lock.json
+supabase/seed.sql

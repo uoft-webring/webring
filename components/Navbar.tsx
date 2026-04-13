@@ -50,7 +50,7 @@ export default function Navbar({
                                 Dashboard
                             </DropdownMenuItem>
                         </Link>
-                        <Link href="/u/[slug]" as={`/u/${user.slug}`}>
+                        <Link href={`/u/${user.slug}`}>
                             <DropdownMenuItem>
                                 <User className="mr-2 h-4 w-4" />
                                 Profile

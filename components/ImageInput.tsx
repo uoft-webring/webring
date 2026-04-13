@@ -40,19 +40,20 @@ function checkImageDimensions(
                 if (img.width === 0 || img.height === 0) {
                     return resolve({ success: false, reason: "Invalid image dimensions" });
                 }
-                // Check if img width or height is bigger than page
-                if (typeof window !== "undefined") {
-                    // When we display the image, it's scaled down, so we check against half its size
-                    if (img.width / 2 > window.innerWidth || img.height / 2 > window.innerHeight) {
-                        return resolve({ success: false, reason: "Image dimensions too large" });
-                    }
+                // Profile pictures are displayed at 90px but we accept up to 4096px for quality
+                const maxDimension = 4096;
+                if (img.width > maxDimension || img.height > maxDimension) {
+                    return resolve({
+                        success: false,
+                        reason: `Image is too large (${img.width}×${img.height}px). Max is ${maxDimension}×${maxDimension}px.`,
+                    });
                 }
 
                 const dimensionRatio = Math.max(img.width, img.height) / Math.min(img.width, img.height);
                 if (dimensionRatio > 2.3) {
                     return resolve({
                         success: false,
-                        reason: "Image aspect ratio too sharp",
+                        reason: "Image is too wide or tall. Use a squarer image (aspect ratio under 2.3:1).",
                     });
                 }
                 displayError("");
@@ -149,7 +150,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     else reject(new Error("Canvas toBlob failed"));
                 },
                 type,
-                0.2 //quality
+                0.8 //quality
             );
         });
     };

@@ -9,6 +9,7 @@ export const signInAction = async (email: string) => {
         email,
         options: {
             shouldCreateUser: false,
+            emailRedirectTo: `${process.env.VERCEL_ENV === "preview" ? `https://${process.env.VERCEL_URL}` : process.env.NEXT_PUBLIC_HOME_DOMAIN}/auth/callback`,
         },
     });
 

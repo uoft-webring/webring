@@ -19,7 +19,7 @@ create function handle_new_user()
 returns trigger as $$
 
 begin
-    insert into public.profile(id, email, name, domain, subdomain)
+    insert into public.profile(id, email, name, domain, slug)
     values (new.id, new.email, new.raw_user_meta_data->>'name', new.raw_user_meta_data->>'domain', gen_random_uuid()::text); -- remember to have the single quotes this!
 
     return new;

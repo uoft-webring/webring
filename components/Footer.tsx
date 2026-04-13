@@ -10,7 +10,7 @@ import { getAuthUserProfile } from "@/app/actions";
 
 function Logo() {
     return (
-        <Link href="/">
+        <Link href="/" prefetch={false}>
             <Image src={logo.src} alt="Logo" height={200} width={200} />
         </Link>
     );
@@ -148,7 +148,7 @@ export default async function Footer() {
                 {/* Copyright Bar */}
                 <div className="border-border mt-12 -mb-6 flex flex-col border-t pt-4 text-sm md:flex-row md:items-center md:justify-between">
                     <p className="w-full text-center text-sm leading-6 text-gray-500 md:text-left xl:text-center dark:text-gray-400">
-                        Copyright © 2025 The UofT Webring. All rights reserved.
+                        Copyright © 2026 The UofT Webring. All rights reserved.
                     </p>
                 </div>
             </div>
