@@ -150,7 +150,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     else reject(new Error("Canvas toBlob failed"));
                 },
                 type,
-                1
+                0.8
             );
         });
     };
@@ -159,12 +159,23 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
         const scaleX = imageEl.naturalWidth / (imageEl.width || imageEl.naturalWidth);
         const scaleY = imageEl.naturalHeight / (imageEl.height || imageEl.naturalHeight);
 
-        const width = Math.max(1, Math.round(cropDef.width));
-        const height = Math.max(1, Math.round(cropDef.height));
+        const srcWidth = Math.max(1, Math.round(cropDef.width * scaleX));
+        const srcHeight = Math.max(1, Math.round(cropDef.height * scaleY));
+
+        // Cap output at 512px to keep file sizes small
+        const maxOutputSize = 512;
+        let outWidth = srcWidth;
+        let outHeight = srcHeight;
+
+        if (outWidth > maxOutputSize || outHeight > maxOutputSize) {
+            const downscale = maxOutputSize / Math.max(outWidth, outHeight);
+            outWidth = Math.round(outWidth * downscale);
+            outHeight = Math.round(outHeight * downscale);
+        }
 
         const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = outWidth;
+        canvas.height = outHeight;
 
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Failed to get canvas context");
@@ -173,12 +184,12 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
             imageEl,
             Math.round(cropDef.x * scaleX),
             Math.round(cropDef.y * scaleY),
-            Math.round(cropDef.width * scaleX),
-            Math.round(cropDef.height * scaleY),
+            srcWidth,
+            srcHeight,
             0,
             0,
-            width,
-            height
+            outWidth,
+            outHeight
         );
 
         const blob = await canvasToBlob(canvas, "image/avif");

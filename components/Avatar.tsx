@@ -56,6 +56,7 @@ export default function Avatar({
                     priority={!lazyLoading}
                     width={width || 90}
                     height={height || 90}
+                    unoptimized
                     draggable={false}
                     className={classList}
                     loading={lazyLoading ? "lazy" : "eager"}
