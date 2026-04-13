@@ -150,7 +150,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
                     else reject(new Error("Canvas toBlob failed"));
                 },
                 type,
-                0.8 //quality
+                1
             );
         });
     };
@@ -212,7 +212,7 @@ export default function ImageInput({ errors, setErrors, saveToForm }: ImageInput
 
         setLoading(true);
         try {
-            // Crop image, degrade quality and convert to avif
+            // Crop image and convert to avif
             const file = await cropImage(imageRef.current, completedCropArg);
 
             // Request presignedUrl from server and get object key to save
