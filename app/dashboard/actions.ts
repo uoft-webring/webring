@@ -117,6 +117,135 @@ export const checkDomainRecords = async (): Promise<boolean> => {
     }
 };
 
+/**
+ * Returns whether the user has verified their domain via a meta tag.
+ *
+ * Fetches the HTML at the user's domain and checks for:
+ *   <meta name="uoft-webring" content="<expectedValue>" />
+ * If found, it updates the user's profile to mark them as verified.
+ *
+ * @returns {Promise<boolean>} A promise that resolves to `true` if the meta tag is found and valid, otherwise `false`.
+ */
+export const checkMetaTagVerification = async (): Promise<boolean> => {
+    const { data: user, error: userError } = await getAuthUserProfile();
+    if (!user || userError) {
+        console.error("Error fetching user data:", userError);
+        return false;
+    }
+
+    const expectedValue = await getTXTRecordValue(String(user.ring_id));
+
+    try {
+        let parsedUrl: URL;
+        try {
+            parsedUrl = new URL(user.domain);
+        } catch {
+            console.warn("Invalid domain URL:", user.domain);
+            return false;
+        }
+        if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+            console.warn("Domain URL must use http or https:", user.domain);
+            return false;
+        }
+
+        // Block requests to private/internal IPs to prevent SSRF
+        const hostname = parsedUrl.hostname;
+        if (
+            hostname === "localhost" ||
+            hostname === "127.0.0.1" ||
+            hostname === "::1" ||
+            hostname === "0.0.0.0" ||
+            hostname.endsWith(".local") ||
+            hostname.endsWith(".internal") ||
+            /^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.)/.test(hostname)
+        ) {
+            console.warn("Domain points to a private/internal address:", hostname);
+            return false;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10_000);
+        const response = await fetch(user.domain, {
+            signal: controller.signal,
+            redirect: "follow",
+            headers: { "User-Agent": "uoft-webring-verifier/1.0" },
+        }).finally(() => clearTimeout(timeoutId));
+
+        if (!response.ok) {
+            console.warn(`Failed to fetch domain (${response.status}): ${user.domain}`);
+            return false;
+        }
+
+        // Validate the final URL after any redirects is still http/https
+        const finalUrl = new URL(response.url);
+        if (finalUrl.protocol !== "http:" && finalUrl.protocol !== "https:") {
+            console.warn("Redirect led to non-http(s) URL:", response.url);
+            return false;
+        }
+
+        // Only read the first 1MB — the meta tag will be in <head>, no need for more
+        const MAX_BODY_SIZE = 1024 * 1024;
+        const reader = response.body?.getReader();
+        if (!reader) {
+            console.warn("Could not read response body for:", user.domain);
+            return false;
+        }
+        const chunks: Uint8Array[] = [];
+        let totalSize = 0;
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            totalSize += value.byteLength;
+            if (totalSize > MAX_BODY_SIZE) {
+                chunks.push(value.slice(0, value.byteLength - (totalSize - MAX_BODY_SIZE)));
+                reader.cancel();
+                break;
+            }
+            chunks.push(value);
+        }
+        const html = new TextDecoder().decode(
+            chunks.reduce((acc, chunk) => {
+                const merged = new Uint8Array(acc.length + chunk.length);
+                merged.set(acc);
+                merged.set(chunk, acc.length);
+                return merged;
+            }, new Uint8Array()),
+        );
+
+        // Match <meta name="uoft-webring" content="..."> with attributes in any order,
+        // tolerating extra whitespace and additional attributes.
+        const metaTagRegex =
+            /<meta\b[^>]*\bname=["']uoft-webring["'][^>]*\bcontent=["']([^"']*)["'][^>]*>/i;
+        const reverseMetaTagRegex =
+            /<meta\b[^>]*\bcontent=["']([^"']*)["'][^>]*\bname=["']uoft-webring["'][^>]*>/i;
+
+        const match = metaTagRegex.exec(html) ?? reverseMetaTagRegex.exec(html);
+
+        if (!match || match[1] !== expectedValue) {
+            console.warn("No matching meta tag found for uoft-webring verification.");
+            return false;
+        }
+
+        const supabase = await createClient();
+        const { error: updateError } = await supabase
+            .from("profile")
+            .update({ is_verified: true })
+            .eq("id", user.id)
+            .select();
+
+        if (updateError) {
+            console.error("Error updating verification status:", updateError);
+            return false;
+        }
+
+        revalidatePath("/dashboard");
+        return true;
+    } catch (err) {
+        console.error("Unexpected error during meta tag verification:", err);
+        return false;
+    }
+};
+
 //---------------------- DOMAIN VALIDITY ----------------------
 
 /**
