@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/utils/supabase/server";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 // TODO: throw error when user is already registered
 export const signUpAction = async (name: string, email: string) => {
@@ -29,6 +30,11 @@ export const signUpAction = async (name: string, email: string) => {
         console.error(error.code + " " + error.message);
         return { error: error.message };
     } else {
+        getPostHogClient().capture({
+            distinctId: email,
+            event: "signup_otp_sent",
+            properties: { email, name },
+        });
         return {}; // return email in auth/confirm link as a search param
     }
 };

@@ -1,6 +1,7 @@
 import { getUserProfile, getAuthUserProfile } from "@/app/actions";
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { notFound } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { Book, BookOpen, CheckCircle, Clock, Globe, GraduationCap, TagIcon, UserIcon } from "lucide-react";
@@ -47,6 +48,17 @@ export default async function User({ params }: { params: Promise<{ slug: string 
     ]);
 
     if (error || !data) notFound();
+
+    getPostHogClient().capture({
+        distinctId: authUser?.id ?? `anon_${slug}`,
+        event: "profile_viewed",
+        properties: {
+            profile_slug: slug,
+            profile_name: data.name,
+            is_verified: data.is_verified,
+            viewer_is_owner: authUser?.id === data.id,
+        },
+    });
 
     const jsonLd = {
         "@context": "https://schema.org",

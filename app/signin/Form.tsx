@@ -8,6 +8,7 @@ import Link from "next/link";
 import { FormEvent, useRef, useState } from "react";
 import { signInAction } from "./actions";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 export default function SigninForm() {
     const router = useRouter();
     const [emailError, setEmailError] = useState<string | undefined>(undefined);
@@ -28,6 +29,7 @@ export default function SigninForm() {
                 if (error) {
                     setEmailError("Email not registered");
                 } else {
+                    posthog.capture("signin_submitted", { email });
                     router.push(`/auth/confirm?email=${email}`);
                 }
             } else {

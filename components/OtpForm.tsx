@@ -7,6 +7,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AuthError } from "@supabase/supabase-js";
+import posthog from "posthog-js";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -53,6 +54,7 @@ export default function OtpForm({ email }: { email: string }) {
         if (cooldown > 0) return;
         setError(undefined);
         await resendOtp(email);
+        posthog.capture("otp_resent", { email });
         setCooldown(RESEND_COOLDOWN_SECONDS);
         inputRef.current?.focus();
     };

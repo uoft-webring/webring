@@ -8,6 +8,7 @@ import { signUpAction } from "./actions";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 
 export default function SignupForm() {
     const router = useRouter();
@@ -38,12 +39,12 @@ export default function SignupForm() {
                         setEmailError(typeof error === "string" ? error : "Email already registered.");
                         setIsFormDisabled(false);
                     } else {
+                        posthog.capture("signup_submitted", { email });
                         // Keep disabled during navigation to prevent double-submit
                         router.push(`/auth/confirm?email=${email}`);
                     }
                 } catch (err: any) {
-                    const isNetwork =
-                        err?.message?.includes("fetch") || err?.message?.includes("network");
+                    const isNetwork = err?.message?.includes("fetch") || err?.message?.includes("network");
                     console.error("Signup action failed:", err?.message, err);
                     setEmailError(
                         isNetwork

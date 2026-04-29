@@ -2,6 +2,7 @@
 
 import { createClient, createAdminClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getPostHogClient } from "@/lib/posthog-server";
 
 export const verifyToken = async (email: string, token: string) => {
     const supabase = await createClient();
@@ -16,6 +17,12 @@ export const verifyToken = async (email: string, token: string) => {
         console.error(authResponse.error.code + " " + authResponse.error.message);
         return authResponse.error;
     } else {
+        const userId = authResponse.data.user?.id ?? email;
+        getPostHogClient().capture({
+            distinctId: userId,
+            event: "otp_verified",
+            properties: { email },
+        });
         return redirect("/dashboard/edit");
     }
 };

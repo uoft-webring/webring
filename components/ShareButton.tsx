@@ -2,6 +2,7 @@
 import { Share2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
+import posthog from "posthog-js";
 
 export default function ShareButton({ title, url }: { title: string; url: string }) {
     const handleShare = async () => {
@@ -13,6 +14,7 @@ export default function ShareButton({ title, url }: { title: string; url: string
                     title: title,
                     url: url,
                 });
+                posthog.capture("profile_shared", { method: "native_share", url });
             } catch (err: any) {
                 // User cancelled the share dialog — not an error
                 if (err?.name === "AbortError") return;
@@ -23,6 +25,7 @@ export default function ShareButton({ title, url }: { title: string; url: string
         } else {
             try {
                 await navigator.clipboard.writeText(url);
+                posthog.capture("profile_shared", { method: "clipboard", url });
                 toast.success("Profile link copied to clipboard!", {
                     duration: 1000,
                 });

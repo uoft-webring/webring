@@ -17,6 +17,7 @@ import ProgramInput from "@/components/ProgramInput";
 import ImageInput from "@/components/ImageInput";
 import { Info } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import posthog from "posthog-js";
 type UserKeys = z.infer<ReturnType<typeof User.keyof>>;
 const NO_ERRORS = Object.fromEntries(User.keyof().options.map((key) => [key, undefined])) as Record<
     UserKeys,
@@ -75,10 +76,18 @@ export default function EditForm({
         if (parseResult.success) {
             const saveResult = await saveData(parseResult.data, true);
             if (saveResult.error) {
-                toast.error(typeof saveResult.error === "string" ? saveResult.error : "Something went wrong.", {
-                    duration: 2000,
-                });
+                toast.error(
+                    typeof saveResult.error === "string" ? saveResult.error : "Something went wrong.",
+                    {
+                        duration: 2000,
+                    }
+                );
             } else {
+                posthog.capture("profile_saved", {
+                    has_domain: !!formData.domain,
+                    has_github: !!formData.github_url,
+                    has_tags: !!(formData.tags && formData.tags.length > 0),
+                });
                 toast.success("Your profile has been saved!", {
                     duration: 1000,
                 });

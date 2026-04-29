@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import posthog from "posthog-js";
 
 export default function VerifyResult({ action }: { action: () => Promise<boolean> }) {
     const [pending, setPending] = useState(false);
@@ -10,6 +11,7 @@ export default function VerifyResult({ action }: { action: () => Promise<boolean
     const handleSubmit = async () => {
         setPending(true);
         setFailed(false);
+        posthog.capture("domain_verification_attempted");
         try {
             const result = await action();
             // If we get here (no redirect), verification failed
@@ -18,6 +20,7 @@ export default function VerifyResult({ action }: { action: () => Promise<boolean
             }
         } catch {
             // redirect() throws NEXT_REDIRECT — that's expected on success
+            posthog.capture("domain_verified");
         } finally {
             setPending(false);
         }
