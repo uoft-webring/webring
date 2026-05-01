@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "prismjs/themes/prism-tomorrow.css"; //find solution to this blocking thread
 import Footer from "@/components/Footer";
 import PosthogIdentityProvider from "@/providers/PosthogIdentityProvider";
+import UoftIndexPromo from "@/components/promo/UoftIndexPromo";
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
@@ -130,6 +131,7 @@ export default function RootLayout({
                 />
                 <PosthogIdentityProvider>{children}</PosthogIdentityProvider>
                 <Footer />
+                <UoftIndexPromo />
                 <Toaster richColors />
             </body>
         </html>

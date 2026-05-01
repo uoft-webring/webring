@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Image from "next/image";
 import logo from "@/public/logo.png";
 import Link from "next/link";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
 import { getAuthUserProfile } from "@/app/actions";
 
 // The data array for footer links has been removed.
@@ -90,6 +90,17 @@ export default async function Footer() {
                                         The Directory
                                     </Link>
                                 </li>
+                                <li>
+                                    <a
+                                        href="https://uoftindex.com"
+                                        target="_blank"
+                                        rel="noopener"
+                                        className="dark:text-muted-foreground inline-flex items-center gap-1 text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
+                                    >
+                                        UofT Index
+                                        <ArrowUpRightIcon className="size-3.5" />
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -138,6 +149,17 @@ export default async function Footer() {
                                             >
                                                 The Directory
                                             </Link>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="https://uoftindex.com"
+                                                target="_blank"
+                                                rel="noopener"
+                                                className="inline-flex items-center gap-1 text-base text-gray-600 dark:text-gray-400"
+                                            >
+                                                UofT Index
+                                                <ArrowUpRightIcon className="size-3.5" />
+                                            </a>
                                         </li>
                                     </ul>
                                 </AccordionContent>
