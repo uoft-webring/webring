@@ -1,62 +1,62 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
-import { verifyToken, resendOtp } from "../app/auth/confirm/actions";
-import CardForm from "@/components/CardForm";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { AuthError } from "@supabase/supabase-js";
+import { useEffect, useRef, useState, useTransition } from "react";
 import posthog from "posthog-js";
+import { toast } from "sonner";
+import { resendOtp, verifyOtp } from "@/app/auth/actions";
+import { CardForm } from "@/components/CardForm";
+import { Button } from "@/components/ui/button";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
+const OTP_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
 
-export default function OtpForm({ email }: { email: string }) {
+export function OtpForm({ email }: { email: string }): React.JSX.Element {
     const [code, setCode] = useState("");
-    const [error, setError] = useState<string | undefined>(undefined);
+    const [error, setError] = useState<string | undefined>();
     const [isPending, startTransition] = useTransition();
-    const [cooldown, setCooldown] = useState(0);
+    // A code was just sent to reach this page, so start in cooldown
+    const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        inputRef.current?.focus();
-    }, []);
-
-    useEffect(() => {
         if (cooldown <= 0) return;
-        const timer = setInterval(() => {
-            setCooldown((prev) => prev - 1);
-        }, 1000);
-        return () => clearInterval(timer);
+        const timer = setTimeout(() => setCooldown((seconds) => seconds - 1), 1000);
+        return () => clearTimeout(timer);
     }, [cooldown]);
 
-    const handleSubmit = (entered?: string) => {
-        const value = (entered ?? code).trim();
-        if (value.length !== 6) return;
-
+    const submit = (value: string) => {
         startTransition(async () => {
-            try {
-                const error: AuthError = await verifyToken(email, value);
-                setError(error.message);
-            } finally {
+            // Resolves only on failure: success redirects to the dashboard
+            const result = await verifyOtp(value);
+            if (result.error) {
+                setError(result.error);
                 setCode("");
                 inputRef.current?.focus();
             }
         });
     };
-    const onChange = (v: string) => {
-        if (error) setError(undefined);
-        setCode(v);
-        if (v.length === 6) handleSubmit(v);
+
+    const onChange = (value: string) => {
+        setError(undefined);
+        setCode(value);
+        if (value.length === OTP_LENGTH) submit(value);
     };
 
-    const onResend = async () => {
-        if (cooldown > 0) return;
-        setError(undefined);
-        await resendOtp(email);
-        posthog.capture("otp_resent", { email });
-        setCooldown(RESEND_COOLDOWN_SECONDS);
-        inputRef.current?.focus();
+    const onResend = () => {
+        startTransition(async () => {
+            setError(undefined);
+            const result = await resendOtp();
+            if (result.error) {
+                setError(result.error);
+                return;
+            }
+            posthog.capture("otp_resent");
+            toast.success("A new code is on its way.");
+            setCooldown(RESEND_COOLDOWN_SECONDS);
+            inputRef.current?.focus();
+        });
     };
 
     return (
@@ -64,45 +64,33 @@ export default function OtpForm({ email }: { email: string }) {
             cardTitle="Verify OTP"
             cardDescription={`Enter the 6-digit code we sent to ${email}.\nYour email may take some time to arrive.`}
         >
-            <div>
-                <InputOTP
-                    maxLength={6}
-                    value={code}
-                    onChange={onChange}
-                    className="mx-auto"
-                    ref={inputRef}
-                    disabled={isPending}
-                    error={error}
-                >
-                    <InputOTPGroup className="mx-auto">
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                </InputOTP>
+            <InputOTP
+                maxLength={OTP_LENGTH}
+                value={code}
+                onChange={onChange}
+                className="mx-auto"
+                ref={inputRef}
+                disabled={isPending}
+                error={error}
+                autoFocus
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                aria-label="One-time code"
+            >
+                <InputOTPGroup className="mx-auto">
+                    {Array.from({ length: OTP_LENGTH }, (_, index) => (
+                        <InputOTPSlot key={index} index={index} />
+                    ))}
+                </InputOTPGroup>
+            </InputOTP>
 
-                <div className="mt-4 flex gap-4">
-                    <div className="flex-1">
-                        <Link href="/signin" className="block">
-                            <Button variant="outline" className="w-full" disabled={isPending}>
-                                Back
-                            </Button>
-                        </Link>
-                    </div>
-                    <div className="flex-1">
-                        <Button
-                            className="w-full"
-                            onClick={onResend}
-                            disabled={cooldown > 0 || isPending}
-                            aria-live="polite"
-                        >
-                            {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
-                        </Button>
-                    </div>
-                </div>
+            <div className="mt-4 flex gap-4">
+                <Button asChild variant="outline" className="flex-1" disabled={isPending}>
+                    <Link href="/signin">Back</Link>
+                </Button>
+                <Button className="flex-1" onClick={onResend} disabled={cooldown > 0 || isPending}>
+                    {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend"}
+                </Button>
             </div>
         </CardForm>
     );

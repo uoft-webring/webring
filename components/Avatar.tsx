@@ -1,87 +1,64 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { createAvatar } from "@dicebear/core";
-import { personas } from "@dicebear/collection";
+import * as personas from "@dicebear/personas";
 import verifiedIcon from "@/icons/verified.svg";
-import { cn } from "@/lib/utils";
-import { SafeUserType } from "@/utils/zod";
+import { avatarUrl } from "@/lib/avatar";
+import { cn } from "@/lib/cn";
+import type { PublicProfile } from "@/lib/profiles/types";
 
-import type { ImageLoaderProps } from "next/image";
 type AvatarProps = {
-    user: SafeUserType;
+    profile: Pick<PublicProfile, "name" | "imageKey" | "isVerified">;
     className?: string;
     verifiedSize?: string;
-    width?: number;
-    height?: number;
-    lazyLoading?: boolean;
+    size?: number;
+    priority?: boolean;
 };
 
-// Do not remove until a few months into production
-// Docs: https://aws.amazon.com/developer/application-security-performance/articles/image-optimization
-function cloudfrontLoader({ src }: ImageLoaderProps) {
-    /* I bet not even Guilermo Rauch can figure out how to load cloudfront images without this loader */
-    const url = new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${src}`);
-    return url.href;
-}
-
-export default function Avatar({
-    user,
+export function Avatar({
+    profile,
     className,
     verifiedSize = "size-9",
-    width,
-    height,
-    lazyLoading = true,
-}: AvatarProps) {
-    const [imgError, setImgError] = useState(false);
-    const alt = `${user.name}'s profile picture`;
-    const classList = cn(
-        "aspect-square object-cover pointer-events-none select-none rounded-full",
-        className
-    );
-    const seed = user.name || "user";
-    const fallbackSvg = useMemo(
-        () => createAvatar(personas, { seed: seed.toString(), size: width || 90 }).toDataUri(),
-        [seed, width]
-    );
+    size = 90,
+    priority = false,
+}: AvatarProps): React.JSX.Element {
+    const [failed, setFailed] = useState(false);
+    const src = failed ? null : avatarUrl(profile.imageKey);
+    const alt = `${profile.name}'s profile picture`;
+    const classList = cn("pointer-events-none aspect-square rounded-full object-cover select-none", className);
 
     return (
         <div className="relative aspect-square rounded-full ring-2">
-            {user.image_key && !imgError ? (
+            {src ? (
                 <Image
-                    src={
-                        new URL(`https://${process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN}/${user.image_key}`)
-                            .href
-                    }
+                    src={src}
                     alt={alt}
-                    priority={!lazyLoading}
-                    width={width || 90}
-                    height={height || 90}
-                    sizes={`${width || 90}px`}
+                    // Fixed-size image: without `sizes`, next/image emits a 1x/2x srcset instead of all 16 widths
+                    width={size}
+                    height={size}
+                    priority={priority}
                     draggable={false}
                     className={classList}
-                    loading={lazyLoading ? "lazy" : "eager"}
-                    fetchPriority={lazyLoading ? "low" : "high"}
-                    onError={() => setImgError(true)}
+                    onError={() => setFailed(true)}
                 />
             ) : (
-                <Image
-                    src={fallbackSvg}
-                    width={width || 90}
-                    height={height || 90}
+                // Only build the generated avatar when it's actually shown
+                // eslint-disable-next-line @next/next/no-img-element -- inline data URI, nothing to optimise
+                <img
+                    src={createAvatar(personas, { seed: profile.name || "user", size }).toDataUri()}
                     alt={alt}
-                    className={classList}
+                    width={size}
+                    height={size}
                     draggable={false}
+                    className={classList}
                 />
             )}
-            {user.is_verified && (
+            {profile.isVerified && (
                 <Image
                     src={verifiedIcon}
-                    alt={`${user.name}'s verification badge`}
-                    aria-hidden
-                    priority={false}
-                    fetchPriority="low"
+                    alt="Verified"
                     className={cn("absolute right-0 bottom-0", verifiedSize)}
                 />
             )}

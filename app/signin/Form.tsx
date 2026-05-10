@@ -1,62 +1,59 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
+import posthog from "posthog-js";
+import { requestSignIn, type AuthFormState } from "@/app/auth/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { parseEmail } from "@/utils/zod";
-import Link from "next/link";
-import { FormEvent, useRef, useState } from "react";
-import { signInAction } from "./actions";
-import { useRouter } from "next/navigation";
-import posthog from "posthog-js";
-export default function SigninForm() {
+
+export function SigninForm(): React.JSX.Element {
     const router = useRouter();
-    const [emailError, setEmailError] = useState<string | undefined>(undefined);
-    const [isFormDisabled, setIsFormDisabled] = useState(false);
-
-    const emailRef = useRef<HTMLInputElement>(null);
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsFormDisabled(true);
-
-        if (emailRef.current) {
-            const email = emailRef.current.value.trim().toLowerCase();
-            const emailParseResult = parseEmail(email);
-            // Parsing success or faliure
-            if (emailParseResult.success) {
-                const { error } = await signInAction(email);
-                if (error) {
-                    setEmailError("Email not registered");
-                } else {
-                    posthog.capture("signin_submitted", { email });
-                    router.push(`/auth/confirm?email=${email}`);
-                }
-            } else {
-                setEmailError(emailParseResult.error!.message || "");
+    const [state, formAction, pending] = useActionState<AuthFormState, FormData>(
+        async (prev, formData) => {
+            try {
+                return await requestSignIn(prev, formData);
+            } catch {
+                // The action never ran (offline, deploy in progress): keep the user on the form
+                return { error: "Could not reach the server. Please reload and try again.", values: prev.values };
             }
-        }
-        setIsFormDisabled(false);
-    };
+        },
+        { error: null }
+    );
+
+    useEffect(() => {
+        if (!state.sent) return;
+        posthog.capture("signin_submitted");
+        router.push("/auth/confirm");
+    }, [state, router]);
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form action={formAction} className="flex flex-col gap-6" noValidate>
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
+                        id="email"
                         name="email"
-                        ref={emailRef}
-                        type="text"
+                        type="email"
+                        autoComplete="email"
                         placeholder="your.email@mail.utoronto.ca"
-                        error={emailError}
-                        disabled={isFormDisabled}
-                        onChange={() => emailError && setEmailError(undefined)}
+                        defaultValue={state.values?.email}
+                        error={state.fieldErrors?.email}
+                        disabled={pending || state.sent}
+                        required
                     />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isFormDisabled}>
-                    Continue
+                {state.error && (
+                    <p role="alert" className="text-destructive text-sm">
+                        {state.error}
+                    </p>
+                )}
+                <Button type="submit" className="w-full" disabled={pending || state.sent}>
+                    {pending ? "Sending code..." : "Continue"}
                 </Button>
             </div>
 

@@ -1,31 +1,19 @@
-export async function register() {
-    if (process.env.NEXT_RUNTIME === "nodejs") {
-        const signals = ["SIGSEGV", "SIGABRT", "SIGBUS", "SIGFPE", "SIGILL"] as const;
+import type { Instrumentation } from "next";
 
-        for (const sig of signals) {
-            process.on(sig, () => {
-                console.error(`\n[CRASH] Process received ${sig} at ${new Date().toISOString()}`);
-                console.error(`[CRASH] Memory: ${JSON.stringify(process.memoryUsage())}`);
-                console.error(`[CRASH] Uptime: ${process.uptime()}s`);
-                process.exit(1);
-            });
-        }
+/** Reports server-side render/route/action errors to PostHog. Visitors only ever see app/error.tsx. */
+export const onRequestError: Instrumentation.onRequestError = async (error, request, context) => {
+    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    if (!key || process.env.NEXT_RUNTIME !== "nodejs") return;
 
-        process.on("exit", (code) => {
-            if (code !== 0) {
-                console.error(`[EXIT] Process exiting with code ${code} at ${new Date().toISOString()}`);
-                console.error(`[EXIT] Memory: ${JSON.stringify(process.memoryUsage())}`);
-            }
-        });
-
-        process.on("uncaughtException", (err) => {
-            console.error(`[UNCAUGHT] ${err.stack || err.message}`);
-        });
-
-        process.on("unhandledRejection", (reason) => {
-            console.error(`[UNHANDLED REJECTION] ${reason}`);
-        });
-
-        console.log("[instrumentation] Crash handlers registered");
-    }
-}
+    // Imported lazily (and not via lib/posthog-server, which is server-only for the RSC layer)
+    const { PostHog } = await import("posthog-node");
+    const client = new PostHog(key, { host: process.env.NEXT_PUBLIC_POSTHOG_HOST, flushAt: 1, flushInterval: 0 });
+    client.captureException(error, "server", {
+        path: request.path,
+        method: request.method,
+        route: context.routePath,
+        route_type: context.routeType,
+        digest: typeof error === "object" && error && "digest" in error ? String(error.digest) : undefined,
+    });
+    await client.shutdown();
+};

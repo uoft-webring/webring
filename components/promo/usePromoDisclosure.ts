@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import posthog from "posthog-js";
 
 /**
@@ -42,9 +42,14 @@ function writeDecision(decision: Decision) {
     }
 }
 
+/** Matches the exit animation in UoftIndexPromo. */
+export const EXIT_DURATION_MS = 350;
+
 export type PromoDisclosure = {
-    /** Whether the promo UI should currently be visible. */
+    /** Whether the promo UI should currently be mounted. */
     open: boolean;
+    /** True while the exit animation plays, just before `open` turns false. */
+    closing: boolean;
     /** User asked to be reminded — resurfaces next session. */
     remindLater: () => void;
     /** User opted out permanently. */
@@ -55,6 +60,7 @@ export type PromoDisclosure = {
 
 export function usePromoDisclosure(): PromoDisclosure {
     const [open, setOpen] = useState(false);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
         if (readDecision() === "dismissed") return;
@@ -79,17 +85,22 @@ export function usePromoDisclosure(): PromoDisclosure {
         return () => window.clearTimeout(timer);
     }, []);
 
-    const close = useCallback((decision: Decision, event: string) => {
+    const close = (decision: Decision, event: string) => {
         writeDecision(decision);
         posthog.capture(event);
-        setOpen(false);
-    }, []);
+        setClosing(true);
+        window.setTimeout(() => {
+            setOpen(false);
+            setClosing(false);
+        }, EXIT_DURATION_MS);
+    };
 
     return {
         open,
-        remindLater: useCallback(() => close("remind", "uoftindex_promo_remind"), [close]),
-        dismissForever: useCallback(() => close("dismissed", "uoftindex_promo_dismissed"), [close]),
-        convert: useCallback(() => close("dismissed", "uoftindex_promo_clicked"), [close]),
+        closing,
+        remindLater: () => close("remind", "uoftindex_promo_remind"),
+        dismissForever: () => close("dismissed", "uoftindex_promo_dismissed"),
+        convert: () => close("dismissed", "uoftindex_promo_clicked"),
     };
 }
 

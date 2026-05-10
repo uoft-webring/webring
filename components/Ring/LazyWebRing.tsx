@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, type ReactNode } from "react";
-import type { SafeUserType } from "@/utils/zod";
+import { Component, useSyncExternalStore, type ReactNode } from "react";
+import type { PublicProfile } from "@/lib/profiles/types";
 
 const WebRing = dynamic(() => import("./WebRing").then((mod) => mod.WebRing), {
     ssr: false,
@@ -13,10 +13,7 @@ const WebRing = dynamic(() => import("./WebRing").then((mod) => mod.WebRing), {
     ),
 });
 
-class WebGLErrorBoundary extends Component<
-    { children: ReactNode },
-    { hasError: boolean }
-> {
+class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
     state = { hasError: false };
 
     static getDerivedStateFromError() {
@@ -37,10 +34,24 @@ class WebGLErrorBoundary extends Component<
     }
 }
 
-export function LazyWebRing({ data }: { data: SafeUserType[] }) {
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+function subscribeReducedMotion(onChange: () => void): () => void {
+    const query = window.matchMedia(REDUCED_MOTION);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+}
+
+export function LazyWebRing({ members }: { members: PublicProfile[] }): React.JSX.Element {
+    const reducedMotion = useSyncExternalStore(
+        subscribeReducedMotion,
+        () => window.matchMedia(REDUCED_MOTION).matches,
+        () => false
+    );
+
     return (
         <WebGLErrorBoundary>
-            <WebRing data={data} />
+            <WebRing members={members} still={reducedMotion} />
         </WebGLErrorBoundary>
     );
 }

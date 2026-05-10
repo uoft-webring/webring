@@ -1,9 +1,7 @@
-import { Button } from "./ui/button";
-import { signOutAction } from "@/app/dashboard/actions";
-import Link from "next/link";
-import logo from "@/public/logo.svg";
-import { UserType } from "@/utils/zod";
 import Image from "next/image";
+import Link from "next/link";
+import { BookOpenText, Contact, House, LayoutDashboard, LogOut, User } from "lucide-react";
+import { signOut } from "@/app/auth/actions";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -11,75 +9,66 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Avatar from "./Avatar";
-import { BookOpenText, Contact, Home, LayoutDashboard, LogOut, User } from "lucide-react";
+import type { PublicProfile } from "@/lib/profiles/types";
+import { profilePath } from "@/lib/site";
+import logo from "@/public/logo.svg";
+import { Avatar } from "./Avatar";
+import { Button } from "./ui/button";
 
-export default function Navbar({
+// "My Page" sits between Edit Profile and Directory; its href depends on the user
+const menuLinks = (slug: string) => [
+    { href: "/", label: "Home", icon: House },
+    { href: "/dashboard/edit", label: "Edit Profile", icon: LayoutDashboard },
+    { href: profilePath(slug), label: "My Page", icon: User },
+    { href: "/directory", label: "Directory", icon: Contact },
+    { href: "/manifesto", label: "Manifesto", icon: BookOpenText },
+];
+
+const itemClass = "cursor-pointer rounded-lg px-3 py-2.5";
+
+export function Navbar({
     user,
-    authAction,
+    authAction = "signup",
 }: {
-    user?: UserType | null;
+    user?: PublicProfile | null;
     authAction?: "signin" | "signup";
-} & React.ComponentPropsWithoutRef<"nav">) {
+}): React.JSX.Element {
     return (
         <nav className="z-999 flex w-full max-w-[85rem] items-center justify-between self-center px-6 py-4">
             <Link href="/" className="w-48 lg:w-60">
-                <Image
-                    priority
-                    width={240}
-                    height={60}
-                    src={logo.src}
-                    alt="UofT Webring Logo"
-                    className="max-h-full max-w-full"
-                />
+                <Image priority width={240} height={60} src={logo} alt="UofT Webring Logo" className="max-h-full max-w-full" />
             </Link>
             {user ? (
                 <DropdownMenu>
-                    <DropdownMenuTrigger className="outline-none focus:outline-none">
-                        <Avatar user={user} className="w-12" verifiedSize="size-5" lazyLoading={false} />
+                    <DropdownMenuTrigger className="outline-none focus:outline-none" aria-label="Account menu">
+                        <Avatar profile={user} className="w-12" verifiedSize="size-5" size={48} priority />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-[10rem] rounded-xl p-2">
-                        <Link href="/">
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
-                                <Home className="mr-2 h-4 w-4" />
-                                Home
+                        {menuLinks(user.slug).map(({ href, label, icon: Icon }) => (
+                            <DropdownMenuItem key={href} asChild className={itemClass}>
+                                <Link href={href}>
+                                    <Icon className="mr-2 h-4 w-4" aria-hidden />
+                                    {label}
+                                </Link>
                             </DropdownMenuItem>
-                        </Link>
-                        <Link href="/dashboard/edit" prefetch={true}>
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
-                                <LayoutDashboard className="mr-2 h-4 w-4" />
-                                Edit Profile
-                            </DropdownMenuItem>
-                        </Link>
-                        <Link href={`/u/${user.slug}`}>
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
-                                <User className="mr-2 h-4 w-4" />
-                                My Page
-                            </DropdownMenuItem>
-                        </Link>
-                        <Link href="/directory" prefetch={false}>
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
-                                <Contact className="mr-2 h-4 w-4" />
-                                Directory
-                            </DropdownMenuItem>
-                        </Link>
-                        <Link href="/manifesto">
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2.5">
-                                <BookOpenText className="mr-2 h-4 w-4" />
-                                Manifesto
-                            </DropdownMenuItem>
-                        </Link>
+                        ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={signOutAction} className="cursor-pointer rounded-lg px-3 py-2.5">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Sign Out
-                        </DropdownMenuItem>
+                        <form action={signOut}>
+                            <DropdownMenuItem asChild className={itemClass}>
+                                <button type="submit" className="w-full">
+                                    <LogOut className="mr-2 h-4 w-4" aria-hidden />
+                                    Sign Out
+                                </button>
+                            </DropdownMenuItem>
+                        </form>
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
-                <Link prefetch={true} href={authAction === "signin" ? "/signin" : "/signup"}>
-                    <Button>{authAction === "signin" ? "Sign in" : "Sign up"}</Button>
-                </Link>
+                <Button asChild>
+                    <Link href={authAction === "signin" ? "/signin" : "/signup"}>
+                        {authAction === "signin" ? "Sign in" : "Sign up"}
+                    </Link>
+                </Button>
             )}
         </nav>
     );

@@ -1,9 +1,6 @@
-import React from "react";
-import { cva, VariantProps } from "class-variance-authority";
-import { Button } from "@/components/ui/button";
-
-import { CheckCircle as Success, CircleAlert as Warning, Info as Error } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import { CircleAlert, CircleCheck, Info } from "lucide-react";
+import { cn } from "@/lib/cn";
 
 const statusCardVariants = cva("my-2 px-6 py-3 rounded-lg flex flex-col border-2", {
     variants: {
@@ -21,20 +18,6 @@ const statusCardVariants = cva("my-2 px-6 py-3 rounded-lg flex flex-col border-2
 
 export type Status = NonNullable<VariantProps<typeof statusCardVariants>["status"]>;
 
-const statusButtonColor: Record<Status, string> = {
-    connected: "bg-green-400",
-    unverified: "bg-yellow-400",
-    pending: "bg-yellow-400",
-    disconnected: "bg-red-400",
-};
-
-const statusButtonLabel: Record<Status, string> = {
-    connected: "",
-    unverified: "Verify now",
-    pending: "",
-    disconnected: "Link now",
-};
-
 const statusLabels: Record<Status, string> = {
     connected: "Connected",
     unverified: "Unverified",
@@ -44,53 +27,33 @@ const statusLabels: Record<Status, string> = {
 
 const statusDescriptions: Record<Status, string> = {
     connected: "Your profile has been linked and your domain has been verified. No action needed.",
-    unverified:
-        "Your profile has been linked, but we could not verify your domain. Click edit to learn more.",
-    pending: "Your domain is being reviewed and we will provide a response shortly. No action needed.",
-    disconnected:
-        "Your profile has not been linked yet, and you are not connected to the ring. Edit your profile to join the ring.",
-};
-
-const statusDescriptionsWithoutCTA: Record<Status, string> = {
-    connected: "Your profile has been linked and your domain has been verified. No action needed.",
     unverified: "Your profile has been linked, but we could not verify your domain.",
     pending: "Your domain is being reviewed and we will provide a response shortly. No action needed.",
     disconnected: "Your profile has not been linked yet, and you are not connected to the ring.",
 };
 
+// Icons differ per status too, so state never relies on colour alone
 const statusIcons: Record<Status, React.JSX.Element> = {
-    connected: <Success className="mb-1 size-5 md:size-8" color="var(--color-green-400)" />,
-    unverified: <Warning className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" />,
-    pending: <Warning className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" />,
-    disconnected: <Error className="mb-1 size-5 md:size-8" color="var(--color-red-400)" />,
+    connected: <CircleCheck className="mb-1 size-5 md:size-8" color="var(--color-green-400)" aria-hidden />,
+    unverified: <CircleAlert className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" aria-hidden />,
+    pending: <CircleAlert className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" aria-hidden />,
+    disconnected: <Info className="mb-1 size-5 md:size-8" color="var(--color-red-400)" aria-hidden />,
 };
 
-type StatusCardProps = {
-    status?: Status;
-    showButton?: boolean;
-    showCTA?: boolean;
+export function StatusCard({
+    status,
+    className,
+}: {
+    status: Status;
     className?: string;
-};
-
-export default function StatusCard({
-    status = "connected",
-    showButton = true,
-    showCTA = true,
-    className = "",
-}: StatusCardProps) {
+}): React.JSX.Element {
     return (
-        <div className={cn(statusCardVariants({ status }), "rounded-xl", className)}>
+        <div role="status" className={cn(statusCardVariants({ status }), "rounded-xl", className)}>
             <div className="flex items-center gap-2">
                 {statusIcons[status]}
                 <h2>{statusLabels[status]}</h2>
             </div>
-            <p>{showCTA ? statusDescriptions[status] : statusDescriptionsWithoutCTA[status]}</p>
-
-            {status !== "connected" && showButton && (
-                <Button className={`mt-4 w-full ${statusButtonColor[status]}`}>
-                    <p className="color-white text-lg font-semibold">{statusButtonLabel[status]}</p>
-                </Button>
-            )}
+            <p>{statusDescriptions[status]}</p>
         </div>
     );
 }

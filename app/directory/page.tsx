@@ -1,184 +1,59 @@
-"use client";
+import { DirectoryBrowser, type DirectoryFilters } from "@/components/directory/DirectoryBrowser";
+import type { PublicProfile } from "@/lib/profiles/types";
+import { getPublicProfiles } from "@/lib/profiles/queries";
+import { profileUrl } from "@/lib/site";
 
-import { useMemo, useState, useDeferredValue, useCallback, useEffect } from "react";
-import HorizontalProfileCard from "@/components/HorizontalProfileCard";
-import Filter from "@/components/Filter";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useProfiles } from "../../providers/ProfileProvider";
-import { SafeUserType } from "@/utils/zod";
+function uniqueSorted(values: (string | number | null)[]): string[] {
+    const set = new Set(values.filter((value) => value !== null).map((value) => String(value).trim()));
+    set.delete("");
+    return [...set].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
 
-const PAGE_SIZE = 20;
+function filterOptions(profiles: PublicProfile[]): DirectoryFilters {
+    return {
+        tags: uniqueSorted(profiles.flatMap((profile) => profile.tags)),
+        programs: uniqueSorted(profiles.map((profile) => profile.program)),
+        graduationYears: uniqueSorted(profiles.map((profile) => profile.graduationYear)),
+    };
+}
 
-type SelectedFilters = {
-    tags: string | null;
-    programs: string | null;
-    "Graduation Years": string | null;
-};
+export default async function DirectoryPage() {
+    const { data: profiles, error } = await getPublicProfiles();
 
-// Normalize string for case-insensitive search
-const normalize = (s: any): string | null => {
-    if (s == null) return null;
-    const str = String(s).trim();
-    if (!str) return null;
-    return str.toLowerCase().normalize();
-};
-const toLower = (s: string | null | undefined) => (s ? s.toLowerCase() : null);
+    if (error !== null) {
+        return (
+            <p className="text-muted-foreground px-6 py-24 text-center">
+                We couldn&apos;t load the directory right now. Please refresh in a moment.
+            </p>
+        );
+    }
 
-type SearchRow = {
-    profile: SafeUserType;
-    text: string;
-    tags: string[];
-    program: string | null;
-    gradYear: string | null;
-    key: string;
-};
-
-export default function DirectoryPage() {
-    const { profiles, filterMetrics } = useProfiles();
-
-    // Search/select state
-    const [query, setQuery] = useState("");
-    const [selected, setSelected] = useState<SelectedFilters>({
-        tags: null,
-        programs: null,
-        "Graduation Years": null,
-    });
-
-    const setSelectedFilter = useCallback((filterName: keyof SelectedFilters, newValue: string | null) => {
-        setSelected((prevFilters) => ({
-            ...prevFilters,
-            [filterName]: newValue,
-        }));
-    }, []);
-
-    // Defer typing to keep UI responsive on large lists
-    const deferredQuery = normalize(useDeferredValue(query));
-
-    // Every time profiles change, we recompute the index which is an array of SearchRow's
-    const index: SearchRow[] = useMemo(() => {
-        return profiles.map((p): SearchRow => {
-            // To build a search index, strip every thing of it's case
-            const tags = (p.tags ?? []).map((t) => t.toLowerCase());
-            const program = toLower(p.program);
-            const gradYear = p.graduation_year != null ? String(p.graduation_year) : null;
-            // build once, lowercased for case insensitive query
-            const text = [p.name, p.domain, ...tags, program ?? "", gradYear ?? ""]
-                .filter(Boolean)
-                .map((x) => toLower(x as string))
-                .join(" ");
-
-            // Solely for rendering
-            const key = String(p.ring_id);
-
-            return { profile: p, text, tags, program, gradYear, key };
-        });
-    }, [profiles]);
-
-    const filtered: SafeUserType[] = useMemo(() => {
-        return index
-            .filter((row) => {
-                // For each row
-                // No match on search query
-                if (deferredQuery && !row.text.includes(deferredQuery)) return false;
-                // Tags don't match
-                if (selected.tags && !row.tags.includes(selected.tags.toLowerCase())) return false;
-                // Program doesn't match
-                if (selected.programs && row.program !== selected.programs.toLowerCase()) return false;
-                // Graduation year doesn't match
-                if (selected["Graduation Years"] && row.gradYear !== selected["Graduation Years"])
-                    return false;
-                return true;
-            })
-            .map((r) => r.profile);
-        // Every time the user types, the index is recomputed or the selected filters change, then this filter is run
-    }, [index, deferredQuery, selected]);
-
-    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-
-    // Reset pagination when filters/search change
-    useEffect(() => {
-        setVisibleCount(PAGE_SIZE);
-    }, [deferredQuery, selected]);
-
-    const visibleProfiles = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
-
-    const clearAll = () => {
-        setQuery("");
-        setSelected({ tags: null, programs: null, "Graduation Years": null });
+    const listed = profiles.filter((profile) => profile.slug && profile.name);
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "UofT Webring Directory",
+        description: "A directory of University of Toronto students and their personal websites.",
+        numberOfItems: listed.length,
+        itemListElement: listed.slice(0, 50).map((profile, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            item: {
+                "@type": "Person",
+                name: profile.name,
+                url: profileUrl(profile.slug),
+                ...(profile.domain && { sameAs: profile.domain }),
+            },
+        })),
     };
 
     return (
-        <div className="container mx-auto max-w-[75rem] px-4 py-6">
-            <h1 className="mb-6 skew-y-2 cursor-crosshair text-center text-3xl font-black tracking-widest underline decoration-pink-500 decoration-wavy drop-shadow-lg sm:text-5xl">
-                The Directory
-            </h1>
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-3 sm:flex-row">
-                    <div className="flex-1">
-                        <span className="text-muted-foreground text-sm">Search</span>
-                        <Input
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search by name, domain, tags, program…"
-                            className="bg-card flex-1 rounded-xl"
-                        />
-                    </div>
-                    {/*                     <div className="flex gap-3 w-full sm:w-auto h-full items-center justify-around">
-                     */}{" "}
-                    <Filter
-                        label="Tags"
-                        options={filterMetrics?.tags ?? []}
-                        value={selected.tags}
-                        onChange={(v) => setSelectedFilter("tags", v)}
-                    />
-                    <Filter
-                        label="Programs"
-                        options={filterMetrics?.programs ?? []}
-                        value={selected.programs}
-                        onChange={(v) => setSelectedFilter("programs", v)}
-                    />
-                    <Filter
-                        label="Graduation Years"
-                        options={filterMetrics?.["Graduation Years"] ?? []}
-                        value={selected["Graduation Years"]}
-                        onChange={(v) => setSelectedFilter("Graduation Years", v)}
-                    />
-                    {/*                     </div>
-                     */}{" "}
-                    <Button variant="secondary" onClick={clearAll} className="h-10 rounded-xl sm:self-end">
-                        Clear
-                    </Button>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                    {visibleProfiles.map((p: any) => (
-                        <HorizontalProfileCard key={p.ring_id} user={p} />
-                    ))}
-                    {filtered.length === 0 && (
-                        <div className="text-muted-foreground mt-6 flex flex-col items-center gap-2 text-center">
-                            <div className="flex size-12 items-center justify-center rounded-full border border-dashed">
-                                <span className="text-lg">😕</span>
-                            </div>
-                            <p className="text-sm">No profiles match your search or filters.</p>
-                            <span className="text-xs italic opacity-70">
-                                Try changing filters or search terms
-                            </span>
-                        </div>
-                    )}
-                    {visibleCount < filtered.length && (
-                        <div className="flex justify-center py-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-                                className="rounded-xl"
-                            >
-                                Show more ({filtered.length - visibleCount} remaining)
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+            />
+            <DirectoryBrowser profiles={listed} filters={filterOptions(listed)} />
+        </>
     );
 }

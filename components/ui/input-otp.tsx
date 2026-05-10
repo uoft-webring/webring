@@ -4,7 +4,7 @@ import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
 import { MinusIcon } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 
 function InputOTP({
     className,
@@ -23,7 +23,11 @@ function InputOTP({
                 className={cn("disabled:cursor-not-allowed", className)}
                 {...props}
             />
-            {error && <p className="text-destructive mt-4 text-center">{error}</p>}
+            {error && (
+                <p role="alert" className="text-destructive mt-4 text-center">
+                    {error}
+                </p>
+            )}
         </>
     );
 }

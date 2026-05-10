@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 
 function Textarea({
     error,
@@ -8,7 +8,7 @@ function Textarea({
     className,
     ...props
 }: {
-    error: string | undefined;
+    error?: string;
     remaining: number;
 } & React.ComponentProps<"textarea">) {
     return (
@@ -25,6 +25,7 @@ function Textarea({
                     {...props}
                 />
                 <p
+                    aria-live="polite"
                     className={cn(
                         "text-muted absolute right-3 bottom-3",
                         remaining < 16 ? "text-destructive" : ""
@@ -33,7 +34,11 @@ function Textarea({
                     {remaining.toString()}
                 </p>
             </div>
-            {error && <p className="text-destructive mt-2 mb-2">{error}</p>}
+            {error && (
+                <p role="alert" className="text-destructive mt-2 mb-2">
+                    {error}
+                </p>
+            )}
         </>
     );
 }

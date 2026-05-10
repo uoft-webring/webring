@@ -1,75 +1,63 @@
 "use client";
-import { defineStepper } from "@stepperize/react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Fragment } from "react";
+import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Fragment, useEffect, useMemo } from "react";
-import { cn } from "@/lib/utils";
-type Step = {
-    id: string;
-    title: string;
-    description: string;
-};
+import { cn } from "@/lib/cn";
 
-export default function Stepper({ steps, className }: { steps: Step[]; className?: string }) {
+type Step = { id: string; title: string };
+
+/** Dashboard progress nav. The current step comes straight from the URL. */
+export function Stepper({ steps, className }: { steps: Step[]; className?: string }): React.JSX.Element {
     const pathname = usePathname();
-    const { useStepper, utils } = useMemo(() => defineStepper(...steps), [steps]);
-    const stepper = useStepper();
-    const currentIndex = utils.getIndex(stepper.current.id);
-
-    const parts = pathname.split("/").filter(Boolean); // e.g. ["dashboard", "edit"]
-    const slug = parts[parts.length - 1] ?? ""; // e.g. "edit" or "join"
-    const slugIsStep = stepper.all.some((s) => s.id === slug); // not always will a slug match a step (Murphy's law)
-
-    useEffect(() => {
-        // Every time the pathname changes, check if the slug matches a step and navigate to it
-        if (slugIsStep && stepper.current.id !== slug) stepper.goTo(slug);
-    }, [slugIsStep, slug, stepper]);
+    const currentIndex = Math.max(
+        0,
+        steps.findIndex((step) => pathname.startsWith(`/dashboard/${step.id}`))
+    );
 
     return (
-        <nav aria-label="" className={cn(className)}>
+        <nav aria-label="Onboarding steps" className={cn(className)}>
             <ol className="flex flex-row md:flex-col">
-                {stepper.all.map((step, index, array) => (
+                {steps.map((step, index, array) => (
                     <Fragment key={step.id}>
-                        <Link href={`/dashboard/${step.id}`} className="cursor-pointer">
-                            <li className="flex flex-shrink-0 flex-col items-center gap-2 sm:flex-row">
-                                <Button
-                                    type="button"
-                                    role="tab"
-                                    variant={index <= currentIndex ? "default" : "secondary"}
-                                    aria-current={stepper.current.id === step.id ? "step" : undefined}
-                                    aria-posinset={index + 1}
-                                    aria-setsize={stepper.all.length}
-                                    aria-selected={stepper.current.id === step.id}
-                                    className="cursor-pointer rounded-full md:text-lg"
-                                    onClick={() => stepper.goTo(step.id)}
+                        <li className="flex flex-shrink-0">
+                            <Link
+                                href={`/dashboard/${step.id}`}
+                                aria-current={index === currentIndex ? "step" : undefined}
+                                className="flex flex-shrink-0 cursor-pointer flex-col items-center gap-2 sm:flex-row"
+                            >
+                                <span
+                                    className={cn(
+                                        buttonVariants({ variant: index <= currentIndex ? "default" : "secondary" }),
+                                        "cursor-pointer rounded-full md:text-lg"
+                                    )}
                                 >
                                     {index + 1}
-                                </Button>
+                                </span>
                                 <span className="text-sm font-medium md:text-lg">{step.title}</span>
-                            </li>
-                        </Link>
+                            </Link>
+                        </li>
 
                         {index < array.length - 1 && (
                             <>
                                 <Separator
+                                    aria-hidden
                                     /* TODO: find a better vertical height center'er on mobile than `my-4` */
                                     className={`my-4 h-8 flex-1 md:hidden ${
                                         index < currentIndex ? "bg-primary" : "bg-muted"
                                     }`}
                                 ></Separator>
                                 <Separator
+                                    aria-hidden
                                     orientation="vertical"
-                                    className={`mx-5 hidden md:flex ${
-                                        index < currentIndex ? "bg-primary" : "bg-muted"
-                                    }`}
+                                    className={`mx-5 hidden md:flex ${index < currentIndex ? "bg-primary" : "bg-muted"}`}
                                 ></Separator>
                                 <Separator
+                                    aria-hidden
                                     orientation="vertical"
-                                    className={`mx-5 hidden md:flex ${
-                                        index < currentIndex ? "bg-primary" : "bg-muted"
-                                    }`}
+                                    className={`mx-5 hidden md:flex ${index < currentIndex ? "bg-primary" : "bg-muted"}`}
                                 ></Separator>
                             </>
                         )}

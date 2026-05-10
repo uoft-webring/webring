@@ -1,233 +1,151 @@
 "use server";
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { createHmac } from "crypto";
-import { ApiResponse, getAuthUserProfile } from "../actions";
-import dns from "node:dns/promises";
-import { User } from "@supabase/supabase-js";
-import { Status } from "@/components/StatusCard";
 
-/**
- * There is a clear distinction between domain vailidity and verification
- * - Validity: Whether the user has added the code to their portfolio
- * - Verification: Whether the user has verified their domain ownership through DNS records
- */
+import { updateTag } from "next/cache";
+import { getAuthUser, getOwnProfile } from "@/lib/auth";
+import { OWN_PROFILE_COLUMNS, toOwnProfile, toProfileUpdate, type OwnProfileRow } from "@/lib/profiles/mapper";
+import { PROFILES_TAG } from "@/lib/profiles/queries";
+import type { OwnProfile, RingStatus } from "@/lib/profiles/types";
+import { fail, ok, type Result } from "@/lib/result";
+import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
+import { createAdminClient, createClient } from "@/lib/supabase/server";
+import { profileInputSchema } from "@/lib/validation";
+import { checkRingWidget, hasVerificationRecord, isUrlReachable } from "@/lib/verification";
 
-/**
- * Only returns the domain verification *status* of the currently authenticated user.
- *
- * Checks if the user is verified by fetching the `is_verified` field in profile's table
- *
- * @returns {Promise<boolean>} A promise that resolves to `true` if the domain is verified, otherwise `false`.
- * @throws {Error} If there is an error fetching the user profile or verification status.
- */
-export const getDomainVerification = async (): Promise<boolean> => {
-    const supabase = await createClient();
+const UNIQUE_VIOLATION = "23505";
 
-    // First obtain the ID of the currently authenticated user
-    const { data: user, error: userError } = await getAuthUserProfile();
-    if (!user || userError) return false;
-
-    console.log(`Fetching verification status for user ID: ${user.id}`);
-
-    const { data, error } = await supabase
-        .from("profile") // Select the 'profiles' table
-        .select("is_verified") // We only need the 'is_verified' column
-        .eq("id", user.id) // Find the row where 'id' matches
-        .single();
-
-    if (error || !data) {
-        console.error("Error fetching verification status:", error.message);
-        return false;
-    }
-
-    return Boolean(data.is_verified);
-};
-
-/**
- * Returns the TXT record value for domain verification.
- *
- * Generates a deterministic value based on the user's ID and a secret key.
- *
- * @returns {Promise<string>} A promise that resolves to the TXT record value.
- * @throws {Error} If the secret key is not set in the environment variables.
- * @param {string} userId - The ID of the user to generate the TXT record value for.
- */
-export const getTXTRecordValue = async (seed: string): Promise<string> => {
-    // Generate a secret-dependent deterministic TXT value from the user ID using a secret key
-    // Increases security by preventing spoofing through ensuring only we can generate valid values
-    if (!process.env.DOMAIN_VALIDATION_SECRET_KEY) {
-        throw new Error("DOMAIN_VALIDATION_SECRET_KEY is not set in environment variables.");
-    }
-    return createHmac("sha256", process.env.DOMAIN_VALIDATION_SECRET_KEY as string)
-        .update(String(seed)) // based on seed
-        .digest("base64url"); // safe for URL's
-};
-
-/**
- * Returns whether the user has verified their domain or not *based on their TXT records*.
- *
- * Fetches the TXT records for the user's domain and checks if the expected TXT record exists.
- * If the expected TXT record is found, it updates the user's profile to mark them as verified.
- *
- * @returns {Promise<boolean>} A promise that resolves to `true` if the domain is verified, otherwise `false`.
- * @throws {Error} If there is an error fetching the user profile or updating the verification status.
- */
-export const checkDomainRecords = async (): Promise<boolean> => {
-    const supabase = await createClient();
-
-    const { data: user, error: userError } = await getAuthUserProfile();
-    if (!user || userError) {
-        console.error("Error fetching user data:", userError);
-        return false;
-    }
-
-    const baseDomain = new URL(user.domain).hostname;
-    const expectedKey = `uoft-webring`;
-    const fullRecordDomain = `${expectedKey}.${baseDomain}`;
-    const expectedValue = await getTXTRecordValue(String(user.ring_id));
+/** The caller's profile as a Result, so actions report failures instead of throwing at the client. */
+async function currentProfile(): Promise<Result<OwnProfile>> {
     try {
-        const records = await dns.resolveTxt(fullRecordDomain);
-        const flatRecords = records.map((entry) => entry.join(""));
-
-        const matched = flatRecords.includes(expectedValue);
-
-        if (!matched) {
-            console.warn("No matching TXT record found for key and value.");
-            return false;
-        }
-
-        const { error: updateError } = await supabase
-            .from("profile")
-            .update({ is_verified: true })
-            .eq("id", user.id)
-            .select();
-
-        if (updateError) {
-            console.error("Error updating verification status:", updateError);
-            return false;
-        }
-
-        revalidatePath("/dashboard");
-        return true;
-    } catch (err) {
-        console.error("Unexpected error during domain verification:", err);
-        return false;
+        const profile = await getOwnProfile();
+        return profile ? ok(profile) : fail("Please sign in again.");
+    } catch (error) {
+        console.error("[dashboard]", error);
+        return fail("Something went wrong. Please try again.");
     }
-};
+}
 
-//---------------------- DOMAIN VALIDITY ----------------------
+export async function updateProfile(input: unknown): Promise<Result<OwnProfile>> {
+    const parsed = profileInputSchema.safeParse(input);
+    if (!parsed.success) return fail(parsed.error.issues[0].message);
 
-/**
- * Only returns the domain validation *status* of the currently authenticated user.
- *
- * Checks if the user has validated their domain by fetching the `valid` field in profile's table
- *
- * @returns {Promise<boolean>} A promise that resolves to `true` if the domain is valid, otherwise `false`.
- * @throws {Error} If there is an error fetching the user profile or validation status.
- * @param {UserType} [user] - Optional user data. If not provided, it will be fetched.
+    const { data: current, error: profileError } = await currentProfile();
+    if (profileError !== null) return fail(profileError);
+    const next = parsed.data;
 
- */ export const getDomainValidity = async (): Promise<Status> => {
+    // Members may keep their current image or switch to one they uploaded, never someone else's key
+    if (next.imageKey !== current.imageKey && next.imageKey !== "" && !isOwnedAvatarKey(next.imageKey, current.id)) {
+        return fail("Invalid image.");
+    }
+
+    // Only probe the site when it changed: autosave runs on every keystroke pause
+    if (next.domain && next.domain !== current.domain && !(await isUrlReachable(next.domain))) {
+        return fail("Domain URL is not reachable. Please enter a live URL.");
+    }
+
     const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("profile")
+        .update(toProfileUpdate(next))
+        .eq("id", current.id)
+        .select(OWN_PROFILE_COLUMNS)
+        .single<OwnProfileRow>();
 
-    // if (!user) {
-    //     const { data, error } = await getAuthUserProfile();
-    //     if (error || !data) {
-    //         console.error("Failed to fetch authenticated user profile:", error);
-    //         return false;
-    //     }
-    //     user = data;
-    // }
-
-    // console.log(`Fetching verification status for user ID: ${user.id}`);
-
-    const { data, error } = await supabase.from("profile").select("validated_user_component").single();
-
-    console.log(data);
-    if (error || !data) {
-        console.error("Error fetching domain validation status:", error.message);
-        return "disconnected"; // equivalent to default false status
+    if (error) {
+        if (error.code === UNIQUE_VIOLATION) return fail("Slug already taken");
+        console.error("[profile] Update failed:", error.code, error.message);
+        return fail("Could not save your profile.");
     }
 
-    return data?.validated_user_component;
-};
-
-// Here we check whether the user has a valid portfolio or not from supabase.
-export const checkAddedCodeToPortfolio = async (): Promise<boolean> => {
-    const supabase = await createClient();
-
-    const { data: userData, error: dataError } = await getAuthUserProfile();
-
-    if (dataError) {
-        console.error("Error fetching user data:", dataError);
-        return false;
+    if (current.imageKey && current.imageKey !== next.imageKey) {
+        await deleteAvatarIfUnused(current.imageKey);
     }
 
-    // fetch initial user validate_user_component state
-    // TODO: fix typescript typing warning
-    if (userData?.validated_user_component !== "pending") {
-        const { error } = await supabase
-            .from("profile")
-            .update({ validated_user_component: "pending" })
-            .eq("id", userData?.id)
-            .select();
+    updateTag(PROFILES_TAG);
+    return ok(toOwnProfile(data));
+}
 
-        if (error) {
-            console.error("Error updating domain verification status:", error);
-            return false;
-        }
-        revalidatePath("/dashboard");
+/** Legacy keys aren't owner-prefixed, so make sure no other profile still points at the object. */
+async function deleteAvatarIfUnused(imageKey: string): Promise<void> {
+    const { count } = await createAdminClient()
+        .from("profile")
+        .select("id", { count: "exact", head: true })
+        .eq("image_key", imageKey);
+    if (count !== 0) return;
+
+    try {
+        await deleteAvatar(imageKey);
+    } catch (error) {
+        console.error("[profile] Failed to delete old avatar:", error);
+    }
+}
+
+export async function createAvatarUpload(size: number): Promise<Result<{ uploadUrl: string; imageKey: string }>> {
+    const user = await getAuthUser();
+    if (!user) return fail("Please sign in again.");
+    if (!Number.isInteger(size) || size <= 0 || size > MAX_AVATAR_BYTES) {
+        return fail("That image is too large. Try a smaller crop.");
+    }
+    return ok(await createAvatarUploadUrl(user.id, size));
+}
+
+export async function verifyDomainOwnership(): Promise<Result<boolean>> {
+    const { data: profile, error: profileError } = await currentProfile();
+    if (profileError !== null) return fail(profileError);
+    if (!profile.domain) return fail("Add your portfolio link before verifying.");
+    if (profile.isVerified) return ok(true);
+
+    if (!(await hasVerificationRecord(profile.domain, profile.ringId))) return ok(false);
+
+    // Members can't write is_verified themselves (column grants), so the server records it.
+    // Matching the checked domain stops a concurrent domain change from inheriting this result.
+    const { data: updated, error } = await createAdminClient()
+        .from("profile")
+        .update({ is_verified: true })
+        .eq("id", profile.id)
+        .eq("domain", profile.domain)
+        .select("id");
+    if (error) {
+        console.error("[verify] Failed to record verification:", error.message);
+        return fail("Your record checks out, but we couldn't save that. Please try again.");
+    }
+    if (updated.length === 0) return fail("Your portfolio link changed while we were checking. Please try again.");
+
+    updateTag(PROFILES_TAG);
+    return ok(true);
+}
+
+export type RingLinkCheck = { status: RingStatus; message: string };
+
+export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
+    const { data: profile, error: profileError } = await currentProfile();
+    if (profileError !== null) return fail(profileError);
+    if (!profile.domain) return fail("Add your portfolio link before joining the ring.");
+    if (profile.ringStatus === "connected") {
+        return ok({ status: "connected", message: "Your site is already linked." });
     }
 
-    // TODO: Replace this with actual domain verification logic.
-    const result: boolean = false; // this will be an api check
-    //TODO need to write code to make a request in the DB
-    if (result) {
-        const { error } = await supabase
-            .from("profile")
-            .update({ validated_user_component: "connected" })
-            .eq("id", userData?.id)
-            .select();
+    const result = await checkRingWidget(profile.domain, profile.ringId);
+    // Sites that render links client-side can't be detected from their HTML, so a miss is
+    // queued for manual review rather than rejected outright
+    const status: RingStatus = result === "found" ? "connected" : "pending";
 
-        if (error) {
-            console.error("Error updating domain verification status:", error);
-            return false;
-        }
-
-        revalidatePath("/dashboard");
+    const { data: updated, error } = await createAdminClient()
+        .from("profile")
+        .update({ validated_user_component: status })
+        .eq("id", profile.id)
+        .eq("domain", profile.domain)
+        .select("id");
+    if (error) {
+        console.error("[ring] Failed to record ring status:", error.message);
+        return fail("Could not save your ring status. Please try again.");
     }
-    return result as boolean;
-};
+    if (updated.length === 0) return fail("Your portfolio link changed while we were checking. Please try again.");
 
-/**
- * Retrieves the currently authenticated user using the Supabase client
- * from the Authentication table.
- *
- * @returns {Promise<ApiResponse<User>>} A response object containing the
- * authenticated user in `data` if successful, or an error message in `error`
- * if the operation fails.
- */
-export const getAuthUser = async (): Promise<ApiResponse<User>> => {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error || !data?.user) {
-        return {
-            data: null,
-            error: error?.message ?? "User not found.",
-        };
-    }
-
-    return {
-        data: data.user,
-        error: null,
+    updateTag(PROFILES_TAG);
+    const messages: Record<typeof result, string> = {
+        found: "Found the webring links on your site. You're in the ring!",
+        missing: "We couldn't find the webring links on your homepage. We'll review your site manually.",
+        unreachable: "We couldn't reach your site. We'll review it manually.",
     };
-};
-
-export const signOutAction = async () => {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-    revalidatePath("/");
-    return redirect("/");
-};
+    return ok({ status, message: messages[result] });
+}
