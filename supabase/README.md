@@ -22,8 +22,9 @@ Three shell scripts that been created to aid the process of handling migrations.
 1. cd into `supabase` directory
 2. Start [local dev environment](https://supabase.com/docs/guides/local-development/cli/getting-started?queryGroups=platform&platform=macos&queryGroups=access-method&access-method=studio)
     1. `supabase start`
-        > - Inbucket is used for testing mail functionaliy (port 54324)
-        > - Supabase Studio is the same as the web Supabase dashboard (port 54323)
+        > - Mailpit is used for testing mail functionality (port 54624)
+        > - Supabase Studio is the same as the web Supabase dashboard (port 54623)
+        > - Ports are 546xx (not the CLI default 543xx) so this stack can run next to other local Supabase projects
     2. `supabase db reset`
 
 ### General CLI Command Guide
@@ -34,3 +35,15 @@ Three shell scripts that been created to aid the process of handling migrations.
 - `supabase db diff -f {migration_name}` can be used to diff the current db configurations to what the updated schema looks like
     - though note that some SQL declarations do not get automatically created in the new migration (not sure why this is the case)
         - some I've noticed that follow the behaviour above include trigger creation and view creation.
+
+### Production data locally
+
+`../scripts/db-pull-prod.sh` dumps production (read-only) and restores member data into the local stack.
+
+### Security model for `public.profile`
+
+- `anon` has no access; public pages read through the service role with an explicit column list (never `email`).
+- `authenticated` can `select` its own row and `update` only the editable profile columns (column grants).
+  `is_verified`, `validated_user_component` and `ring_id` are written by the server with the service role.
+- Changing `domain` resets verification via the `on_profile_domain_change` trigger.
+- Check constraints mirror `lib/validation.ts`.

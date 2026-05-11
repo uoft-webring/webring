@@ -17,8 +17,8 @@ A webring for University of Toronto students to showcase their personal websites
 
 | Layer     | Technology                          |
 | --------- | ----------------------------------- |
-| Framework | Next.js 15 (App Router, Turbopack) |
-| Language  | TypeScript                          |
+| Framework | Next.js 16 (App Router, Turbopack, React Compiler) |
+| Language  | TypeScript (strict)                 |
 | Styling   | Tailwind CSS 4                      |
 | Database  | Supabase (Postgres + Auth + RLS)    |
 | 3D        | Three.js, React Three Fiber         |
@@ -29,45 +29,58 @@ A webring for University of Toronto students to showcase their personal websites
 
 ## Getting Started
 
+Requires Node 24 (`nvm use`), Docker and the [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started).
+
 ```bash
-# Install dependencies
 npm install
-
-# Start the dev server
+cp .env.example .env          # local defaults; ask a maintainer for AWS values
+supabase start                # local Postgres/Auth/Studio on ports 546xx
+supabase db reset             # apply migrations + seed users
 npm run dev
-
-# Run tests
-npm test
 ```
 
-You'll also need a local Supabase instance — see the [Supabase quickstart](supabase/README.md) for setup instructions.
+The local stack runs on ports **546xx** (API 54621, DB 54622, Studio 54623, Mailpit 54624) so it can run
+alongside other local Supabase projects. Sign-in codes land in Mailpit at http://127.0.0.1:54624.
 
-### Environment Variables
+### Working with production data
 
-Copy `.env.example` (or ask a maintainer) to `.env.local` and fill in your Supabase and AWS credentials.
+`scripts/db-pull-prod.sh` copies production members into your **local** database. It only reads from
+production (`supabase db dump`) and needs the repo linked with `supabase link`. Never point `.env` at the
+production database.
+
+## Scripts
+
+```bash
+npm run dev         # dev server
+npm run build       # production build
+npm run lint        # ESLint
+npm run typecheck   # tsc --noEmit
+npm test            # Vitest
+```
 
 ## Project Structure
 
 ```
-app/                    # Next.js App Router pages and API routes
-  ├── auth/             # Authentication (OTP confirm, callback)
-  ├── dashboard/        # User dashboard (edit profile, join, verify)
+app/                    # Routes, layouts and server actions (App Router)
+  ├── auth/             # OTP sign-in/up actions, confirm + magic-link callback
+  ├── dashboard/        # Member onboarding: edit, join (ring widget), verify (DNS TXT)
   ├── directory/        # Member directory
-  ├── u/[slug]/         # Individual member pages
-  └── actions.ts        # Server actions for profile queries
-components/             # React components
-  ├── Ring/             # 3D webring visualization
-  ├── homeComponents/   # Landing page sections
-  └── ui/               # Shared UI primitives (shadcn)
-hooks/                  # Custom React hooks
-providers/              # Context providers (auth, analytics)
-utils/                  # Validation schemas, Supabase clients, helpers
+  └── u/[slug]/         # Public member pages
+components/             # React components (ui/ holds shadcn primitives)
+lib/                    # Server + shared logic
+  ├── auth.ts           # Request-cached session/profile helpers
+  ├── profiles/         # Domain types, DB row mapping, cached queries, ring navigation
+  ├── supabase/         # Supabase clients (server, browser)
+  ├── validation.ts     # Zod schemas shared by forms and server actions
+  └── url-safety.ts     # SSRF-safe fetching of member URLs
+proxy.ts                # /redirect ring navigation + session refresh
+supabase/               # Migrations and declarative schema
 __tests__/              # Unit tests (Vitest)
 ```
 
 ## Testing
 
-Tests use [Vitest](https://vitest.dev/) and cover validation schemas, URL safety checks, and utility functions.
+Tests use [Vitest](https://vitest.dev/) and cover validation, ring navigation (including wrap-around), SSRF protection, ring-widget detection and DB row mapping.
 
 ```bash
 npm test              # Single run
