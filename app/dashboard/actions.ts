@@ -1,6 +1,7 @@
 "use server";
 
 import { updateTag } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { getAuthUser, getOwnProfile } from "@/lib/auth";
 import { OWN_PROFILE_COLUMNS, toOwnProfile, toProfileUpdate, type OwnProfileRow } from "@/lib/profiles/mapper";
 import { PROFILES_TAG } from "@/lib/profiles/queries";
@@ -19,6 +20,7 @@ async function currentProfile(): Promise<Result<OwnProfile>> {
         const profile = await getOwnProfile();
         return profile ? ok(profile) : fail("Please sign in again.");
     } catch (error) {
+        unstable_rethrow(error);
         console.error("[dashboard]", error);
         return fail("Something went wrong. Please try again.");
     }

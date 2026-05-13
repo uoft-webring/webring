@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { OWN_PROFILE_COLUMNS, toOwnProfile, type OwnProfileRow } from "@/lib/profiles/mapper";
 import type { OwnProfile } from "@/lib/profiles/types";
@@ -46,6 +46,8 @@ export async function getViewerProfile(): Promise<OwnProfile | null> {
     try {
         return await getOwnProfile();
     } catch (error) {
+        // Let Next's own control flow (dynamic rendering bailout, redirects) through
+        unstable_rethrow(error);
         console.error("[auth]", error);
         return null;
     }

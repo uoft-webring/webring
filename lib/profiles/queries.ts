@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { fail, ok, type Result } from "@/lib/result";
 import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "./mapper";
@@ -30,6 +31,7 @@ export const getPublicProfiles = cache(async (): Promise<Result<PublicProfile[]>
     try {
         return ok(await loadPublicProfiles());
     } catch (error) {
+        unstable_rethrow(error);
         console.error("[profiles] Failed to load profiles:", error);
         return fail("Could not load profiles.");
     }
