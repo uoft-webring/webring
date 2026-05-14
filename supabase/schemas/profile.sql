@@ -16,6 +16,7 @@ create table public.profile (
     graduation_year int,
     program text,
     slug text unique,
+    open_to_work boolean not null default false, -- looking for co-op / internship roles
     constraint profile_ring_id_key unique (ring_id),
     -- Mirrors lib/validation.ts. Added NOT VALID in production so legacy rows are left untouched.
     constraint profile_domain_format check (domain ~ '^(https?://[^[:space:]]+)?$' and length(domain) <= 255),
@@ -41,7 +42,7 @@ create policy "Allow user to edit their own profile" on public.profile
 -- Members edit only their profile fields; verification state is written by the server (service role).
 revoke all on table public.profile from anon, authenticated;
 grant select on table public.profile to authenticated;
-grant update (name, domain, tagline, image_key, github_url, tags, graduation_year, program, slug)
+grant update (name, domain, tagline, image_key, github_url, tags, graduation_year, program, slug, open_to_work)
     on table public.profile to authenticated;
 
 -- A new domain needs to be re-verified and re-linked

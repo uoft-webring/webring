@@ -3,7 +3,7 @@ import type { ProfileInput } from "@/lib/validation";
 
 /** Columns that may be read for public pages. `email` is deliberately absent. */
 export const PUBLIC_PROFILE_COLUMNS =
-    "ring_id, slug, name, tagline, domain, github_url, image_key, is_verified, validated_user_component, tags, graduation_year, program";
+    "ring_id, slug, name, tagline, domain, github_url, image_key, is_verified, validated_user_component, tags, graduation_year, program, open_to_work";
 
 export const OWN_PROFILE_COLUMNS = `id, email, ${PUBLIC_PROFILE_COLUMNS}`;
 
@@ -20,6 +20,7 @@ export type PublicProfileRow = {
     tags: string[] | null;
     graduation_year: number | null;
     program: string | null;
+    open_to_work: boolean | null;
 };
 
 export type OwnProfileRow = PublicProfileRow & { id: string; email: string | null };
@@ -39,6 +40,7 @@ export function toPublicProfile(row: PublicProfileRow): PublicProfile {
         tags: row.tags ?? [],
         graduationYear: row.graduation_year,
         program: row.program,
+        openToWork: row.open_to_work ?? false,
     };
 }
 
@@ -57,6 +59,7 @@ export function toProfileInput(profile: PublicProfile): ProfileInput {
         graduationYear: profile.graduationYear,
         program: profile.program,
         slug: profile.slug,
+        openToWork: profile.openToWork,
     };
 }
 
@@ -72,5 +75,6 @@ export function toProfileUpdate(input: ProfileInput) {
         graduation_year: input.graduationYear,
         program: input.program,
         slug: input.slug,
+        open_to_work: input.openToWork,
     };
 }

@@ -14,6 +14,8 @@ export type PublicProfile = {
     tags: string[];
     graduationYear: number | null;
     program: string | null;
+    /** Looking for co-op / internship roles. */
+    openToWork: boolean;
 };
 
 /** The signed-in member's own profile. */

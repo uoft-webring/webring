@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpenText, Contact, House, LayoutDashboard, LogOut, User } from "lucide-react";
+import { BookOpenText, ChartColumn, Contact, House, LayoutDashboard, LogOut, User } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import {
     DropdownMenu,
@@ -15,11 +15,12 @@ import logo from "@/public/logo.svg";
 import { Avatar } from "./Avatar";
 import { Button } from "./ui/button";
 
-// "My Page" sits between Edit Profile and Directory; its href depends on the user
+// Order is intentional; "My Page" depends on the user's slug
 const menuLinks = (slug: string) => [
     { href: "/", label: "Home", icon: House },
     { href: "/dashboard/edit", label: "Edit Profile", icon: LayoutDashboard },
     { href: profilePath(slug), label: "My Page", icon: User },
+    { href: "/dashboard/stats", label: "My Stats", icon: ChartColumn },
     { href: "/directory", label: "Directory", icon: Contact },
     { href: "/manifesto", label: "Manifesto", icon: BookOpenText },
 ];

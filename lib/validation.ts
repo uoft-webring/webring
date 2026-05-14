@@ -92,6 +92,7 @@ export const profileInputSchema = z.object({
         .min(2, { error: "Slug must be at least 2 characters." })
         .max(40, { error: "Slug must be at most 40 characters." })
         .regex(SLUG, { error: "Slug can only contain lowercase letters, numbers, and hyphens." }),
+    openToWork: z.boolean(),
 });
 
 export type ProfileInput = z.infer<typeof profileInputSchema>;

@@ -52,6 +52,7 @@ const valid: ProfileInput = {
     graduationYear: 2027,
     program: "Computer Science",
     slug: "jane-doe",
+    openToWork: false,
 };
 
 function parse(patch: Partial<ProfileInput>) {

@@ -14,6 +14,7 @@ const row: PublicProfileRow = {
     tags: null,
     graduation_year: null,
     program: null,
+    open_to_work: null,
 };
 
 describe("toPublicProfile", () => {
@@ -31,6 +32,7 @@ describe("toPublicProfile", () => {
             tags: [],
             graduationYear: null,
             program: null,
+            openToWork: false,
         });
     });
 

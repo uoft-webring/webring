@@ -16,6 +16,7 @@ function member(ringId: number, domain = `https://site${ringId}.dev`): PublicPro
         tags: [],
         graduationYear: null,
         program: null,
+        openToWork: false,
     };
 }
 
