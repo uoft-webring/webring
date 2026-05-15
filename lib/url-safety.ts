@@ -80,7 +80,15 @@ type SafeFetchOptions = {
     maxBytes?: number;
 };
 
-export type SafeResponse = { status: number; ok: boolean; body: string };
+export type SafeResponse = {
+    status: number;
+    ok: boolean;
+    contentType: string;
+    /** Up to `maxBytes` of the body. */
+    body: Buffer;
+    /** True when the body was cut off at `maxBytes`. */
+    truncated: boolean;
+};
 
 /**
  * DNS lookup for outgoing requests that refuses non-public addresses. The socket connects to the
@@ -101,7 +109,7 @@ const publicOnlyLookup: LookupFunction = (hostname, options, callback) => {
         .catch((error: NodeJS.ErrnoException) => callback(error, "", 4));
 };
 
-type RawResponse = { status: number; location: string | null; body: string };
+type RawResponse = { status: number; location: string | null; contentType: string; body: Buffer; truncated: boolean };
 
 function requestOnce(url: URL, method: string, maxBytes: number, signal: AbortSignal): Promise<RawResponse> {
     const send = url.protocol === "https:" ? httpsRequest : httpRequest;
@@ -121,7 +129,9 @@ function requestOnce(url: URL, method: string, maxBytes: number, signal: AbortSi
                     resolve({
                         status: response.statusCode ?? 0,
                         location: response.headers.location ?? null,
-                        body: Buffer.concat(chunks).subarray(0, maxBytes).toString("utf8"),
+                        contentType: response.headers["content-type"] ?? "",
+                        body: Buffer.concat(chunks).subarray(0, maxBytes),
+                        truncated: total > maxBytes,
                     });
                 response.on("data", (chunk: Buffer) => {
                     chunks.push(chunk);
@@ -168,7 +178,13 @@ export async function safeFetch(
             target = new URL(response.location, url).toString();
             continue;
         }
-        return { status: response.status, ok: response.status >= 200 && response.status < 300, body: response.body };
+        return {
+            status: response.status,
+            ok: response.status >= 200 && response.status < 300,
+            contentType: response.contentType,
+            body: response.body,
+            truncated: response.truncated,
+        };
     }
     return null;
 }

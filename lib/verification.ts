@@ -58,5 +58,5 @@ export async function checkRingWidget(domain: string, ringId: number): Promise<W
     // The widget belongs in the static HTML; scanning past the first 2MB isn't worth it
     const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 2 * 1024 * 1024 });
     if (!response || !response.ok) return "unreachable";
-    return hasRingWidget(response.body, ringId) ? "found" : "missing";
+    return hasRingWidget(response.body.toString("utf8"), ringId) ? "found" : "missing";
 }
