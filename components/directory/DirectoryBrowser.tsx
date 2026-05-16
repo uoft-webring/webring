@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useDeferredValue, useState } from "react";
 import { HorizontalProfileCard } from "@/components/HorizontalProfileCard";
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,9 @@ const PAGE_SIZE = 20;
 
 export type DirectoryFilters = { tags: string[]; programs: string[]; graduationYears: string[] };
 
-type Selection = { tag: string | null; program: string | null; graduationYear: string | null };
+type Selection = { tag: string | null; program: string | null; graduationYear: string | null; openToWork: boolean };
 
-const NO_SELECTION: Selection = { tag: null, program: null, graduationYear: null };
+const NO_SELECTION: Selection = { tag: null, program: null, graduationYear: null, openToWork: false };
 
 function searchText(profile: PublicProfile): string {
     return [profile.name, profile.domain, ...profile.tags, profile.program ?? "", profile.graduationYear ?? ""]
@@ -26,6 +27,7 @@ function matches(profile: PublicProfile, query: string, selection: Selection): b
     if (selection.tag && !profile.tags.includes(selection.tag)) return false;
     if (selection.program && profile.program !== selection.program) return false;
     if (selection.graduationYear && String(profile.graduationYear) !== selection.graduationYear) return false;
+    if (selection.openToWork && !profile.openToWork) return false;
     return true;
 }
 
@@ -59,6 +61,16 @@ export function DirectoryBrowser({
             <h1 className="mb-6 skew-y-2 cursor-crosshair text-center text-3xl font-black tracking-widest underline decoration-pink-500 decoration-wavy drop-shadow-lg sm:text-5xl">
                 The Directory
             </h1>
+            <p className="text-muted-foreground mb-6 text-center text-sm">
+                Browse by{" "}
+                <Link href="/tags" className="text-primary hover:underline">
+                    tag
+                </Link>{" "}
+                or{" "}
+                <Link href="/programs" className="text-primary hover:underline">
+                    program
+                </Link>
+            </p>
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3 sm:flex-row">
                     <label className="flex-1">
@@ -84,6 +96,15 @@ export function DirectoryBrowser({
                         value={selection.graduationYear}
                         onChange={(graduationYear) => select({ graduationYear })}
                     />
+                    <label className="flex h-10 cursor-pointer items-center gap-2 self-end text-sm whitespace-nowrap">
+                        <input
+                            type="checkbox"
+                            checked={selection.openToWork}
+                            onChange={(e) => select({ openToWork: e.target.checked })}
+                            className="accent-primary size-4"
+                        />
+                        Open to co-op
+                    </label>
                     <Button
                         variant="secondary"
                         onClick={() => {

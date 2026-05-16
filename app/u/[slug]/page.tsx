@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Book, CircleCheck, GraduationCap, TagIcon, UserIcon } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ExternalLinkPill } from "@/components/ExternalLinkPill";
 import { Navbar } from "@/components/Navbar";
+import { OpenToWorkBadge } from "@/components/OpenToWorkBadge";
 import { ShareButton } from "@/components/ShareButton";
+import { SitePreview } from "@/components/SitePreview";
 import { SkillTag } from "@/components/SkillTag";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
@@ -12,6 +15,8 @@ import { getViewerProfile } from "@/lib/auth";
 import { avatarUrl } from "@/lib/avatar";
 import { getPostHogClient } from "@/lib/posthog-server";
 import { getPublicProfileBySlug } from "@/lib/profiles/queries";
+import { isLinkableDomain } from "@/lib/profiles/ring";
+import { topicPath } from "@/lib/profiles/topics";
 import { displayDomain, profileUrl } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Promise<Metadata> {
@@ -101,6 +106,7 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                         Verified
                                     </div>
                                 )}
+                                {profile.openToWork && <OpenToWorkBadge className="mt-2" />}
 
                                 <div className="border-border my-6 w-full border-t" />
 
@@ -110,7 +116,9 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                             <Book className="text-primary h-5 w-5 shrink-0" />
                                             <div>
                                                 <p className="text-foreground font-semibold">
-                                                    {profile.program}
+                                                    <Link href={topicPath("programs", profile.program)} className="hover:underline">
+                                                        {profile.program}
+                                                    </Link>
                                                 </p>
                                                 <p className="text-sm">Program</p>
                                             </div>
@@ -165,7 +173,9 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
 
                                 <div className="flex flex-row flex-wrap justify-center gap-2">
                                     {profile.tags.map((tagName) => (
-                                        <SkillTag key={tagName} tagName={tagName} />
+                                        <Link key={tagName} href={topicPath("tags", tagName)} className="hover:opacity-80">
+                                            <SkillTag tagName={tagName} />
+                                        </Link>
                                     ))}
                                 </div>
                             </div>
@@ -190,6 +200,11 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                 )}
                             </div>
                         </section>
+                        {isLinkableDomain(profile.domain) && (
+                            <section aria-label={`Preview of ${profile.name}'s website`}>
+                                <SitePreview ringId={profile.ringId} domain={profile.domain} className="shadow-lg" />
+                            </section>
+                        )}
                     </main>
                 </div>
             </div>

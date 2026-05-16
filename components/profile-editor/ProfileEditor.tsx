@@ -208,6 +208,19 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                     </div>
                 </div>
 
+                <div className="flex items-center gap-3">
+                    <input
+                        id="openToWork"
+                        name="openToWork"
+                        type="checkbox"
+                        checked={values.openToWork}
+                        onChange={(e) => update({ openToWork: e.target.checked })}
+                        className="accent-primary size-4 cursor-pointer"
+                    />
+                    <Label htmlFor="openToWork" className="cursor-pointer">
+                        Open to co-op / internships
+                    </Label>
+                </div>
                 <Label htmlFor="avatar">Profile picture</Label>
                 <AvatarInput id="avatar" error={errors.imageKey} onUploaded={(imageKey) => update({ imageKey })} />
                 <Label htmlFor="tags">Tags</Label>

@@ -6,6 +6,7 @@ import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain, profilePath, profileUrl } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { ExternalLinkPill } from "./ExternalLinkPill";
+import { OpenToWorkBadge } from "./OpenToWorkBadge";
 import { ShareButton } from "./ShareButton";
 import { SkillTag } from "./SkillTag";
 
@@ -36,6 +37,7 @@ export function ProfileCard({
                 {profile.program && profile.graduationYear && <span aria-hidden>·</span>}
                 {profile.graduationYear && <span>{profile.graduationYear}</span>}
             </div>
+            {profile.openToWork && <OpenToWorkBadge />}
 
             {profile.tags.length > 0 && (
                 <div className="flex flex-row flex-wrap justify-center gap-2">

@@ -4,6 +4,7 @@ import { cn } from "@/lib/cn";
 import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain, profilePath } from "@/lib/site";
 import { Avatar } from "./Avatar";
+import { OpenToWorkBadge } from "./OpenToWorkBadge";
 
 export function HorizontalProfileCard({
     profile,
@@ -34,6 +35,7 @@ export function HorizontalProfileCard({
                             {profile.graduationYear}
                         </p>
                     )}
+                    {profile.openToWork && <OpenToWorkBadge className="mt-2" />}
                 </div>
             </Link>
 
