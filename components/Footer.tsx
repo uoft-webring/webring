@@ -89,6 +89,14 @@ export function Footer(): React.JSX.Element {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link
+                                        href="/plain"
+                                        className="dark:text-muted-foreground text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
+                                    >
+                                        Plain version
+                                    </Link>
+                                </li>
+                                <li>
                                     <a
                                         href="https://uoftindex.com"
                                         target="_blank"
@@ -150,6 +158,14 @@ export function Footer(): React.JSX.Element {
                                                 className="text-base text-gray-600 dark:text-gray-400"
                                             >
                                                 The Directory
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link
+                                                href="/plain"
+                                                className="text-base text-gray-600 dark:text-gray-400"
+                                            >
+                                                Plain version
                                             </Link>
                                         </li>
                                         <li>
