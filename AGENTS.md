@@ -75,6 +75,9 @@ The root layout must stay static-friendly: don't read cookies in `Footer` or oth
 - Signup requires a UofT email: `utoronto.ca` or its `mail.`/`alum.`/`alumni.` subdomains. Enforced in `lib/validation.ts` and the `check_uoft_email` trigger; keep them identical.
 - `/redirect?nav=prev|next&id=…` is embedded on members' sites: never break its URL shape, and always resolve to a valid member (wrap around at the ends).
 - The redirect chain includes only members with a valid http(s) domain (`ringMembers` in `lib/profiles/ring.ts`).
+- `/redirect` records hops in `ring_visit_daily` via `record_ring_hop` after the response (`event.waitUntil`); it must never slow or block the redirect. Bots and prefetches aren't counted.
+- `/api/preview/[ringId]` only fetches ring members' own domains, through `safeFetch`, and always re-encodes the image.
+- Two front doors for now: the 3D site (`/`) and the plain version (`/plain`). Keep both working; the plain one may become the default.
 - Treat member emails as private; never expose them in public APIs.
 
 ## Verification

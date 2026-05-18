@@ -12,6 +12,10 @@ A webring for University of Toronto students to showcase their personal websites
 - **Ring Navigation** — Visit any member's site and navigate to the next/previous member in the ring
 - **Profile Customization** — Set your tagline, avatar, skills/tags, program, and graduation year
 - **UofT-only** — Sign up requires a `utoronto.ca` email address
+- **Plain version** — A text-first view of the ring at `/plain`, with search and a 2D map of the ring
+- **Ring stats** — Members see how many visitors the ring sent them (`/dashboard/stats`)
+- **Site previews** — Profile pages show each site's own social preview image
+- **Browse by tag or program** — `/tags/{tag}` and `/programs/{program}` pages, plus an "open to co-op" flag
 
 ## Tech Stack
 
