@@ -5,7 +5,16 @@ import posthog from "posthog-js";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 
-export function ShareButton({ title, url }: { title: string; url: string }): React.JSX.Element {
+/** `compact` renders an icon-only ghost button, for card footers. */
+export function ShareButton({
+    title,
+    url,
+    compact = false,
+}: {
+    title: string;
+    url: string;
+    compact?: boolean;
+}): React.JSX.Element {
     const handleShare = async () => {
         if (navigator.share) {
             try {
@@ -27,6 +36,21 @@ export function ShareButton({ title, url }: { title: string; url: string }): Rea
             toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 1000 });
         }
     };
+
+    if (compact) {
+        return (
+            <Button
+                onClick={handleShare}
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Share profile"
+                className="size-10"
+            >
+                <Share2 className="size-5" aria-hidden />
+            </Button>
+        );
+    }
 
     return (
         <Button

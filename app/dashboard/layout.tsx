@@ -1,27 +1,33 @@
+import { DashboardNav } from "@/components/dashboard/DashboardNav";
 import { Navbar } from "@/components/Navbar";
-import { Stepper } from "@/components/Stepper";
 import { requireOwnProfile } from "@/lib/auth";
-
-const ONBOARDING_STEPS = [
-    { id: "edit", title: "Edit" },
-    { id: "join", title: "Join" },
-    { id: "verify", title: "Verify" },
-];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const profile = await requireOwnProfile();
 
+    const steps = [
+        {
+            id: "edit",
+            title: "Edit",
+            hint: "Your profile card",
+            done: Boolean(profile.domain && profile.graduationYear && profile.program),
+        },
+        { id: "join", title: "Join", hint: "Add the ring widget", done: profile.ringStatus === "connected" },
+        { id: "verify", title: "Verify", hint: "Prove you own your domain", done: profile.isVerified },
+    ];
+
     return (
         <div className="bg-background flex min-h-screen flex-col">
             <Navbar user={profile} />
-            <section className="mx-auto w-full max-w-[85rem] px-6">
-                <h1 className="mb-4 capitalize">{`Welcome, ${profile.name}.`}</h1>
-            </section>
-            <div className="mx-auto flex w-full max-w-[85rem] flex-1 flex-col place-items-start md:flex-row">
-                <Stepper steps={ONBOARDING_STEPS} className="mt-6 w-full px-6 md:flex md:h-screen md:w-min md:flex-col" />
-                <div className="mx-auto mt-12 mb-5 w-full max-w-[85rem] px-6 sm:mt-6">{children}</div>
-                {/* On mobile, some space at the bottom feels better */}
-                <div className="flex h-10 sm:hidden"></div>
+            <div className="mx-auto flex w-full max-w-[85rem] flex-1 flex-col gap-6 px-6 pt-4 pb-16 md:flex-row md:gap-10">
+                <aside className="flex flex-col gap-5 md:sticky md:top-6 md:-ml-3 md:w-56 md:shrink-0 md:self-start lg:w-64">
+                    <p className="flex flex-col md:px-3">
+                        <span className="text-muted-foreground text-base">Welcome,</span>
+                        <span className="truncate text-xl leading-tight font-semibold capitalize">{`${profile.name}.`}</span>
+                    </p>
+                    <DashboardNav steps={steps} />
+                </aside>
+                <div className="min-w-0 flex-1">{children}</div>
             </div>
         </div>
     );

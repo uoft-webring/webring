@@ -27,10 +27,13 @@ export function Avatar({
     const [failed, setFailed] = useState(false);
     const src = failed ? null : avatarUrl(profile.imageKey);
     const alt = `${profile.name}'s profile picture`;
-    const classList = cn("pointer-events-none aspect-square rounded-full object-cover select-none", className);
+    const classList = cn(
+        "pointer-events-none aspect-square rounded-full object-cover select-none",
+        className
+    );
 
     return (
-        <div className="relative aspect-square rounded-full ring-2">
+        <div className="ring-foreground/15 relative aspect-square rounded-full ring-1">
             {src ? (
                 <Image
                     src={src}

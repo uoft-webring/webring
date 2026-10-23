@@ -2,24 +2,25 @@ import { cva } from "class-variance-authority";
 import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 
+// Soft tint + light text in the same hue: readable on the dark card without shouting
 const SkillTagColors = [
-    "border-red-400/80 bg-red-400/40",
-    "border-orange-400/80 bg-orange-400/40",
-    "border-amber-400/80 bg-amber-400/40",
-    "border-yellow-400/80 bg-yellow-400/40",
-    "border-lime-400/80 bg-lime-400/40",
-    "border-green-400/80 bg-green-400/40",
-    "border-emerald-400/80 bg-emerald-400/40",
-    "border-teal-400/80 bg-teal-400/40",
-    "border-cyan-400/80 bg-cyan-400/40",
-    "border-sky-400/80 bg-sky-400/40",
-    "border-blue-400/80 bg-blue-400/40",
-    "border-indigo-400/80 bg-indigo-400/40",
-    "border-violet-400/80 bg-violet-400/40",
-    "border-purple-400/80 bg-purple-400/40",
-    "border-fuchsia-400/80 bg-fuchsia-400/40",
-    "border-pink-400/80 bg-pink-400/40",
-    "border-rose-400/80 bg-rose-400/40",
+    "border-red-400/30 bg-red-400/15 text-red-200",
+    "border-orange-400/30 bg-orange-400/15 text-orange-200",
+    "border-amber-400/30 bg-amber-400/15 text-amber-200",
+    "border-yellow-400/30 bg-yellow-400/15 text-yellow-200",
+    "border-lime-400/30 bg-lime-400/15 text-lime-200",
+    "border-green-400/30 bg-green-400/15 text-green-200",
+    "border-emerald-400/30 bg-emerald-400/15 text-emerald-200",
+    "border-teal-400/30 bg-teal-400/15 text-teal-200",
+    "border-cyan-400/30 bg-cyan-400/15 text-cyan-200",
+    "border-sky-400/30 bg-sky-400/15 text-sky-200",
+    "border-blue-400/30 bg-blue-400/15 text-blue-200",
+    "border-indigo-400/30 bg-indigo-400/15 text-indigo-200",
+    "border-violet-400/30 bg-violet-400/15 text-violet-200",
+    "border-purple-400/30 bg-purple-400/15 text-purple-200",
+    "border-fuchsia-400/30 bg-fuchsia-400/15 text-fuchsia-200",
+    "border-pink-400/30 bg-pink-400/15 text-pink-200",
+    "border-rose-400/30 bg-rose-400/15 text-rose-200",
 ];
 
 // Hash the tag name so a tag always gets the same colour
@@ -33,7 +34,7 @@ function mapSkillToColor(skill: string) {
     return SkillTagColors[index];
 }
 
-const skillTagVariants = cva("rounded-full border-1 px-3", {
+const skillTagVariants = cva("rounded-full border px-3", {
     variants: {
         size: {
             default: "py-1",
@@ -49,7 +50,11 @@ export function SkillTag({
     removable = false,
     className,
     ...props
-}: { tagName: string; size?: "default" | "mini"; removable?: boolean } & React.ComponentProps<"div">): React.JSX.Element {
+}: {
+    tagName: string;
+    size?: "default" | "mini";
+    removable?: boolean;
+} & React.ComponentProps<"div">): React.JSX.Element {
     return (
         <div
             className={cn(
@@ -60,8 +65,10 @@ export function SkillTag({
             )}
             {...props}
         >
-            <p className={cn(size === "mini" ? "font-medium" : "font-bold", "text-white select-none")}>{tagName}</p>
-            {removable && <X className="ml-2 size-4 text-white hover:text-red-500" aria-label={`Remove ${tagName}`} />}
+            <p className="font-medium select-none">{tagName}</p>
+            {removable && (
+                <X className="ml-2 size-4 opacity-70 hover:opacity-100" aria-label={`Remove ${tagName}`} />
+            )}
         </div>
     );
 }

@@ -6,6 +6,7 @@ import { Info } from "lucide-react";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import { updateProfile } from "@/app/dashboard/actions";
+import { PageHeader, Panel, TAB_TRIGGER_CLASS } from "@/components/dashboard/Panel";
 import { ProfileCard } from "@/components/ProfileCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,13 @@ const AUTOSAVE_DELAY_MS = 1000;
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const requiredLabel = "after:text-destructive after:ml-1 after:content-['*']";
+
+const saveStatusText: Record<SaveStatus, string> = {
+    idle: "Changes save automatically.",
+    saving: "Saving…",
+    saved: "All changes saved.",
+    error: "Couldn't save. Try again.",
+};
 
 /**
  * Edits autosave a second after the last change. Each change is validated locally first so
@@ -90,7 +98,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
         await persist(valid, true);
     };
 
-    const preview = <ProfileCard profile={{ ...initialProfile, ...values }} />;
+    const preview = <ProfileCard profile={{ ...initialProfile, ...values }} className="mt-0" />;
 
     const form = (
         <form
@@ -101,36 +109,40 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
             className="flex flex-col"
             noValidate
         >
-            <div className="gap-2 [&>*:not(label)]:mt-1 [&>*:not(label)]:mb-4">
-                <Label htmlFor="name" className={requiredLabel}>
-                    Name
-                </Label>
-                <Input
-                    id="name"
-                    name="name"
-                    autoComplete="name"
-                    placeholder="John Doe"
-                    required
-                    value={values.name}
-                    onChange={(e) => update({ name: e.target.value })}
-                    error={errors.name}
-                />
-                <Label htmlFor="domain" className={requiredLabel}>
-                    Portfolio Link
-                </Label>
-                <Input
-                    id="domain"
-                    name="domain"
-                    type="url"
-                    autoComplete="url"
-                    placeholder="https://yourdomain.com"
-                    required
-                    value={values.domain}
-                    onChange={(e) => update({ domain: e.target.value })}
-                    error={errors.domain}
-                />
-                <div className="flex flex-row justify-evenly gap-2">
-                    <div className="flex w-full flex-col gap-2">
+            <FormSection title="Basics" first>
+                <Field>
+                    <Label htmlFor="name" className={requiredLabel}>
+                        Name
+                    </Label>
+                    <Input
+                        id="name"
+                        name="name"
+                        autoComplete="name"
+                        placeholder="John Doe"
+                        required
+                        value={values.name}
+                        onChange={(e) => update({ name: e.target.value })}
+                        error={errors.name}
+                    />
+                </Field>
+                <Field>
+                    <Label htmlFor="domain" className={requiredLabel}>
+                        Portfolio Link
+                    </Label>
+                    <Input
+                        id="domain"
+                        name="domain"
+                        type="url"
+                        autoComplete="url"
+                        placeholder="https://yourdomain.com"
+                        required
+                        value={values.domain}
+                        onChange={(e) => update({ domain: e.target.value })}
+                        error={errors.domain}
+                    />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Field>
                         <Label htmlFor="graduationYear" className={requiredLabel}>
                             Graduation Year
                         </Label>
@@ -149,8 +161,8 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                             }}
                             error={errors.graduationYear}
                         />
-                    </div>
-                    <div className="flex w-full flex-col gap-2">
+                    </Field>
+                    <Field>
                         <Label htmlFor="program" className={requiredLabel}>
                             Program
                         </Label>
@@ -164,10 +176,57 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                                 {errors.program}
                             </p>
                         )}
-                    </div>
+                    </Field>
                 </div>
-                <div className="flex flex-row justify-evenly gap-2">
-                    <div className="flex w-full flex-col gap-2">
+            </FormSection>
+
+            <FormSection title="About you">
+                <Field>
+                    <Label htmlFor="avatar">Profile picture</Label>
+                    <AvatarInput
+                        id="avatar"
+                        error={errors.imageKey}
+                        onUploaded={(imageKey) => update({ imageKey })}
+                    />
+                </Field>
+                <Field className="[&_.text-muted]:text-muted-foreground">
+                    <Label htmlFor="tagline">Bio</Label>
+                    <Textarea
+                        id="tagline"
+                        name="tagline"
+                        placeholder="John Doe is a full stack..."
+                        remaining={MAX_TAGLINE_LENGTH - values.tagline.length}
+                        value={values.tagline}
+                        onChange={(e) => update({ tagline: e.target.value })}
+                        error={errors.tagline}
+                    />
+                </Field>
+                <Field>
+                    <Label htmlFor="tags">Tags</Label>
+                    <TagInput
+                        tags={values.tags}
+                        onTagsChange={(tags) => update({ tags })}
+                        error={errors.tags}
+                    />
+                </Field>
+                <div className="flex items-center gap-3">
+                    <input
+                        id="openToWork"
+                        name="openToWork"
+                        type="checkbox"
+                        checked={values.openToWork}
+                        onChange={(e) => update({ openToWork: e.target.checked })}
+                        className="accent-primary size-4 cursor-pointer"
+                    />
+                    <Label htmlFor="openToWork" className="cursor-pointer">
+                        Open to internships
+                    </Label>
+                </div>
+            </FormSection>
+
+            <FormSection title="Links">
+                <div className="grid gap-4 sm:grid-cols-2">
+                    <Field>
                         <Label htmlFor="githubUsername">GitHub Username</Label>
                         <Input
                             id="githubUsername"
@@ -180,8 +239,8 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                             onChange={(e) => update({ githubUsername: e.target.value })}
                             error={errors.githubUsername}
                         />
-                    </div>
-                    <div className="flex w-full flex-col gap-2">
+                    </Field>
+                    <Field>
                         <Label htmlFor="slug" className="flex justify-between">
                             Slug
                             <Tooltip>
@@ -189,7 +248,9 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                                     <Info size={16} aria-hidden />
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>This slug is used for your public profile, ex. uoftwebring.com/johndoe</p>
+                                    <p>
+                                        This slug is used for your public profile, ex. uoftwebring.com/johndoe
+                                    </p>
                                 </TooltipContent>
                             </Tooltip>
                         </Label>
@@ -205,43 +266,18 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                             onChange={(e) => update({ slug: e.target.value.toLowerCase() })}
                             error={errors.slug}
                         />
-                    </div>
+                    </Field>
                 </div>
+            </FormSection>
 
-                <div className="flex items-center gap-3">
-                    <input
-                        id="openToWork"
-                        name="openToWork"
-                        type="checkbox"
-                        checked={values.openToWork}
-                        onChange={(e) => update({ openToWork: e.target.checked })}
-                        className="accent-primary size-4 cursor-pointer"
-                    />
-                    <Label htmlFor="openToWork" className="cursor-pointer">
-                        Open to co-op / internships
-                    </Label>
-                </div>
-                <Label htmlFor="avatar">Profile picture</Label>
-                <AvatarInput id="avatar" error={errors.imageKey} onUploaded={(imageKey) => update({ imageKey })} />
-                <Label htmlFor="tags">Tags</Label>
-                <TagInput tags={values.tags} onTagsChange={(tags) => update({ tags })} error={errors.tags} />
-                <Label htmlFor="tagline">Bio</Label>
-                <Textarea
-                    id="tagline"
-                    name="tagline"
-                    placeholder="John Doe is a full stack..."
-                    remaining={MAX_TAGLINE_LENGTH - values.tagline.length}
-                    value={values.tagline}
-                    onChange={(e) => update({ tagline: e.target.value })}
-                    error={errors.tagline}
-                />
-            </div>
-
-            <div className="flex items-center justify-start gap-4">
-                <Button variant="secondary" type="submit" disabled={status === "saving"}>
+            <div className="flex items-center gap-4 border-t pt-5">
+                <p aria-live="polite" className="text-muted-foreground text-sm">
+                    {saveStatusText[status]}
+                </p>
+                <Button variant="secondary" type="submit" disabled={status === "saving"} className="ml-auto">
                     Save
                 </Button>
-                <Button asChild className="ml-auto">
+                <Button asChild>
                     <Link href="/dashboard/join">Continue</Link>
                 </Button>
             </div>
@@ -249,40 +285,71 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
     );
 
     return (
-        <>
+        <section className="flex flex-col gap-6">
+            <PageHeader
+                title="Edit your profile"
+                description="Complete the information below to complete your profile."
+            />
             {/* The form is mounted once (no duplicate ids); on small screens the tabs swap it for the preview */}
             <Tabs
                 value={mobileTab}
                 onValueChange={(tab) => setMobileTab(tab as "edit" | "preview")}
-                className="w-full lg:hidden"
+                className="w-full xl:hidden"
             >
-                <TabsList className="mb-2 grid w-full grid-cols-2">
-                    <TabsTrigger value="edit">Edit</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="edit" className={TAB_TRIGGER_CLASS}>
+                        Edit
+                    </TabsTrigger>
+                    <TabsTrigger value="preview" className={TAB_TRIGGER_CLASS}>
+                        Preview
+                    </TabsTrigger>
                 </TabsList>
-                <TabsContent value="preview">
-                    <h2>Preview</h2>
-                    <p className="mb-6">Preview your profile live, as you make changes.</p>
-                    {preview}
-                </TabsContent>
+                <TabsContent value="preview">{preview}</TabsContent>
             </Tabs>
-            <section
-                className={cn(
-                    "items-start justify-center gap-12 lg:flex lg:[&>*]:shrink lg:[&>*]:grow lg:[&>*]:basis-0",
-                    mobileTab === "preview" ? "hidden" : "flex"
-                )}
-            >
-                <div className="w-full">
-                    <h2>Edit your profile</h2>
-                    <p className="mb-6 lg:text-base">Complete the information below to complete your profile.</p>
-                    {form}
-                </div>
-                <div className="justify-left hidden h-full flex-col items-start lg:flex">
-                    <h2>Preview</h2>
-                    <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
+            <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_25rem] xl:items-start xl:gap-8">
+                <Panel className={cn(mobileTab === "preview" && "hidden xl:flex")}>{form}</Panel>
+                <aside className="hidden flex-col gap-3 xl:sticky xl:top-6 xl:flex">
+                    <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
+                        Preview
+                    </p>
                     {preview}
-                </div>
-            </section>
-        </>
+                </aside>
+            </div>
+        </section>
+    );
+}
+
+// Input/Textarea errors carry their own margins for the old stacked layout; the gap handles spacing here
+function Field({
+    className,
+    children,
+}: {
+    className?: string;
+    children: React.ReactNode;
+}): React.JSX.Element {
+    return (
+        <div className={cn("flex flex-col gap-2 [&>[role=alert]]:m-0 [&>[role=alert]]:text-sm", className)}>
+            {children}
+        </div>
+    );
+}
+
+function FormSection({
+    title,
+    first = false,
+    children,
+}: {
+    title: string;
+    first?: boolean;
+    children: React.ReactNode;
+}): React.JSX.Element {
+    return (
+        <fieldset className={cn("flex flex-col gap-4 pb-6", !first && "border-t pt-5")}>
+            <legend className="sr-only">{title}</legend>
+            <p aria-hidden className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
+                {title}
+            </p>
+            {children}
+        </fieldset>
     );
 }

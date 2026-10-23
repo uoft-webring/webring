@@ -2,13 +2,14 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { CircleAlert, CircleCheck, Info } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const statusCardVariants = cva("my-2 px-6 py-3 rounded-lg flex flex-col border-2", {
+// Tinted icon chip on the shared card surface (theme tokens, not raw palette colours)
+const statusIconVariants = cva("flex size-10 shrink-0 items-center justify-center rounded-full", {
     variants: {
         status: {
-            connected: "bg-green-300/20 border-green-400",
-            unverified: "bg-yellow-300/20 border-yellow-400",
-            pending: "bg-yellow-300/20 border-yellow-400",
-            disconnected: "bg-red-300/20 border-red-400",
+            connected: "bg-chart-3/15 text-chart-3",
+            unverified: "bg-chart-4/15 text-chart-4",
+            pending: "bg-chart-4/15 text-chart-4",
+            disconnected: "bg-destructive/15 text-destructive",
         },
     },
     defaultVariants: {
@@ -16,7 +17,7 @@ const statusCardVariants = cva("my-2 px-6 py-3 rounded-lg flex flex-col border-2
     },
 });
 
-export type Status = NonNullable<VariantProps<typeof statusCardVariants>["status"]>;
+export type Status = NonNullable<VariantProps<typeof statusIconVariants>["status"]>;
 
 const statusLabels: Record<Status, string> = {
     connected: "Connected",
@@ -34,26 +35,32 @@ const statusDescriptions: Record<Status, string> = {
 
 // Icons differ per status too, so state never relies on colour alone
 const statusIcons: Record<Status, React.JSX.Element> = {
-    connected: <CircleCheck className="mb-1 size-5 md:size-8" color="var(--color-green-400)" aria-hidden />,
-    unverified: <CircleAlert className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" aria-hidden />,
-    pending: <CircleAlert className="mb-1 size-5 md:size-8" color="var(--color-yellow-400)" aria-hidden />,
-    disconnected: <Info className="mb-1 size-5 md:size-8" color="var(--color-red-400)" aria-hidden />,
+    connected: <CircleCheck className="size-5" aria-hidden />,
+    unverified: <CircleAlert className="size-5" aria-hidden />,
+    pending: <CircleAlert className="size-5" aria-hidden />,
+    disconnected: <Info className="size-5" aria-hidden />,
 };
 
+/** `children` is an optional action (e.g. "Check my site") shown under the status it changes. */
 export function StatusCard({
     status,
     className,
+    children,
 }: {
     status: Status;
     className?: string;
+    children?: React.ReactNode;
 }): React.JSX.Element {
     return (
-        <div role="status" className={cn(statusCardVariants({ status }), "rounded-xl", className)}>
-            <div className="flex items-center gap-2">
-                {statusIcons[status]}
-                <h2>{statusLabels[status]}</h2>
+        <div className={cn("bg-card flex items-start gap-4 rounded-xl border p-5", className)}>
+            <span className={statusIconVariants({ status })}>{statusIcons[status]}</span>
+            <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <div role="status" className="flex flex-col gap-1">
+                    <h3 className="text-lg font-semibold">{statusLabels[status]}</h3>
+                    <p className="text-muted-foreground text-base">{statusDescriptions[status]}</p>
+                </div>
+                {children}
             </div>
-            <p>{statusDescriptions[status]}</p>
         </div>
     );
 }

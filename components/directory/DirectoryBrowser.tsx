@@ -103,7 +103,7 @@ export function DirectoryBrowser({
                             onChange={(e) => select({ openToWork: e.target.checked })}
                             className="accent-primary size-4"
                         />
-                        Open to co-op
+                        Open to internships
                     </label>
                     <Button
                         variant="secondary"

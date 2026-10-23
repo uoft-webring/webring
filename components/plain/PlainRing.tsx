@@ -32,7 +32,7 @@ function SearchBox({
                 onChange={(event) => onChange(event.target.value)}
                 placeholder="Search by name, year or URL…"
                 autoComplete="off"
-                className="w-full border border-[#9aa7c2] bg-[#fdfbf6] px-4 py-3 text-[17px] tracking-wide text-[#1f1d1a] [font-variant:small-caps] placeholder:text-[#7c7567] focus:border-[#1E3765] focus:ring-2 focus:ring-[#1E3765]/25 focus:outline-none"
+                className="w-full border border-[#9aa7c2] bg-[#fafcff] px-4 py-3 text-[17px] tracking-wide text-[#14213d] [font-variant:small-caps] placeholder:text-[#5b6b88] focus:border-[#1E3765] focus:ring-2 focus:ring-[#1E3765]/25 focus:outline-none"
             />
         </div>
     );
@@ -100,7 +100,7 @@ export function PlainRing({
                                         href={member.domain}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="font-[family-name:var(--font-plain-mono)] text-[15px] text-[#8a4600] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]"
+                                        className="font-[family-name:var(--font-plain-mono)] text-[15px] text-[#006a8a] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]"
                                     >
                                         {member.label}
                                     </a>
@@ -109,7 +109,7 @@ export function PlainRing({
                         ))}
                         {visible.length === 0 && (
                             <tr>
-                                <td colSpan={3} className="py-6 text-[#5c564b] italic">
+                                <td colSpan={3} className="py-6 text-[#4a5a78] italic">
                                     No sites match “{query.trim()}”.
                                 </td>
                             </tr>

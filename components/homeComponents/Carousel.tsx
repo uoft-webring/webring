@@ -21,7 +21,7 @@ export function ProfileCarousel({ profiles }: { profiles: PublicProfile[] }): Re
             disableDotsControls
             disableButtonsControls
             items={profiles.map((profile, index) => (
-                <div key={profile.ringId} className="mx-3 flex min-h-[35rem] flex-col">
+                <div key={profile.ringId} className="mx-3 flex min-h-[28rem] flex-col">
                     {/* Only the first visible cards compete for bandwidth */}
                     <ProfileCard profile={profile} priority={index < 3} />
                 </div>

@@ -50,7 +50,7 @@
     --font-sans: "Oxanium", sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -78,7 +78,7 @@
     --secondary: oklch(0.4569 0.0671 266.6915);
     --secondary-foreground: oklch(0.9074 0.0328 262.6918);
     --muted: oklch(0.2549 0.046 265.4298);
-    --muted-foreground: oklch(0.6865 0.0437 273.0751);
+    --muted-foreground: oklch(0.76 0.0437 273.0751);
     --accent: oklch(0.2863 0.0596 281.964);
     --accent-foreground: oklch(0.8424 0.1274 335.2096);
     --destructive: oklch(0.7099 0.2175 350.9482);
@@ -102,7 +102,7 @@
     --font-sans: "Oxanium", sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -156,8 +156,8 @@
 
     /*
      * One radius scale for the whole app (it was 0, so sm–lg rendered square while 2xl+ cards and
-     * pill buttons stayed round). Controls (inputs, selects) use md, menus and small panels xl,
-     * cards 2xl–3xl; buttons and tags stay pills.
+     * pill buttons stayed round). Controls (inputs, selects, OTP slots, tab triggers) use md,
+     * tab lists and menus lg, cards and panels xl; buttons and tags stay pills.
      */
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);

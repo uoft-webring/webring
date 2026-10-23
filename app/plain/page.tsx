@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     openGraph: { title: "UofT Webring (plain)", description, url: "/plain" },
 };
 
-const linkClass = "text-[#8a4600] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]";
+const linkClass = "text-[#006a8a] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]";
 
 export default async function PlainPage() {
     const { data: profiles } = await getPublicProfiles();
@@ -46,7 +46,7 @@ export default async function PlainPage() {
             <header className="flex items-center gap-3">
                 <Image src={ringLogo} alt="" width={44} height={44} priority />
                 <h1 className="m-0 text-3xl leading-none font-normal text-[#1E3765]">
-                    <span className="block text-[11px] leading-normal tracking-[0.2em] text-[#5c564b] uppercase">
+                    <span className="block text-[11px] leading-normal tracking-[0.2em] text-[#4a5a78] uppercase">
                         University of Toronto
                     </span>
                     Webring
@@ -86,16 +86,16 @@ export default async function PlainPage() {
     // sets its own palette and lets paragraphs inherit from their container
     return (
         <div
-            className={`${serif.variable} ${mono.variable} relative min-h-svh overflow-x-clip bg-[#fbf8f1] font-[family-name:var(--font-plain-serif)] text-[#1f1d1a] [&_p]:[font-size:inherit] [&_p]:[line-height:inherit] [&_p]:[color:inherit]`}
+            className={`${serif.variable} ${mono.variable} relative min-h-svh overflow-x-clip bg-[#f3f6fb] font-[family-name:var(--font-plain-serif)] text-[#14213d] [&_p]:[font-size:inherit] [&_p]:[line-height:inherit] [&_p]:[color:inherit]`}
         >
             <nav
                 aria-label="About the webring"
                 className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1 font-[family-name:var(--font-plain-mono)] text-xs italic sm:top-6 sm:right-6"
             >
-                <Link href="/manifesto" className={`${linkClass} bg-[#fbf8f1]/80 px-1`}>
+                <Link href="/manifesto" className={`${linkClass} bg-[#f3f6fb]/80 px-1`}>
                     what&apos;s a webring?
                 </Link>
-                <Link href="/signup" className={`${linkClass} bg-[#fbf8f1]/80 px-1`}>
+                <Link href="/signup" className={`${linkClass} bg-[#f3f6fb]/80 px-1`}>
                     how can i join?
                 </Link>
             </nav>
@@ -109,7 +109,7 @@ export default async function PlainPage() {
             </main>
 
             {/* Soft hand-off into the site's dark footer */}
-            <div aria-hidden className="h-16 bg-gradient-to-b from-[#fbf8f1] to-transparent" />
+            <div aria-hidden className="h-16 bg-gradient-to-b from-[#f3f6fb] to-transparent" />
         </div>
     );
 }
