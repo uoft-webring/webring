@@ -6,7 +6,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 /** Who an unsubscribe link belongs to. */
 export const unsubscribeParamsSchema = z.object({
-    kind: z.enum(["member"]),
+    kind: z.enum(["member", "invite"]),
     id: z.uuid(),
     token: z.string().min(1).max(100),
 });
@@ -35,9 +35,11 @@ export function unsubscribeUrls(kind: UnsubscribeKind, id: string): { page: stri
 
 /** Caller must have checked the token. Returns whether the opt-out was saved. */
 export async function recordUnsubscribe(kind: UnsubscribeKind, id: string): Promise<boolean> {
-    const { error } = await createAdminClient()
-        .from("member_email_pref")
-        .upsert({ profile_id: id, opted_out: true }, { onConflict: "profile_id" });
+    const admin = createAdminClient();
+    const { error } =
+        kind === "member"
+            ? await admin.from("member_email_pref").upsert({ profile_id: id, opted_out: true }, { onConflict: "profile_id" })
+            : await admin.from("invite_candidate").update({ status: "opted_out" }).eq("id", id);
     // 23503: the account was deleted, so there's no one left to email
     if (error?.code === "23503") return true;
     if (error) console.error(`[unsubscribe] Failed to save opt-out (${kind}):`, error.message);

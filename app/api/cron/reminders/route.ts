@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isAuthorized } from "@/lib/bearer";
+import { cronAuthError, cronMode, pauseBetweenSends, sendRefusal } from "@/lib/cron";
 import { sendEmail } from "@/lib/email";
-import { serverEnv, siteUrl } from "@/lib/env";
+import { siteUrl } from "@/lib/env";
 import { REMINDER_BATCH_SIZE, reminderEmail } from "@/lib/reminders";
 import { fail, ok, type Result } from "@/lib/result";
 import { profileUrl } from "@/lib/site";
@@ -26,25 +26,14 @@ type ClaimedMember = {
 // Counts only: Actions logs on a public repo are public, so this must never include emails
 type ReminderRun = { mode: "dry-run" | "send"; due: number; sent: number; failed: number };
 
-// SES starts accounts at 1 email a second
-const SEND_GAP_MS = 1100;
-
-/** Called by .github/workflows/reminders.yml. `?mode=send` emails people; anything else is a dry run. */
+/** Called by .github/workflows/reminders.yml. */
 export async function POST(request: NextRequest): Promise<NextResponse<Result<ReminderRun>>> {
-    const env = serverEnv();
-    if (!env.CRON_SECRET) {
-        console.error("[reminders] CRON_SECRET is not set.");
-        return NextResponse.json(fail("Server configuration error."), { status: 500 });
-    }
-    if (!isAuthorized(request.headers.get("authorization"), env.CRON_SECRET)) {
-        return NextResponse.json(fail("Unauthorized."), { status: 401 });
-    }
+    const authError = cronAuthError(request);
+    if (authError) return authError;
 
-    const mode = request.nextUrl.searchParams.get("mode") === "send" ? "send" : "dry-run";
-    // Local and preview deployments can hold real members' data and AWS keys: only production emails
-    if (mode === "send" && env.VERCEL_ENV !== "production") {
-        return NextResponse.json(fail("Sending only runs on the production deployment."), { status: 403 });
-    }
+    const mode = cronMode(request);
+    const refusal = sendRefusal(mode);
+    if (refusal) return refusal;
 
     const admin = createAdminClient();
     const { data, error } = await admin.rpc("claim_profile_reminders", {
@@ -61,7 +50,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
     let sent = 0;
     let failed = 0;
     for (const [index, member] of members.entries()) {
-        if (index > 0) await new Promise((resolve) => setTimeout(resolve, SEND_GAP_MS));
+        if (index > 0) await pauseBetweenSends();
 
         const unsubscribe = unsubscribeUrls("member", member.id);
         const message = reminderEmail(
