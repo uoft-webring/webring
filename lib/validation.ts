@@ -71,7 +71,9 @@ export const profileInputSchema = z.object({
     }),
     tags: z
         .array(z.string().trim().min(1).max(40))
-        .max(MAX_TAGS, { error: `You can choose up to ${MAX_TAGS} tags.` }),
+        // Counted after duplicates are dropped, matching what's stored
+        .refine((tags) => new Set(tags).size <= MAX_TAGS, { error: `You can choose up to ${MAX_TAGS} tags.` })
+        .transform((tags) => [...new Set(tags)]),
     graduationYear: z
         .number({ error: "Graduation year must be a number." })
         .int({ error: "Graduation year must be an integer." })
@@ -105,6 +107,83 @@ export function fieldErrors(error: z.ZodError<ProfileInput>): ProfileErrors {
     for (const issue of error.issues) {
         const field = issue.path[0] as ProfileField | undefined;
         if (field && !errors[field]) errors[field] = issue.message;
+    }
+    return errors;
+}
+
+// ---- A member's own page (/u/[slug]). Mirrors the profile_* page constraints in the DB. ----
+
+export const MAX_ABOUT_LENGTH = 4000;
+export const MAX_PROJECTS = 6;
+export const MAX_EXPERIENCE = 8;
+export const MAX_LINKS = 5;
+export const ACCENTS = ["periwinkle", "line-1", "line-2", "line-4", "streetcar", "lake"] as const;
+export type Accent = (typeof ACCENTS)[number];
+
+const MONTH = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+const linkUrlSchema = z
+    .string()
+    .trim()
+    .max(255, { error: "URL can be at most 255 characters." })
+    .refine((value) => httpUrl(value)?.hostname.includes(".") === true, { error: "Please enter a valid URL." });
+
+export const projectSchema = z.object({
+    title: z
+        .string()
+        .trim()
+        .min(1, { error: "Give the project a name." })
+        .max(80, { error: "Project names can be at most 80 characters." }),
+    url: z.string().trim().pipe(z.union([z.literal(""), linkUrlSchema])),
+    description: z.string().trim().max(280, { error: "Keep descriptions under 280 characters." }),
+});
+
+export const experienceSchema = z
+    .object({
+        role: z.string().trim().min(1, { error: "Add your role." }).max(80, { error: "At most 80 characters." }),
+        organization: z
+            .string()
+            .trim()
+            .min(1, { error: "Add where you worked." })
+            .max(80, { error: "At most 80 characters." }),
+        start: z.string().regex(MONTH, { error: "Pick a start month." }),
+        // "" means it's ongoing
+        end: z.union([z.literal(""), z.string().regex(MONTH, { error: "Pick an end month." })]),
+        description: z.string().trim().max(280, { error: "Keep descriptions under 280 characters." }),
+    })
+    .refine((entry) => entry.end === "" || entry.end >= entry.start, {
+        error: "The end month is before the start.",
+        path: ["end"],
+    });
+
+export const customLinkSchema = z.object({
+    label: z.string().trim().min(1, { error: "Name the link." }).max(40, { error: "At most 40 characters." }),
+    url: linkUrlSchema,
+});
+
+export const pageContentSchema = z.object({
+    about: z.string().max(MAX_ABOUT_LENGTH, { error: `About can be at most ${MAX_ABOUT_LENGTH} characters.` }),
+    projects: z.array(projectSchema).max(MAX_PROJECTS, { error: `You can add up to ${MAX_PROJECTS} projects.` }),
+    experience: z
+        .array(experienceSchema)
+        .max(MAX_EXPERIENCE, { error: `You can add up to ${MAX_EXPERIENCE} roles.` }),
+    links: z.array(customLinkSchema).max(MAX_LINKS, { error: `You can add up to ${MAX_LINKS} links.` }),
+    accent: z.enum(ACCENTS),
+});
+
+export type Project = z.infer<typeof projectSchema>;
+export type Experience = z.infer<typeof experienceSchema>;
+export type CustomLink = z.infer<typeof customLinkSchema>;
+export type PageContent = z.infer<typeof pageContentSchema>;
+
+export const EMPTY_PAGE_CONTENT: PageContent = { about: "", projects: [], experience: [], links: [], accent: "periwinkle" };
+
+/** First error per field path ("projects.0.title"), for inline errors in the page editor. */
+export function pageFieldErrors(error: z.ZodError<PageContent>): Record<string, string> {
+    const errors: Record<string, string> = {};
+    for (const issue of error.issues) {
+        const key = issue.path.join(".");
+        if (!errors[key]) errors[key] = issue.message;
     }
     return errors;
 }

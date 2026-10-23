@@ -29,9 +29,15 @@ export function TagInput({
     return (
         <>
             <Tags>
-                <TagsTrigger className="rounded-xl">
+                <TagsTrigger type="button" className="rounded-md">
                     {tags.map((tag) => (
-                        <SkillTag key={tag} tagName={tag} size="mini" removable onClick={() => remove(tag)} />
+                        <SkillTag key={tag} tagName={tag} size="mini" removable
+                            onClick={(event) => {
+                                // Removing a tag shouldn't also open the picker
+                                event.stopPropagation();
+                                remove(tag);
+                            }}
+                        />
                     ))}
                 </TagsTrigger>
                 <TagsContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/cn";
 import { seededRandom } from "./seeded";
 import type { PlainMember } from "./types";
 
@@ -59,7 +60,7 @@ export function RingGraph({
     };
 
     return (
-        <div className="relative overflow-hidden border border-[#c9c2b3] bg-[#f4f1ea]">
+        <div className="relative overflow-hidden border border-[#b9c4d6] bg-[#e9eef6]">
             <svg
                 role="img"
                 aria-label={`Map of the ${members.length} sites in the ring. The list of sites is the accessible version.`}
@@ -78,7 +79,7 @@ export function RingGraph({
                             y1={node.y}
                             x2={next.x}
                             y2={next.y}
-                            stroke={lit ? "#1E3765" : "#cdc6b8"}
+                            stroke={lit ? "#1E3765" : "#c3cddd"}
                             strokeWidth={lit ? 2.5 : 1.2}
                         />
                     );
@@ -89,7 +90,10 @@ export function RingGraph({
                     return (
                         <g
                             key={node.ringId}
-                            className="cursor-pointer transition-opacity duration-150 motion-reduce:transition-none"
+                            className={cn(
+                                "transition-opacity duration-150 motion-reduce:transition-none",
+                                visible ? "cursor-pointer" : "pointer-events-none"
+                            )}
                             opacity={visible ? 1 : 0.15}
                             onPointerEnter={() => setHovered(node.ringId)}
                             onClick={() => openMemberSite(node.domain)}
@@ -100,13 +104,13 @@ export function RingGraph({
                                 cx={node.x}
                                 cy={node.y}
                                 r={active ? 10 : 8}
-                                fill={active ? "#1E3765" : isNeighbour(index) ? "#4f6896" : "#a7a196"}
+                                fill={active ? "#1E3765" : isNeighbour(index) ? "#4f6896" : "#98a5bc"}
                             />
                             <text
                                 x={node.x + 14}
                                 y={node.y + 5}
                                 fontSize={15}
-                                fill={active ? "#1E3765" : "#6a6355"}
+                                fill={active ? "#1E3765" : "#52617d"}
                                 className="font-[family-name:var(--font-plain-mono)]"
                             >
                                 {node.label}

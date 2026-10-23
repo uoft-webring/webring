@@ -16,10 +16,14 @@ function Shell({ title, children }: { title: string; children: React.ReactNode }
     );
 }
 
+// Never render Supabase's messages or the URL's error_description: the first is raw, the second
+// lets anyone craft a link that shows their own text on our domain
+const AUTH_ERROR = "Unable to complete authentication. Please try again.";
+
 async function sessionFromHash(): Promise<string | null> {
     const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const hashError = hash.get("error_description") ?? hash.get("error");
-    if (hashError) return hashError;
+    if (hashError) return AUTH_ERROR;
 
     const supabase = createClient();
     const accessToken = hash.get("access_token");
@@ -27,11 +31,11 @@ async function sessionFromHash(): Promise<string | null> {
     if (!accessToken || !refreshToken) {
         // Already signed in (e.g. the link was opened twice): carry on
         const { data } = await supabase.auth.getSession();
-        return data.session ? null : "Unable to complete authentication. Please try again.";
+        return data.session ? null : AUTH_ERROR;
     }
 
     const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-    return error?.message ?? null;
+    return error ? AUTH_ERROR : null;
 }
 
 export function AuthCallback({
@@ -43,7 +47,7 @@ export function AuthCallback({
     type: "magiclink" | "email" | null;
     initialError: string | null;
 }): React.JSX.Element {
-    const [error, setError] = useState<string | null>(initialError);
+    const [error, setError] = useState<string | null>(initialError ? AUTH_ERROR : null);
     const [verifying, setVerifying] = useState(false);
 
     useEffect(() => {
@@ -66,7 +70,7 @@ export function AuthCallback({
         setError(null);
         const { error: verifyError } = await createClient().auth.verifyOtp({ token_hash: tokenHash, type });
         if (verifyError) {
-            setError(verifyError.message);
+            setError(AUTH_ERROR);
             setVerifying(false);
             return;
         }

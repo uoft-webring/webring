@@ -18,7 +18,9 @@ export function VisitsChart({ days }: { days: DailyVisits[] }): React.JSX.Elemen
         <figure className="bg-card rounded-xl border p-5">
             <figcaption className="mb-4 flex items-baseline justify-between gap-4">
                 <span className="text-sm font-medium">{title}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">peak {max}</span>
+                {max > 0 && (
+                    <span className="text-muted-foreground text-sm tabular-nums">Busiest day: {max}</span>
+                )}
             </figcaption>
 
             {max === 0 ? (
@@ -35,9 +37,15 @@ export function VisitsChart({ days }: { days: DailyVisits[] }): React.JSX.Elemen
                                 role="img"
                                 aria-label={`${formatDay(day.day)}: ${day.inbound} in, ${day.outbound} out`}
                                 className="bg-primary focus-visible:ring-ring w-full rounded-t-[4px] outline-none group-hover:opacity-80 focus-visible:ring-2"
-                                style={{ height: `${(day.inbound / max) * 100}%`, minHeight: day.inbound ? 2 : 0 }}
+                                style={{
+                                    height: `${(day.inbound / max) * 100}%`,
+                                    minHeight: day.inbound ? 2 : 0,
+                                }}
                             />
-                            <span aria-hidden className="bg-popover text-popover-foreground pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md border px-2 py-1 text-xs whitespace-nowrap shadow-md group-focus-within:block group-hover:block">
+                            <span
+                                aria-hidden
+                                className="bg-popover text-popover-foreground pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-md border px-2 py-1 text-xs whitespace-nowrap shadow-md group-focus-within:block group-hover:block"
+                            >
                                 {formatDay(day.day)}: {day.inbound} in · {day.outbound} out
                             </span>
                         </div>
@@ -45,31 +53,34 @@ export function VisitsChart({ days }: { days: DailyVisits[] }): React.JSX.Elemen
                 </div>
             )}
             {max > 0 && (
-                <div aria-hidden className="text-muted-foreground mt-2 flex justify-between text-xs">
+                <div aria-hidden className="text-muted-foreground mt-2 flex justify-between text-sm">
                     <span>{formatDay(days[0].day)}</span>
                     <span>{formatDay(days[days.length - 1].day)}</span>
                 </div>
             )}
 
-            <table className="sr-only">
-                <caption>{title}</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Day</th>
-                        <th scope="col">Visitors sent to you</th>
-                        <th scope="col">Visitors you sent on</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {days.map((day) => (
-                        <tr key={day.day}>
-                            <td>{formatDay(day.day)}</td>
-                            <td>{day.inbound}</td>
-                            <td>{day.outbound}</td>
+            {/* sr-only on a wrapper: a table's <caption> is laid out outside the table box and would show */}
+            <div className="sr-only">
+                <table>
+                    <caption>{title}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Day</th>
+                            <th scope="col">Visitors sent to you</th>
+                            <th scope="col">Visitors you sent on</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {days.map((day) => (
+                            <tr key={day.day}>
+                                <td>{formatDay(day.day)}</td>
+                                <td>{day.inbound}</td>
+                                <td>{day.outbound}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </figure>
     );
 }

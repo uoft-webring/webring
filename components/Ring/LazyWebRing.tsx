@@ -1,8 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Component, useSyncExternalStore, type ReactNode } from "react";
+import { Component, type ReactNode } from "react";
 import type { PublicProfile } from "@/lib/profiles/types";
+import { usePrefersReducedMotion } from "../usePrefersReducedMotion";
 
 const WebRing = dynamic(() => import("./WebRing").then((mod) => mod.WebRing), {
     ssr: false,
@@ -13,19 +14,33 @@ const WebRing = dynamic(() => import("./WebRing").then((mod) => mod.WebRing), {
     ),
 });
 
-class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-    state = { hasError: false };
+function supportsWebGL(): boolean {
+    try {
+        const canvas = document.createElement("canvas");
+        return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+    } catch {
+        return false;
+    }
+}
 
-    static getDerivedStateFromError() {
-        return { hasError: true };
+type Failure = "webgl" | "load" | null;
+
+class WebGLErrorBoundary extends Component<{ children: ReactNode }, { failure: Failure }> {
+    state: { failure: Failure } = { failure: null };
+
+    // Any error lands here, including a scene chunk that failed to download on a flaky network
+    static getDerivedStateFromError(): { failure: Failure } {
+        return { failure: supportsWebGL() ? "load" : "webgl" };
     }
 
     render() {
-        if (this.state.hasError) {
+        if (this.state.failure) {
             return (
                 <div className="flex h-[max(12rem,calc(100svh-36rem))] w-full items-center justify-center">
                     <p className="text-muted-foreground">
-                        3D scene unavailable — WebGL is not supported in this browser.
+                        {this.state.failure === "webgl"
+                            ? "3D scene unavailable — WebGL is not supported in this browser."
+                            : "3D scene unavailable — it couldn't load. Refresh the page to try again."}
                     </p>
                 </div>
             );
@@ -34,20 +49,8 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
     }
 }
 
-const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
-
-function subscribeReducedMotion(onChange: () => void): () => void {
-    const query = window.matchMedia(REDUCED_MOTION);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
-}
-
 export function LazyWebRing({ members }: { members: PublicProfile[] }): React.JSX.Element {
-    const reducedMotion = useSyncExternalStore(
-        subscribeReducedMotion,
-        () => window.matchMedia(REDUCED_MOTION).matches,
-        () => false
-    );
+    const reducedMotion = usePrefersReducedMotion();
 
     return (
         <WebGLErrorBoundary>

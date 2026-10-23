@@ -4,7 +4,7 @@ import { TypingAnimation } from "./components/TypingAnimation";
 
 export default function ManifestoPage() {
     return (
-        <section className="mx-auto mt-8 w-full max-w-[45rem] px-4 [&>p]:text-base md:[&>p]:text-xl">
+        <section className="mx-auto mt-8 w-full max-w-[64rem] px-6 [&>p]:text-base md:[&>p]:text-xl">
             <p className="mb-[1.25ch] text-base font-medium tracking-[.1em] uppercase opacity-60">
                 manifesto
             </p>

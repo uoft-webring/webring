@@ -31,12 +31,14 @@ export function DomainVerificationCheck({ hasDomain }: { hasDomain: boolean }): 
 
     return (
         <div>
-            <Button className="mt-1 mb-1 w-full" type="button" onClick={verify} disabled={pending || !hasDomain}>
+            <Button className="w-fit" type="button" onClick={verify} disabled={pending || !hasDomain}>
                 {pending ? "Verifying..." : "Verify now"}
             </Button>
-            {!hasDomain && <p className="text-muted-foreground mt-2 text-sm">Add your portfolio link first.</p>}
+            {!hasDomain && (
+                <p className="text-muted-foreground mt-2 text-sm">Add your portfolio link first.</p>
+            )}
             {message && (
-                <p role="alert" className="mt-2 text-sm text-red-500">
+                <p role="alert" className="text-destructive mt-2 text-sm">
                     {message}
                 </p>
             )}

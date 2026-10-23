@@ -12,7 +12,8 @@
         "lint": "eslint .",
         "typecheck": "next typegen && tsc --noEmit",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "test:db": "sh -c 'set -a; . ./.env; set +a; SUPABASE_DB_TESTS=1 vitest run __tests__/integration/db'"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.1149.0",
@@ -47,7 +48,9 @@
         "react": "^19.3.1",
         "react-alice-carousel": "^2.9.1",
         "react-dom": "^19.3.1",
+        "react-icons": "^5.7.0",
         "react-image-crop": "^11.1.2",
+        "react-markdown": "^10.1.0",
         "react-type-animation": "^3.2.0",
         "server-only": "^0.0.1",
         "sharp": "^0.35.5",

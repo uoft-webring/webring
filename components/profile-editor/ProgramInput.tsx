@@ -34,10 +34,11 @@ export function ProgramInput({
             <PopoverTrigger asChild>
                 <Button
                     id={id}
+                    type="button"
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="flex h-10 flex-row justify-between"
+                    className="flex h-10 flex-row justify-between rounded-md font-normal"
                 >
                     {value
                         ? programs.find((program) => program.value === value)?.label

@@ -8,12 +8,15 @@ import { collectTopics, topicPath, type Topic } from "@/lib/profiles/topics";
 async function findTopic(slug: string): Promise<Topic | null> {
     const { data: profiles, error } = await getPublicProfiles();
     if (error !== null) throw new Error(error);
-    return collectTopics(profiles, "programs").find((topic) => topic.slug === slug) ?? null;
+    // Slugs are lowercase; accept /programs/JavaScript-style links too
+    const wanted = slug.toLowerCase();
+    return collectTopics(profiles, "programs").find((topic) => topic.slug === wanted) ?? null;
 }
 
 export async function generateMetadata({ params }: PageProps<"/programs/[program]">): Promise<Metadata> {
     const topic = await findTopic((await params).program);
-    if (!topic) return { title: "Not found" };
+    // Otherwise it inherits the root layout's canonical "/"
+    if (!topic) return { title: "Not found", robots: { index: false }, alternates: { canonical: null } };
 
     const title = `UofT ${topic.name} students`;
     const description = `${topic.members.length} UofT Webring ${topic.members.length === 1 ? "member" : "members"}: ${topic.members

@@ -25,12 +25,21 @@ export function RingLinkCheck({ hasDomain }: { hasDomain: boolean }): React.JSX.
 
     return (
         <div>
-            <Button className="mt-1 mb-1 w-full" type="button" onClick={check} disabled={pending || !hasDomain}>
+            <Button className="w-fit" type="button" onClick={check} disabled={pending || !hasDomain}>
                 {pending ? "Checking your site..." : "Check my site"}
             </Button>
-            {!hasDomain && <p className="text-muted-foreground mt-2 text-sm">Add your portfolio link first.</p>}
+            {!hasDomain && (
+                <p className="text-muted-foreground mt-2 text-sm">Add your portfolio link first.</p>
+            )}
             {message && (
-                <p role={message.isError ? "alert" : "status"} className={message.isError ? "mt-2 text-sm text-red-500" : "mt-2 text-sm"}>
+                <p
+                    role={message.isError ? "alert" : "status"}
+                    className={
+                        message.isError
+                            ? "text-destructive mt-2 text-sm"
+                            : "text-muted-foreground mt-2 text-sm"
+                    }
+                >
                     {message.text}
                 </p>
             )}

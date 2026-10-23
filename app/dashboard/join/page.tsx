@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { JoinCodeSnippets } from "@/components/dashboard/JoinCodeSnippets";
+import { PageHeader, Panel } from "@/components/dashboard/Panel";
 import { RingLinkCheck } from "@/components/dashboard/RingLinkCheck";
 import { StatusCard } from "@/components/StatusCard";
 import { Button } from "@/components/ui/button";
@@ -24,14 +25,19 @@ export default async function JoinPage() {
     const profile = await requireOwnProfile();
 
     return (
-        <section>
-            <h2>Join the community</h2>
-            <p className="mb-4">Copy the code and paste it into your portfolio to join the community.</p>
+        <section className="flex flex-col gap-6">
+            <PageHeader
+                title="Join the community"
+                description="Copy the code and paste it into your portfolio to join the community."
+            />
 
-            <JoinCodeSnippets snippets={allSnippets(profile.ringId)} />
+            <Panel>
+                <JoinCodeSnippets snippets={allSnippets(profile.ringId)} />
+            </Panel>
 
-            <StatusCard status={profile.ringStatus} className="mt-4" />
-            {profile.ringStatus !== "connected" && <RingLinkCheck hasDomain={Boolean(profile.domain)} />}
+            <StatusCard status={profile.ringStatus}>
+                {profile.ringStatus !== "connected" && <RingLinkCheck hasDomain={Boolean(profile.domain)} />}
+            </StatusCard>
 
             {profile.ringStatus !== "disconnected" && (
                 <div className="flex">

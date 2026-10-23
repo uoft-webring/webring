@@ -1,22 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Book, CircleCheck, GraduationCap, TagIcon, UserIcon } from "lucide-react";
+import { CircleCheck, Globe, UserIcon } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ExternalLinkPill } from "@/components/ExternalLinkPill";
+import { FiGithub } from "react-icons/fi";
+import { LinkIcon } from "@/components/LinkIcon";
+import { Markdown } from "@/components/Markdown";
 import { Navbar } from "@/components/Navbar";
 import { OpenToWorkBadge } from "@/components/OpenToWorkBadge";
+import { ExperienceLine } from "@/components/profile-page/ExperienceLine";
+import { ProjectsSection } from "@/components/profile-page/ProjectsSection";
 import { ShareButton } from "@/components/ShareButton";
 import { SitePreview } from "@/components/SitePreview";
 import { SkillTag } from "@/components/SkillTag";
-import gitHubIcon from "@/icons/gitHub.svg";
-import portfolioIcon from "@/icons/portfolio.svg";
+import { ACCENT_COLORS } from "@/lib/accents";
 import { getViewerProfile } from "@/lib/auth";
 import { avatarUrl } from "@/lib/avatar";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { getPageContent } from "@/lib/profiles/page";
 import { getPublicProfileBySlug } from "@/lib/profiles/queries";
 import { isLinkableDomain } from "@/lib/profiles/ring";
-import { topicPath } from "@/lib/profiles/topics";
+import { topicPath, topicSlug } from "@/lib/profiles/topics";
 import { displayDomain, profileUrl } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Promise<Metadata> {
@@ -44,10 +49,16 @@ export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Prom
 
 export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
     const { slug } = await params;
-    const [{ data: profile, error }, viewer] = await Promise.all([getPublicProfileBySlug(slug), getViewerProfile()]);
+    const [{ data: profile, error }, viewer] = await Promise.all([
+        getPublicProfileBySlug(slug),
+        getViewerProfile(),
+    ]);
 
     if (error !== null) throw new Error(error);
     if (!profile) notFound();
+    const content = await getPageContent(profile.ringId);
+    const isOwner = viewer?.slug === profile.slug;
+    const pageIsEmpty = !content.about && content.projects.length === 0 && content.experience.length === 0;
 
     getPostHogClient().capture({
         distinctId: viewer?.id ?? `anon_${slug}`,
@@ -72,13 +83,17 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
             sameAs: [
                 ...(profile.githubUsername ? [`https://github.com/${profile.githubUsername}`] : []),
                 ...(profile.domain ? [profile.domain] : []),
+                ...content.links.map((link) => link.url),
             ],
         },
         ...(profile.domain && { relatedLink: profile.domain }),
     };
 
     return (
-        <div className="bg-background text-foreground flex min-h-screen flex-col">
+        <div
+            className="bg-background text-foreground flex min-h-screen flex-col"
+            style={{ "--profile-accent": ACCENT_COLORS[content.accent].color } as React.CSSProperties}
+        >
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -88,125 +103,152 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
 
             <Navbar user={viewer} />
 
-            <div className="container mx-auto max-w-7xl flex-1 px-6 py-5">
-                <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
-                    {/* Profile Sidebar */}
-                    <aside className="space-y-8 self-start lg:sticky lg:top-8 lg:col-span-1">
-                        <div className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-8">
-                            <div className="flex flex-col items-center text-center">
-                                {profile.imageKey && <Avatar profile={profile} className="h-32 w-32" priority />}
+            {/* One column at every width: a sidebar card only fit from lg up and stacked awkwardly below it */}
+            <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 pt-4 pb-16">
+                {isOwner && pageIsEmpty && (
+                    <p className="text-muted-foreground rounded-xl border border-dashed p-5 text-base">
+                        This is your public page. Add a longer about section, your projects and your
+                        experience in{" "}
+                        <Link href="/dashboard/page" className="text-foreground underline underline-offset-4">
+                            Customize page
+                        </Link>
+                        .
+                    </p>
+                )}
 
-                                <h2 className="py-2 text-center text-2xl font-bold capitalize">
-                                    {profile.name}
-                                </h2>
-
-                                {profile.isVerified && (
-                                    <div className="mt-2 flex items-center gap-1 text-sm font-semibold text-green-500">
-                                        <CircleCheck className="stroke-background h-4 w-4 fill-green-500" />
-                                        Verified
-                                    </div>
-                                )}
-                                {profile.openToWork && <OpenToWorkBadge className="mt-2" />}
-
-                                <div className="border-border my-6 w-full border-t" />
-
-                                <div className="text-muted-foreground w-full space-y-4">
-                                    {profile.program && (
-                                        <div className="flex items-center gap-5">
-                                            <Book className="text-primary h-5 w-5 shrink-0" />
-                                            <div>
-                                                <p className="text-foreground font-semibold">
-                                                    <Link href={topicPath("programs", profile.program)} className="hover:underline">
-                                                        {profile.program}
-                                                    </Link>
-                                                </p>
-                                                <p className="text-sm">Program</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {profile.graduationYear && (
-                                        <div className="flex items-center gap-5">
-                                            <GraduationCap className="text-primary h-5 w-5 shrink-0" />
-                                            <div>
-                                                <p className="text-foreground font-semibold">
-                                                    Class of {profile.graduationYear}
-                                                </p>
-                                                <p className="text-sm">Graduation Year</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="border-border my-6 w-full border-t" />
-
-                                <div className="flex w-full flex-col gap-3">
-                                    {profile.domain && (
-                                        <ExternalLinkPill
-                                            href={profile.domain}
-                                            icon={portfolioIcon}
-                                            label={displayDomain(profile.domain)}
-                                            fallbackLabel="Portfolio"
-                                        />
-                                    )}
-                                    {profile.githubUsername && (
-                                        <ExternalLinkPill
-                                            href={`https://github.com/${profile.githubUsername}`}
-                                            icon={gitHubIcon}
-                                            label={profile.githubUsername}
-                                            fallbackLabel="GitHub"
-                                        />
-                                    )}
-                                    <ShareButton
-                                        title={`${profile.name}'s UofT Webring Profile`}
-                                        url={profileUrl(profile.slug)}
-                                    />
-                                </div>
-                            </div>
+                <header className="bg-card rounded-xl border p-6 sm:p-8">
+                    <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:text-left">
+                        {/* The member's accent as a ring around the photo, with a gap so it doesn't touch the avatar's own edge */}
+                        <div className="shrink-0 rounded-full border-2 border-(--profile-accent) p-1">
+                            <Avatar
+                                profile={profile}
+                                className="size-28"
+                                verifiedSize="size-8"
+                                size={112}
+                                priority
+                            />
                         </div>
 
-                        {profile.tags.length > 0 && (
-                            <div className="bg-card border-border rounded-2xl border p-6 shadow">
-                                <h3 className="border-border mb-3 flex items-center gap-2 border-b pb-2 text-lg font-semibold">
-                                    <TagIcon className="text-primary h-5 w-5" />
-                                    Interests
-                                </h3>
-
-                                <div className="flex flex-row flex-wrap justify-center gap-2">
-                                    {profile.tags.map((tagName) => (
-                                        <Link key={tagName} href={topicPath("tags", tagName)} className="hover:opacity-80">
-                                            <SkillTag tagName={tagName} />
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-                    </aside>
-
-                    <main className="space-y-10 lg:col-span-3">
-                        <section className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-10">
-                            <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold capitalize sm:text-3xl">
-                                <UserIcon className="text-primary h-7 w-7" />
-                                About {profile.name}
-                            </h2>
-                            <div className="prose prose-xl prose-a:text-primary prose-strong:text-foreground max-w-none">
-                                {profile.tagline ? (
-                                    <p className="text-md text-muted-foreground flex-1 px-4 text-pretty break-all hyphens-auto normal-case">
-                                        {profile.tagline}
-                                    </p>
-                                ) : (
-                                    <p className="text-md text-muted-foreground italic">
-                                        {profile.name} thinks they&apos;re too cool to write a bio...
-                                    </p>
+                        <div className="flex min-w-0 flex-1 flex-col items-center sm:items-start">
+                            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 sm:justify-start">
+                                <h1 className="m-0 text-3xl leading-tight font-semibold capitalize">
+                                    {profile.name}
+                                </h1>
+                                {profile.isVerified && (
+                                    <span className="text-chart-3 inline-flex items-center gap-1 text-sm font-medium">
+                                        <CircleCheck className="size-4" aria-hidden />
+                                        Verified
+                                    </span>
                                 )}
                             </div>
-                        </section>
-                        {isLinkableDomain(profile.domain) && (
-                            <section aria-label={`Preview of ${profile.name}'s website`}>
-                                <SitePreview ringId={profile.ringId} domain={profile.domain} className="shadow-lg" />
-                            </section>
+
+                            {(profile.program || profile.graduationYear) && (
+                                <p className="text-muted-foreground mt-1 flex flex-wrap justify-center gap-x-2 text-base sm:justify-start">
+                                    {profile.program && (
+                                        <Link
+                                            href={topicPath("programs", profile.program)}
+                                            className="hover:text-foreground underline-offset-4 hover:underline"
+                                        >
+                                            {profile.program}
+                                        </Link>
+                                    )}
+                                    {profile.program && profile.graduationYear && <span aria-hidden>·</span>}
+                                    {profile.graduationYear && <span>Class of {profile.graduationYear}</span>}
+                                </p>
+                            )}
+
+                            {profile.openToWork && <OpenToWorkBadge className="mt-3" />}
+
+                            {profile.tagline ? (
+                                <p className="text-foreground/90 mt-4 max-w-[60ch] text-lg text-pretty break-words">
+                                    {profile.tagline}
+                                </p>
+                            ) : (
+                                !content.about && (
+                                    <p className="text-muted-foreground mt-4 text-base italic">
+                                        {profile.name} thinks they&apos;re too cool to write a bio...
+                                    </p>
+                                )
+                            )}
+
+                            {profile.tags.length > 0 && (
+                                <ul
+                                    aria-label="Interests"
+                                    className="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start"
+                                >
+                                    {profile.tags.map((tagName) => (
+                                        <li key={tagName}>
+                                            {topicSlug(tagName) ? (
+                                                <Link
+                                                    href={topicPath("tags", tagName)}
+                                                    className="hover:opacity-80"
+                                                >
+                                                    <SkillTag tagName={tagName} size="mini" className="text-sm" />
+                                                </Link>
+                                            ) : (
+                                                <SkillTag tagName={tagName} size="mini" className="text-sm" />
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-2 border-t pt-5 sm:justify-start">
+                        {profile.domain && (
+                            <ExternalLinkPill
+                                href={profile.domain}
+                                icon={<Globe />}
+                                label={displayDomain(profile.domain)}
+                                fallbackLabel="Portfolio"
+                            />
                         )}
-                    </main>
-                </div>
+                        {profile.githubUsername && (
+                            <ExternalLinkPill
+                                href={`https://github.com/${profile.githubUsername}`}
+                                icon={<FiGithub />}
+                                label={profile.githubUsername}
+                                fallbackLabel="GitHub"
+                            />
+                        )}
+                        {content.links.map((link, index) => (
+                            <ExternalLinkPill
+                                key={`${index}-${link.url}`}
+                                href={link.url}
+                                icon={<LinkIcon url={link.url} />}
+                                label={link.label}
+                                fallbackLabel="Link"
+                            />
+                        ))}
+                        <div className="sm:ml-auto">
+                            <ShareButton
+                                title={`${profile.name}'s UofT Webring Profile`}
+                                url={profileUrl(profile.slug)}
+                            />
+                        </div>
+                    </div>
+                </header>
+
+                {content.about && (
+                    <section className="bg-card rounded-xl border p-6 sm:p-8" aria-labelledby="about">
+                        <h2
+                            id="about"
+                            className="mb-4 flex items-center gap-3 text-xl font-semibold capitalize"
+                        >
+                            <UserIcon className="size-6 text-(--profile-accent)" aria-hidden />
+                            About {profile.name}
+                        </h2>
+                        <Markdown className="text-muted-foreground">{content.about}</Markdown>
+                    </section>
+                )}
+                {content.projects.length > 0 && <ProjectsSection projects={content.projects} />}
+                {content.experience.length > 0 && <ExperienceLine experience={content.experience} />}
+                {isLinkableDomain(profile.domain) && (
+                    <section aria-label={`Preview of ${profile.name}'s website`}>
+                        <SitePreview ringId={profile.ringId} domain={profile.domain} />
+                    </section>
+                )}
             </div>
         </div>
     );

@@ -27,6 +27,9 @@ for (const [network, prefix] of [
 for (const [network, prefix] of [
     ["::", 128],
     ["::1", 128],
+    // IPv4-compatible (::a.b.c.d) and 6to4 both embed an IPv4 address this list never sees
+    ["::", 96],
+    ["2002::", 16],
     ["64:ff9b::", 96],
     ["100::", 64],
     ["2001:db8::", 32],

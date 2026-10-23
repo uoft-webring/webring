@@ -11,6 +11,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 
 const OTP_LENGTH = 6;
 const RESEND_COOLDOWN_SECONDS = 60;
+const NETWORK_ERROR = "Could not reach the server. Please reload and try again.";
 
 export function OtpForm({ email }: { email: string }): React.JSX.Element {
     const [code, setCode] = useState("");
@@ -29,7 +30,7 @@ export function OtpForm({ email }: { email: string }): React.JSX.Element {
     const submit = (value: string) => {
         startTransition(async () => {
             // Resolves only on failure: success redirects to the dashboard
-            const result = await verifyOtp(value);
+            const result = await verifyOtp(value).catch(() => ({ error: NETWORK_ERROR }));
             if (result.error) {
                 setError(result.error);
                 setCode("");
@@ -47,7 +48,7 @@ export function OtpForm({ email }: { email: string }): React.JSX.Element {
     const onResend = () => {
         startTransition(async () => {
             setError(undefined);
-            const result = await resendOtp();
+            const result = await resendOtp().catch(() => ({ error: NETWORK_ERROR }));
             if (result.error) {
                 setError(result.error);
                 return;

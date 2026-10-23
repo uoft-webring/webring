@@ -1,11 +1,11 @@
 import Link from "next/link";
-import gitHubIcon from "@/icons/gitHub.svg";
-import portfolioIcon from "@/icons/portfolio.svg";
+import { Globe } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain, profilePath, profileUrl } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { ExternalLinkPill } from "./ExternalLinkPill";
+import { FiGithub } from "react-icons/fi";
 import { OpenToWorkBadge } from "./OpenToWorkBadge";
 import { ShareButton } from "./ShareButton";
 import { SkillTag } from "./SkillTag";
@@ -14,60 +14,104 @@ export function ProfileCard({
     profile,
     className,
     priority = false,
+    linked = true,
 }: {
     profile: PublicProfile;
     className?: string;
     priority?: boolean;
+    /** Whole card opens the member's page. Off in the editor's live preview, where a stray click would leave unsaved changes. */
+    linked?: boolean;
 }): React.JSX.Element {
+    const href = linked && profile.slug ? profilePath(profile.slug) : null;
+
     return (
         <div
             className={cn(
-                "bg-card mx-auto mt-6 flex h-full w-full max-w-[25rem] flex-1 flex-col items-center gap-4 rounded-2xl border p-6 shadow-lg transition hover:shadow-xl",
+                "bg-card relative mx-auto mt-6 flex h-full w-full max-w-[25rem] flex-1 flex-col items-center rounded-xl border p-6 text-center shadow-sm transition hover:shadow-md",
+                href && "hover:border-primary/40",
                 className
             )}
         >
-            <Avatar profile={profile} className="ring-primary/20 h-26 w-26 rounded-full" priority={priority} />
+            {/* Top-aligned so avatars and names line up across carousel cards; spare height (slots share one
+                min height) falls between the bio and the tags, which sit on the footer */}
+            <div className="flex w-full flex-1 flex-col items-center">
+                <Avatar
+                    profile={profile}
+                    className="ring-primary/20 size-20"
+                    verifiedSize="size-6"
+                    size={80}
+                    priority={priority}
+                />
 
-            <h2 className="text-center text-2xl font-bold capitalize hover:underline">
-                {profile.slug ? <Link href={profilePath(profile.slug)}>{profile.name}</Link> : profile.name}
-            </h2>
+                <h2 className="mt-4 text-xl leading-tight font-semibold capitalize">
+                    {href ? (
+                        // Links can't nest, so the name's link stretches over the card (::after) and the
+                        // footer links sit above it
+                        <Link
+                            href={href}
+                            className="focus-visible:after:outline-ring after:absolute after:inset-0 after:rounded-xl after:content-[''] hover:underline focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2"
+                        >
+                            {profile.name}
+                        </Link>
+                    ) : (
+                        profile.name
+                    )}
+                </h2>
 
-            <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
-                {profile.program && <span>{profile.program}</span>}
-                {profile.program && profile.graduationYear && <span aria-hidden>·</span>}
-                {profile.graduationYear && <span>{profile.graduationYear}</span>}
+                {(profile.program || profile.graduationYear) && (
+                    <p className="text-muted-foreground mt-1 flex flex-wrap justify-center gap-x-2 text-base">
+                        {profile.program && <span>{profile.program}</span>}
+                        {profile.program && profile.graduationYear && <span aria-hidden>·</span>}
+                        {profile.graduationYear && <span>{profile.graduationYear}</span>}
+                    </p>
+                )}
+                {profile.openToWork && <OpenToWorkBadge className="mt-3" />}
+
+                {profile.tagline && (
+                    <p className="text-foreground/90 mt-4 max-w-md text-base text-pretty break-words hyphens-auto normal-case">
+                        {profile.tagline}
+                    </p>
+                )}
             </div>
-            {profile.openToWork && <OpenToWorkBadge />}
 
+            {/* Tags sit on the footer, not in the centred block, so they line up across carousel cards */}
             {profile.tags.length > 0 && (
-                <div className="flex flex-row flex-wrap justify-center gap-2">
+                <div className="mt-5 flex flex-row flex-wrap justify-center gap-1.5">
                     {profile.tags.map((tag) => (
-                        <SkillTag key={tag} tagName={tag} />
+                        <SkillTag key={tag} tagName={tag} size="mini" className="text-sm" />
                     ))}
                 </div>
             )}
 
-            <p className="text-muted-foreground max-w-md flex-1 px-4 text-center text-sm text-pretty break-words hyphens-auto normal-case">
-                {profile.tagline}
-            </p>
-            <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
-                {profile.githubUsername && (
-                    <ExternalLinkPill
-                        href={`https://github.com/${profile.githubUsername}`}
-                        icon={gitHubIcon}
-                        label={profile.githubUsername}
-                        fallbackLabel="GitHub"
-                    />
-                )}
-                {profile.domain && (
-                    <ExternalLinkPill
-                        href={profile.domain}
-                        icon={portfolioIcon}
-                        label={displayDomain(profile.domain)}
-                        fallbackLabel="Portfolio"
-                    />
-                )}
-                {profile.slug && <ShareButton title={`${profile.name}'s Profile`} url={profileUrl(profile.slug)} />}
+            <div className="relative z-10 w-full pt-4">
+                <div className="flex items-center gap-1 border-t pt-4">
+                    {profile.domain && (
+                        <ExternalLinkPill
+                            href={profile.domain}
+                            icon={<Globe className="size-5.5" />}
+                            label={displayDomain(profile.domain)}
+                            fallbackLabel="Portfolio"
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 mr-auto min-h-11 bg-transparent px-3 py-2 text-base"
+                        />
+                    )}
+                    {profile.githubUsername && (
+                        // Label stays as (screen-reader) link text; visually it's an icon button
+                        <ExternalLinkPill
+                            href={`https://github.com/${profile.githubUsername}`}
+                            icon={<FiGithub className="size-6" />}
+                            label={`${profile.githubUsername} on GitHub`}
+                            fallbackLabel="GitHub"
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 ml-auto size-11 justify-center bg-transparent p-0 [&>.truncate]:sr-only"
+                        />
+                    )}
+                    {profile.slug && (
+                        <ShareButton
+                            title={`${profile.name}'s Profile`}
+                            url={profileUrl(profile.slug)}
+                            compact
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

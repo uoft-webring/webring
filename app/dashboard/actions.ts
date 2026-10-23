@@ -4,13 +4,14 @@ import { updateTag } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 import { getAuthUser, getOwnProfile } from "@/lib/auth";
 import { OWN_PROFILE_COLUMNS, toOwnProfile, toProfileUpdate, type OwnProfileRow } from "@/lib/profiles/mapper";
+import { PAGE_CONTENT_COLUMNS, toPageContent, type PageContentRow } from "@/lib/profiles/page";
 import { PROFILES_TAG } from "@/lib/profiles/queries";
 import type { OwnProfile, RingStatus } from "@/lib/profiles/types";
 import { fail, ok, type Result } from "@/lib/result";
-import { consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/rate-limit";
+import { AVATAR_UPLOAD_LIMIT, consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/rate-limit";
 import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
-import { profileInputSchema } from "@/lib/validation";
+import { pageContentSchema, profileInputSchema, type PageContent } from "@/lib/validation";
 import { checkRingWidget, hasDomainOwnershipProof, isUrlReachable } from "@/lib/verification";
 
 const UNIQUE_VIOLATION = "23505";
@@ -89,6 +90,9 @@ export async function createAvatarUpload(size: number): Promise<Result<{ uploadU
     if (!Number.isInteger(size) || size <= 0 || size > MAX_AVATAR_BYTES) {
         return fail("That image is too large. Try a smaller crop.");
     }
+    if (!(await consumeRateLimit(AVATAR_UPLOAD_LIMIT, user.id))) {
+        return fail("Too many uploads. Please try again in an hour.");
+    }
     return ok(await createAvatarUploadUrl(user.id, size));
 }
 
@@ -155,4 +159,28 @@ export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
         unreachable: "We couldn't reach your site. We'll review it manually.",
     };
     return ok({ status, message: messages[result] });
+}
+
+/** Saves the member's own page (about, projects, experience, links, accent). */
+export async function updatePageContent(input: unknown): Promise<Result<PageContent>> {
+    const parsed = pageContentSchema.safeParse(input);
+    if (!parsed.success) return fail(parsed.error.issues[0].message);
+
+    const { data: current, error: profileError } = await currentProfile();
+    if (profileError !== null) return fail(profileError);
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from("profile")
+        .update(parsed.data)
+        .eq("id", current.id)
+        .select(PAGE_CONTENT_COLUMNS)
+        .single<PageContentRow>();
+    if (error) {
+        console.error("[page] Update failed:", error.code, error.message);
+        return fail("Could not save your page.");
+    }
+
+    updateTag(PROFILES_TAG);
+    return ok(toPageContent(data));
 }

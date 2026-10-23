@@ -1,12 +1,34 @@
 "use client";
 
+import { useRef } from "react";
 import { Share2 } from "lucide-react";
 import posthog from "posthog-js";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 
-export function ShareButton({ title, url }: { title: string; url: string }): React.JSX.Element {
+/** `compact` renders an icon-only ghost button, for card footers. */
+export function ShareButton({
+    title,
+    url,
+    compact = false,
+}: {
+    title: string;
+    url: string;
+    compact?: boolean;
+}): React.JSX.Element {
+    const sharing = useRef(false);
+
     const handleShare = async () => {
+        if (sharing.current) return;
+        sharing.current = true;
+        try {
+            await share();
+        } finally {
+            sharing.current = false;
+        }
+    };
+
+    const share = async () => {
         if (navigator.share) {
             try {
                 await navigator.share({ title, url });
@@ -14,7 +36,7 @@ export function ShareButton({ title, url }: { title: string; url: string }): Rea
             } catch (error) {
                 // Closing the share sheet rejects with AbortError: not a failure
                 if (error instanceof DOMException && error.name === "AbortError") return;
-                toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 1000 });
+                toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 2000 });
             }
             return;
         }
@@ -24,9 +46,24 @@ export function ShareButton({ title, url }: { title: string; url: string }): Rea
             posthog.capture("profile_shared", { method: "clipboard", url });
             toast.success("Profile link copied to clipboard!", { duration: 1000 });
         } catch {
-            toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 1000 });
+            toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 2000 });
         }
     };
+
+    if (compact) {
+        return (
+            <Button
+                onClick={handleShare}
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Share profile"
+                className="text-muted-foreground hover:text-foreground size-11"
+            >
+                <Share2 className="size-6" aria-hidden />
+            </Button>
+        );
+    }
 
     return (
         <Button

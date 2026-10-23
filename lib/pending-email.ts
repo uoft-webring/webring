@@ -5,7 +5,8 @@ import { emailSchema } from "@/lib/validation";
 // The email awaiting an OTP lives in an httpOnly cookie rather than the URL: it stays out of
 // logs/analytics, survives `+` addresses, and stops /auth/confirm being used to probe emails.
 const COOKIE = "otp_email";
-const MAX_AGE_SECONDS = 20 * 60;
+// Matches the OTP lifetime (auth.email.otp_expiry), so a still-valid code is never refused
+const MAX_AGE_SECONDS = 60 * 60;
 
 export async function setPendingEmail(email: string): Promise<void> {
     (await cookies()).set(COOKIE, email, {

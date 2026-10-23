@@ -21,7 +21,14 @@ describe("hasRingWidget", () => {
         expect(hasRingWidget(`<a href="https://uoftwebring.com/redirect?nav=prev&id=4">`, 4)).toBe(false);
     });
 
-    it("requires the member's own ring id", () => {
+    it("ignores commented-out links and look-alike hosts", () => {
+        const html = `<!-- <a href="https://uoftwebring.com/redirect?nav=prev&id=5">←</a> -->
+            <a href="https://evil-uoftwebring.com/redirect?nav=next&id=5">→</a>
+            <a href="https://notuoftwebring.com/redirect?nav=prev&id=5">←</a>`;
+        expect(hasRingWidget(html, 5)).toBe(false);
+    });
+
+        it("requires the member's own ring id", () => {
         const html = widgetSnippets(5, "PNG", "Black")[1].code;
         expect(hasRingWidget(html, 50)).toBe(false);
     });
