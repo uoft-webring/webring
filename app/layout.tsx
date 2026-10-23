@@ -18,7 +18,9 @@ const description =
 
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_ORIGIN),
-    title: "UofT Webring",
+    // Pages set a short title ("Tags", a member's name); the template brands it, so Google gets a
+    // consistent "<page> | UofT Webring" instead of rewriting bare titles itself
+    title: { default: "UofT Webring: University of Toronto Student Websites", template: "%s | UofT Webring" },
     description,
     keywords: ["UofT Webring", "University of Toronto", "Webring", "Student Community"],
     // OG and Twitter Images are auto-added by Next.js
