@@ -14,15 +14,21 @@ export function ProfileCard({
     profile,
     className,
     priority = false,
+    linked = true,
 }: {
     profile: PublicProfile;
     className?: string;
     priority?: boolean;
+    /** Whole card opens the member's page. Off in the editor's live preview, where a stray click would leave unsaved changes. */
+    linked?: boolean;
 }): React.JSX.Element {
+    const href = linked && profile.slug ? profilePath(profile.slug) : null;
+
     return (
         <div
             className={cn(
-                "bg-card mx-auto mt-6 flex h-full w-full max-w-[25rem] flex-1 flex-col items-center rounded-xl border p-6 text-center shadow-sm transition hover:shadow-md",
+                "bg-card relative mx-auto mt-6 flex h-full w-full max-w-[25rem] flex-1 flex-col items-center rounded-xl border p-6 text-center shadow-sm transition hover:shadow-md",
+                href && "hover:border-primary/40",
                 className
             )}
         >
@@ -36,9 +42,16 @@ export function ProfileCard({
                     priority={priority}
                 />
 
-                <h2 className="mt-4 text-xl leading-tight font-semibold capitalize hover:underline">
-                    {profile.slug ? (
-                        <Link href={profilePath(profile.slug)}>{profile.name}</Link>
+                <h2 className="mt-4 text-xl leading-tight font-semibold capitalize">
+                    {href ? (
+                        // Links can't nest, so the name's link stretches over the card (::after) and the
+                        // footer links sit above it
+                        <Link
+                            href={href}
+                            className="focus-visible:after:outline-ring after:absolute after:inset-0 after:rounded-xl after:content-[''] hover:underline focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2"
+                        >
+                            {profile.name}
+                        </Link>
                     ) : (
                         profile.name
                     )}
@@ -68,7 +81,7 @@ export function ProfileCard({
                 )}
             </div>
 
-            <div className="w-full pt-5">
+            <div className="relative z-10 w-full pt-5">
                 <div className="flex items-center gap-1 border-t pt-4 [&_img]:size-5">
                     {profile.domain && (
                         <ExternalLinkPill

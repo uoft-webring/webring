@@ -98,7 +98,9 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
         await persist(valid, true);
     };
 
-    const preview = <ProfileCard profile={{ ...initialProfile, ...values }} className="mt-0" />;
+    const preview = (
+        <ProfileCard profile={{ ...initialProfile, ...values }} className="mt-0" linked={false} />
+    );
 
     const form = (
         <form
