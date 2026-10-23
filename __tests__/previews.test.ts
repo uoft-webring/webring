@@ -20,3 +20,11 @@ describe("extractPreviewImageUrl", () => {
         expect(extractPreviewImageUrl("", "https://x.dev")).toBeNull();
     });
 });
+
+describe("extractPreviewImageUrl on hostile pages", () => {
+    it("stays fast when a page is full of unclosed <meta tags", () => {
+        const start = performance.now();
+        expect(extractPreviewImageUrl("<meta ".repeat(100_000), "https://a.dev")).toBeNull();
+        expect(performance.now() - start).toBeLessThan(1000);
+    });
+});

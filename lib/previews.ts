@@ -6,7 +6,9 @@ import { safeFetch } from "@/lib/url-safety";
 export const PREVIEW_WIDTH = 640;
 export const PREVIEW_HEIGHT = 336;
 
-const PREVIEW_META = /<meta\b[^>]*>/gi;
+// `[^<>]` rather than `[^>]`: on a page full of unclosed `<meta`s the latter rescans to the end
+// from every one (quadratic), which a member's page could use to stall the server
+const PREVIEW_META = /<meta\b[^<>]*>/gi;
 const PREVIEW_KEYS = ["og:image", "og:image:url", "og:image:secure_url", "twitter:image", "twitter:image:src"];
 
 /** The social preview image a site declares for itself (og:image / twitter:image), as an absolute URL. */
@@ -31,11 +33,21 @@ export const PREVIEWS_TAG = "previews";
  * `renderSitePreview` cached per domain, as base64 (the data cache stores JSON). Without this every
  * CDN miss would refetch the member's site and re-run sharp.
  */
-export const cachedSitePreview = unstable_cache(
-    async (domain: string): Promise<string | null> => (await renderSitePreview(domain))?.toString("base64") ?? null,
+const cachedRender = unstable_cache(
+    async (domain: string): Promise<string> => {
+        const preview = await renderSitePreview(domain);
+        // Throwing keeps a miss out of the data cache: a site that was briefly down shouldn't lose
+        // its preview for a day. The route's 404 is still cached at the CDN for a few hours.
+        if (!preview) throw new Error("no preview");
+        return preview.toString("base64");
+    },
     ["site-preview"],
     { revalidate: 86400, tags: [PREVIEWS_TAG] }
 );
+
+export async function cachedSitePreview(domain: string): Promise<string | null> {
+    return cachedRender(domain).catch(() => null);
+}
 
 /**
  * A small WebP of the member's own preview image, or null if their site doesn't declare one.

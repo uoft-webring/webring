@@ -36,10 +36,11 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
 
 export async function isUrlReachable(url: string): Promise<boolean> {
     // Real sites chain http→https→www→trailing slash→locale; main accepted any redirect, so allow plenty
-    const response =
-        (await safeFetch(url, { method: "HEAD", maxRedirects: 8 })) ??
-        (await safeFetch(url, { method: "GET", maxRedirects: 8 }));
-    return response !== null && response.status < 400;
+    const head = await safeFetch(url, { method: "HEAD", maxRedirects: 8 });
+    if (head && head.status < 400) return true;
+    // Plenty of servers answer HEAD with 405 or 404 but serve GET fine
+    const get = await safeFetch(url, { method: "GET", maxRedirects: 8 });
+    return get !== null && get.status < 400;
 }
 
 const WIDGET_LINK = /uoftwebring\.com\/redirect\?([^"'\s<>`]*)/gi;
