@@ -20,6 +20,9 @@ export const AUTH_LIMITS = {
     otpVerifyPerIp: { name: "otp-verify:ip", max: 150, windowSeconds: 15 * 60 },
 } satisfies Record<string, RateLimit>;
 
+/** Dashboard checks that make the server fetch a member's site (verify, ring link). Per member. */
+export const SITE_CHECK_LIMIT: RateLimit = { name: "site-check:member", max: 20, windowSeconds: 60 * 60 };
+
 /** `alice+anything@x` reaches alice@x's inbox, so they share one budget. */
 export function inboxKey(email: string): string {
     const [local, domain] = email.trim().toLowerCase().split("@");

@@ -7,12 +7,14 @@ import { OWN_PROFILE_COLUMNS, toOwnProfile, toProfileUpdate, type OwnProfileRow 
 import { PROFILES_TAG } from "@/lib/profiles/queries";
 import type { OwnProfile, RingStatus } from "@/lib/profiles/types";
 import { fail, ok, type Result } from "@/lib/result";
+import { consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/rate-limit";
 import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { profileInputSchema } from "@/lib/validation";
 import { checkRingWidget, hasDomainOwnershipProof, isUrlReachable } from "@/lib/verification";
 
 const UNIQUE_VIOLATION = "23505";
+const TOO_MANY_SITE_CHECKS = "Too many checks. Please try again in an hour.";
 
 /** The caller's profile as a Result, so actions report failures instead of throwing at the client. */
 async function currentProfile(): Promise<Result<OwnProfile>> {
@@ -95,6 +97,8 @@ export async function verifyDomainOwnership(): Promise<Result<boolean>> {
     if (profileError !== null) return fail(profileError);
     if (!profile.domain) return fail("Add your portfolio link before verifying.");
     if (profile.isVerified) return ok(true);
+    // Each check fetches the member's site; don't let a stuck button hammer it
+    if (!(await consumeRateLimit(SITE_CHECK_LIMIT, profile.id))) return fail(TOO_MANY_SITE_CHECKS);
 
     if (!(await hasDomainOwnershipProof(profile.domain, profile.ringId))) return ok(false);
 
@@ -125,6 +129,7 @@ export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
     if (profile.ringStatus === "connected") {
         return ok({ status: "connected", message: "Your site is already linked." });
     }
+    if (!(await consumeRateLimit(SITE_CHECK_LIMIT, profile.id))) return fail(TOO_MANY_SITE_CHECKS);
 
     const result = await checkRingWidget(profile.domain, profile.ringId);
     // Sites that render links client-side can't be detected from their HTML, so a miss is

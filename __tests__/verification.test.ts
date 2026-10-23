@@ -65,4 +65,35 @@ describe("hasVerificationMetaTag", () => {
         expect(hasVerificationMetaTag(`<p>uoft-webring ${value}</p>`, value)).toBe(false);
         expect(hasVerificationMetaTag(`<meta name="uoft-webring">${value}`, value)).toBe(false);
     });
+
+    it("only counts real <meta> elements in the document head", () => {
+        const tag = `<meta name=uoft-webring content=${value}>`;
+        // Each of these echoes the tag somewhere a browser wouldn't treat it as a meta element
+        for (const html of [
+            `<!-- ${tag} -->`,
+            `<script>window.__S={"q":"${tag}"}</script>`,
+            `<textarea>${tag}</textarea>`,
+            `<title>${tag}</title>`,
+            `<html><head></head><body>${tag}</body></html>`,
+            `<input value="${tag}">`,
+        ]) {
+            expect(hasVerificationMetaTag(html, value), html).toBe(false);
+        }
+    });
+
+    it("isn't fooled by attribute names it doesn't know or by duplicates", () => {
+        expect(
+            hasVerificationMetaTag(`<meta property="og:description" data-v2="name=uoft-webring content=${value}">`, value)
+        ).toBe(false);
+        // Browsers keep the first `name`
+        expect(hasVerificationMetaTag(`<meta name="description" name="uoft-webring" content="${value}">`, value)).toBe(
+            false
+        );
+    });
+
+    it("still finds a real tag next to scripts and comments", () => {
+        const html = `<html><head><!-- hi --><script>var a = "<b>";</script><meta name="uoft-webring" content="${value}"></head><body></body></html>`;
+        expect(hasVerificationMetaTag(html, value)).toBe(true);
+    });
 });
+
