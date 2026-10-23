@@ -11,6 +11,12 @@ permissions:
 jobs:
     check:
         runs-on: ubuntu-latest
+        # Placeholders, no secrets: next.config needs them to load (typegen and build), and
+        # data-backed pages fall back gracefully when the DB is unreachable
+        env:
+            NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN: example.cloudfront.net
+            NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54621
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
         steps:
             - uses: actions/checkout@v4
 
@@ -23,9 +29,4 @@ jobs:
             - run: npm run lint
             - run: npm run typecheck
             - run: npm test
-            # Build without secrets: data-backed pages fall back gracefully when the DB is unreachable
             - run: npm run build
-              env:
-                  NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN: example.cloudfront.net
-                  NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54621
-                  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
