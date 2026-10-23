@@ -38,6 +38,8 @@ export async function recordUnsubscribe(kind: UnsubscribeKind, id: string): Prom
     const { error } = await createAdminClient()
         .from("member_email_pref")
         .upsert({ profile_id: id, opted_out: true }, { onConflict: "profile_id" });
+    // 23503: the account was deleted, so there's no one left to email
+    if (error?.code === "23503") return true;
     if (error) console.error(`[unsubscribe] Failed to save opt-out (${kind}):`, error.message);
     return !error;
 }

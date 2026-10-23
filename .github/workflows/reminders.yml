@@ -15,6 +15,11 @@ on:
 
 permissions: {}
 
+# Never two runs at once (schedule + manual dispatch); the second waits
+concurrency:
+    group: reminders
+    cancel-in-progress: false
+
 jobs:
     remind:
         runs-on: ubuntu-latest

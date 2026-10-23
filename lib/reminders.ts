@@ -2,8 +2,11 @@ import { escapeHtml } from "@/lib/email";
 import { isLinkableDomain } from "@/lib/profiles/ring";
 import type { RingStatus } from "@/lib/profiles/types";
 
-/** Members claimed per run. Resend's free plan allows 100 emails a day, invites included. */
-export const REMINDER_BATCH_SIZE = 50;
+/**
+ * Members claimed per run. Small enough that 25 × (8s timeout + pause) fits Vercel's 300s limit,
+ * and inside Resend's free 100 emails a day alongside invites.
+ */
+export const REMINDER_BATCH_SIZE = 25;
 
 export type ReminderRecipient = {
     name: string;

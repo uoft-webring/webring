@@ -50,12 +50,18 @@ as $$
         insert into public.member_email_pref as pref (profile_id, last_reminded_at)
         select due.id, now() from due where not dry_run
         on conflict (profile_id) do update set last_reminded_at = excluded.last_reminded_at
+        -- Re-checked against the latest committed row: if an overlapping run stamped this member
+        -- (or they opted out) after our snapshot, skip them instead of emailing twice
+        where not pref.opted_out
+          and (pref.last_reminded_at is null or pref.last_reminded_at < now() - interval '8 months')
         returning pref.profile_id
     )
     select p.id, p.email, p.name, p.domain, p.slug, p.tagline, p.image_key, p.tags,
            p.validated_user_component, due.last_reminded_at
     from public.profile p
     join due on due.id = p.id
+    -- Sends only go to members this run actually stamped
+    where dry_run or p.id in (select profile_id from stamped)
     order by p.ring_id;
 $$;
 

@@ -1,6 +1,5 @@
 import "server-only";
 import { serverEnv } from "@/lib/env";
-import { fail, ok, type Result } from "@/lib/result";
 
 export type EmailMessage = {
     to: string;
@@ -9,17 +8,29 @@ export type EmailMessage = {
     text: string;
     /** One-click unsubscribe endpoint (RFC 8058); Gmail and Yahoo require it for bulk mail. */
     oneClickUnsubscribeUrl: string;
+    /** Resend drops a repeat of the same key within 24h, so a retried send can't deliver twice. */
+    idempotencyKey: string;
 };
 
+/**
+ * `rejected`: Resend refused it, so nothing was delivered and it's safe to retry later.
+ * `unknown`: a timeout, network error or 5xx; it may have been delivered, so never retry.
+ */
+export type SendOutcome = "sent" | "rejected" | "unknown";
+
 /** Sends through Resend's HTTP API. Never throws: callers decide what a failed send means. */
-export async function sendEmail(message: EmailMessage): Promise<Result<null>> {
+export async function sendEmail(message: EmailMessage): Promise<SendOutcome> {
     const env = serverEnv();
-    if (!env.RESEND_API_KEY) return fail("Email is not configured.");
+    if (!env.RESEND_API_KEY) return "rejected";
 
     try {
         const response = await fetch("https://api.resend.com/emails", {
             method: "POST",
-            headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+            headers: {
+                authorization: `Bearer ${env.RESEND_API_KEY}`,
+                "content-type": "application/json",
+                "idempotency-key": message.idempotencyKey,
+            },
             body: JSON.stringify({
                 from: env.EMAIL_FROM,
                 to: [message.to],
@@ -31,16 +42,16 @@ export async function sendEmail(message: EmailMessage): Promise<Result<null>> {
                     "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
                 },
             }),
-            signal: AbortSignal.timeout(10_000),
+            signal: AbortSignal.timeout(8_000),
         });
-        if (!response.ok) {
-            console.error("[email] Resend rejected a message:", response.status, await response.text().catch(() => ""));
-            return fail("Could not send the email.");
-        }
-        return ok(null);
+        if (response.ok) return "sent";
+        // Only the error name: Resend's messages can quote the recipient's address
+        const { name } = (await response.json().catch(() => ({}))) as { name?: string };
+        console.error("[email] Resend refused a message:", response.status, name ?? "");
+        return response.status < 500 ? "rejected" : "unknown";
     } catch (error) {
-        console.error("[email] Resend request failed:", error);
-        return fail("Could not send the email.");
+        console.error("[email] Resend request failed:", error instanceof Error ? error.name : "unknown error");
+        return "unknown";
     }
 }
 

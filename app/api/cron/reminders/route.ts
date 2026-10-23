@@ -78,14 +78,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
                 unsubscribe: unsubscribe.page,
             }
         );
-        const result = await sendEmail({ to: member.email, ...message, oneClickUnsubscribeUrl: unsubscribe.oneClick });
+        const outcome = await sendEmail({
+            to: member.email,
+            ...message,
+            oneClickUnsubscribeUrl: unsubscribe.oneClick,
+            // Same key for every attempt in this 8-month cycle
+            idempotencyKey: `reminder-${member.id}-${member.previous_reminded_at ?? "first"}`,
+        });
 
-        if (result.error === null) {
+        if (outcome === "sent") {
             sent++;
             continue;
         }
         failed++;
-        // Un-claim so the next run retries this member instead of skipping them for 8 months
+        // Maybe delivered: keep the claim. Skipping someone for 8 months beats emailing them twice
+        if (outcome === "unknown") continue;
+        // Definitely not sent: un-claim so the next run retries this member
         const { error: releaseError } = await admin
             .from("member_email_pref")
             .update({ last_reminded_at: member.previous_reminded_at })
