@@ -10,12 +10,11 @@ import { cn } from "@/lib/cn";
 type Step = { id: string; title: string };
 
 /** Dashboard progress nav. The current step comes straight from the URL. */
-export function Stepper({ steps, className }: { steps: Step[]; className?: string }): React.JSX.Element {
+export function Stepper({ steps, className }: { steps: Step[]; className?: string }): React.JSX.Element | null {
     const pathname = usePathname();
-    const currentIndex = Math.max(
-        0,
-        steps.findIndex((step) => pathname.startsWith(`/dashboard/${step.id}`))
-    );
+    const currentIndex = steps.findIndex((step) => pathname.startsWith(`/dashboard/${step.id}`));
+    // Other dashboard pages (stats) aren't part of onboarding
+    if (currentIndex === -1) return null;
 
     return (
         <nav aria-label="Onboarding steps" className={cn(className)}>

@@ -50,7 +50,7 @@
     --font-sans: "Oxanium", sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0rem;
+    --radius: 0.75rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -102,7 +102,7 @@
     --font-sans: "Oxanium", sans-serif;
     --font-serif: "Lora", Georgia, serif;
     --font-mono: "Fira Code", "Courier New", monospace;
-    --radius: 0rem;
+    --radius: 0.75rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -154,10 +154,17 @@
     --font-mono: var(--font-mono);
     --font-serif: var(--font-serif);
 
+    /*
+     * One radius scale for the whole app (it was 0, so sm–lg rendered square while 2xl+ cards and
+     * pill buttons stayed round). Controls (inputs, selects) use md, menus and small panels xl,
+     * cards 2xl–3xl; buttons and tags stay pills.
+     */
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
     --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+    --radius-3xl: calc(var(--radius) + 12px);
 
     --shadow-2xs: var(--shadow-2xs);
     --shadow-xs: var(--shadow-xs);

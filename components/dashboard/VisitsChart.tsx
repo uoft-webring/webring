@@ -15,10 +15,12 @@ export function VisitsChart({ days }: { days: DailyVisits[] }): React.JSX.Elemen
     const title = "Visitors sent to you per day";
 
     return (
-        <figure className="bg-card rounded-xl border p-5">
+        <figure className="bg-card rounded-2xl border p-5">
             <figcaption className="mb-4 flex items-baseline justify-between gap-4">
                 <span className="text-sm font-medium">{title}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">peak {max}</span>
+                {max > 0 && (
+                    <span className="text-muted-foreground text-xs tabular-nums">Busiest day: {max}</span>
+                )}
             </figcaption>
 
             {max === 0 ? (
@@ -51,25 +53,28 @@ export function VisitsChart({ days }: { days: DailyVisits[] }): React.JSX.Elemen
                 </div>
             )}
 
-            <table className="sr-only">
-                <caption>{title}</caption>
-                <thead>
-                    <tr>
-                        <th scope="col">Day</th>
-                        <th scope="col">Visitors sent to you</th>
-                        <th scope="col">Visitors you sent on</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {days.map((day) => (
-                        <tr key={day.day}>
-                            <td>{formatDay(day.day)}</td>
-                            <td>{day.inbound}</td>
-                            <td>{day.outbound}</td>
+            {/* sr-only on a wrapper: a table's <caption> is laid out outside the table box and would show */}
+            <div className="sr-only">
+                <table>
+                    <caption>{title}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Day</th>
+                            <th scope="col">Visitors sent to you</th>
+                            <th scope="col">Visitors you sent on</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {days.map((day) => (
+                            <tr key={day.day}>
+                                <td>{formatDay(day.day)}</td>
+                                <td>{day.inbound}</td>
+                                <td>{day.outbound}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </figure>
     );
 }

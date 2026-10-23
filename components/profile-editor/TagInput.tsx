@@ -29,7 +29,7 @@ export function TagInput({
     return (
         <>
             <Tags>
-                <TagsTrigger className="rounded-xl">
+                <TagsTrigger className="rounded-md">
                     {tags.map((tag) => (
                         <SkillTag key={tag} tagName={tag} size="mini" removable onClick={() => remove(tag)} />
                     ))}

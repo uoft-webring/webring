@@ -233,7 +233,6 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                     remaining={MAX_TAGLINE_LENGTH - values.tagline.length}
                     value={values.tagline}
                     onChange={(e) => update({ tagline: e.target.value })}
-                    className="rounded-xl"
                     error={errors.tagline}
                 />
             </div>
