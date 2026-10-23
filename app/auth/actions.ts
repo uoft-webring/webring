@@ -5,9 +5,12 @@ import { redirect } from "next/navigation";
 import { siteUrl } from "@/lib/env";
 import { clearPendingEmail, getPendingEmail, setPendingEmail } from "@/lib/pending-email";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { AUTH_LIMITS, allowOtpSend, consumeRateLimit } from "@/lib/rate-limit";
 import { fail, ok, type Result } from "@/lib/result";
 import { createAdminClient, createAnonClient, createClient } from "@/lib/supabase/server";
 import { emailSchema, nameSchema, otpSchema } from "@/lib/validation";
+
+const TOO_MANY_CODES = "Too many codes requested. Please try again in an hour.";
 
 export type AuthFormState = {
     error: string | null;
@@ -39,6 +42,9 @@ export async function requestSignUp(_prev: AuthFormState, formData: FormData): P
             fieldErrors: { name: name.error?.issues[0]?.message, email: email.error?.issues[0]?.message },
         };
     }
+
+    // Before the lookup, so this also throttles probing which emails are registered
+    if (!(await allowOtpSend(email.data))) return { error: TOO_MANY_CODES, values };
 
     const { data: existing } = await createAdminClient()
         .from("profile")
@@ -72,6 +78,8 @@ export async function requestSignIn(_prev: AuthFormState, formData: FormData): P
         return { error: null, values, fieldErrors: { email: email.error.issues[0]?.message } };
     }
 
+    if (!(await allowOtpSend(email.data))) return { error: TOO_MANY_CODES, values };
+
     const { error } = await sendOtp(email.data, { createUser: false });
     if (error) {
         // Supabase answers "Signups not allowed for otp" for unknown emails
@@ -92,6 +100,9 @@ export async function verifyOtp(code: string): Promise<Result<null>> {
 
     const email = await getPendingEmail();
     if (!email) return fail("Your code expired. Please request a new one.");
+    if (!(await consumeRateLimit(AUTH_LIMITS.otpVerifyPerEmail, email))) {
+        return fail("Too many attempts. Please wait 15 minutes and try again.");
+    }
 
     const supabase = await createClient();
     const { data, error } = await supabase.auth.verifyOtp({ email, token: token.data, type: "email" });
@@ -107,6 +118,7 @@ export async function verifyOtp(code: string): Promise<Result<null>> {
 export async function resendOtp(): Promise<Result<null>> {
     const email = await getPendingEmail();
     if (!email) return fail("Your session expired. Please start again.");
+    if (!(await allowOtpSend(email))) return fail(TOO_MANY_CODES);
 
     // Never create accounts here: sign-up must go through requestSignUp so the name is captured
     const { error } = await sendOtp(email, { createUser: false });
