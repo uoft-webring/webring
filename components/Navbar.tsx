@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpenText, ChartColumn, Contact, House, LayoutDashboard, LogOut, User } from "lucide-react";
+import { BookOpenText, ChartColumn, Contact, House, LayoutDashboard, LogOut, Palette, User } from "lucide-react";
 import { signOut } from "@/app/auth/actions";
 import {
     DropdownMenu,
@@ -20,6 +20,7 @@ const menuLinks = (slug: string) => [
     { href: "/", label: "Home", icon: House },
     { href: "/dashboard/edit", label: "Edit Profile", icon: LayoutDashboard },
     { href: profilePath(slug), label: "My Page", icon: User },
+    { href: "/dashboard/page", label: "Customize Page", icon: Palette },
     { href: "/dashboard/stats", label: "My Stats", icon: ChartColumn },
     { href: "/directory", label: "Directory", icon: Contact },
     { href: "/manifesto", label: "Manifesto", icon: BookOpenText },

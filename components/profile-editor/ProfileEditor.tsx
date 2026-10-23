@@ -202,6 +202,13 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                         onChange={(e) => update({ tagline: e.target.value })}
                         error={errors.tagline}
                     />
+                    <p className="text-muted-foreground text-sm">
+                        Want more than a line?{" "}
+                        <Link href="/dashboard/page" className="text-foreground underline underline-offset-4">
+                            Add an about section, projects and experience to your page
+                        </Link>
+                        .
+                    </p>
                 </Field>
                 <Field>
                     <Label htmlFor="tags">Tags</Label>
