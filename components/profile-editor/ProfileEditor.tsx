@@ -236,6 +236,13 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                     className="rounded-xl"
                     error={errors.tagline}
                 />
+                <p className="text-muted-foreground -mt-2 text-sm">
+                    Want more than a line?{" "}
+                    <Link href="/dashboard/page" className="text-foreground underline underline-offset-4">
+                        Add an about section, projects and experience to your page
+                    </Link>
+                    .
+                </p>
             </div>
 
             <div className="flex items-center justify-start gap-4">

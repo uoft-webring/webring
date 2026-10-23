@@ -17,6 +17,11 @@ create table public.profile (
     program text,
     slug text unique,
     open_to_work boolean not null default false, -- looking for co-op / internship roles
+    about text not null default '', -- Markdown about section for the member's page
+    projects jsonb not null default '[]'::jsonb, -- [{title, url, description}], shape checked in lib/validation.ts
+    experience jsonb not null default '[]'::jsonb, -- [{role, organization, start, end, description}]
+    links jsonb not null default '[]'::jsonb, -- [{label, url}]
+    accent text not null default 'periwinkle', -- page accent colour, see ACCENTS in lib/validation.ts
     constraint profile_ring_id_key unique (ring_id),
     -- Mirrors lib/validation.ts. Added NOT VALID in production so legacy rows are left untouched.
     constraint profile_domain_format check (domain ~ '^(https?://[^[:space:]]+)?$' and length(domain) <= 255),
@@ -26,7 +31,13 @@ create table public.profile (
     constraint profile_tags_limit check (coalesce(cardinality(tags), 0) <= 3),
     constraint profile_image_key_format check (image_key ~ '^([A-Za-z0-9_-]+\.avif)?$'),
     constraint profile_github_format check (btrim(github_url) ~ '^([A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38})?$'),
-    constraint profile_program_length check (length(program) between 2 and 60)
+    constraint profile_program_length check (length(program) between 2 and 60),
+    -- Mirrors lib/validation.ts (MAX_ABOUT_LENGTH, MAX_PROJECTS, MAX_EXPERIENCE, MAX_LINKS, ACCENTS)
+    constraint profile_about_length check (length(about) <= 4000),
+    constraint profile_projects_shape check (jsonb_typeof(projects) = 'array' and jsonb_array_length(projects) <= 6),
+    constraint profile_experience_shape check (jsonb_typeof(experience) = 'array' and jsonb_array_length(experience) <= 8),
+    constraint profile_links_shape check (jsonb_typeof(links) = 'array' and jsonb_array_length(links) <= 5),
+    constraint profile_accent_value check (accent in ('periwinkle', 'line-1', 'line-2', 'line-4', 'streetcar', 'lake'))
 );
 comment on table public.profile is 'Table to store user data';
 
@@ -42,7 +53,7 @@ create policy "Allow user to edit their own profile" on public.profile
 -- Members edit only their profile fields; verification state is written by the server (service role).
 revoke all on table public.profile from anon, authenticated;
 grant select on table public.profile to authenticated;
-grant update (name, domain, tagline, image_key, github_url, tags, graduation_year, program, slug, open_to_work)
+grant update (name, domain, tagline, image_key, github_url, tags, graduation_year, program, slug, open_to_work, about, projects, experience, links, accent)
     on table public.profile to authenticated;
 
 -- A new domain needs to be re-verified and re-linked

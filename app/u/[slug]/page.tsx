@@ -1,19 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Book, CircleCheck, GraduationCap, TagIcon, UserIcon } from "lucide-react";
+import { Book, CircleCheck, GraduationCap, Link2, TagIcon, UserIcon } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ExternalLinkPill } from "@/components/ExternalLinkPill";
+import { Markdown } from "@/components/Markdown";
 import { Navbar } from "@/components/Navbar";
 import { OpenToWorkBadge } from "@/components/OpenToWorkBadge";
+import { ExperienceLine } from "@/components/profile-page/ExperienceLine";
+import { ProjectsSection } from "@/components/profile-page/ProjectsSection";
 import { ShareButton } from "@/components/ShareButton";
 import { SitePreview } from "@/components/SitePreview";
 import { SkillTag } from "@/components/SkillTag";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
+import { ACCENT_COLORS } from "@/lib/accents";
 import { getViewerProfile } from "@/lib/auth";
 import { avatarUrl } from "@/lib/avatar";
 import { getPostHogClient } from "@/lib/posthog-server";
+import { getPageContent } from "@/lib/profiles/page";
 import { getPublicProfileBySlug } from "@/lib/profiles/queries";
 import { isLinkableDomain } from "@/lib/profiles/ring";
 import { topicPath } from "@/lib/profiles/topics";
@@ -48,6 +53,9 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
 
     if (error !== null) throw new Error(error);
     if (!profile) notFound();
+    const content = await getPageContent(profile.ringId);
+    const isOwner = viewer?.slug === profile.slug;
+    const pageIsEmpty = !content.about && content.projects.length === 0 && content.experience.length === 0;
 
     getPostHogClient().capture({
         distinctId: viewer?.id ?? `anon_${slug}`,
@@ -72,13 +80,17 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
             sameAs: [
                 ...(profile.githubUsername ? [`https://github.com/${profile.githubUsername}`] : []),
                 ...(profile.domain ? [profile.domain] : []),
+                ...content.links.map((link) => link.url),
             ],
         },
         ...(profile.domain && { relatedLink: profile.domain }),
     };
 
     return (
-        <div className="bg-background text-foreground flex min-h-screen flex-col">
+        <div
+            className="bg-background text-foreground flex min-h-screen flex-col"
+            style={{ "--profile-accent": ACCENT_COLORS[content.accent].color } as React.CSSProperties}
+        >
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -94,7 +106,12 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                     <aside className="space-y-8 self-start lg:sticky lg:top-8 lg:col-span-1">
                         <div className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-8">
                             <div className="flex flex-col items-center text-center">
-                                {profile.imageKey && <Avatar profile={profile} className="h-32 w-32" priority />}
+                                {profile.imageKey && (
+                                    // The member's accent as a ring around the photo, with a gap so it doesn't touch the avatar's own edge
+                                    <div className="rounded-full border-4 border-(--profile-accent) p-1.5">
+                                        <Avatar profile={profile} className="h-32 w-32" priority />
+                                    </div>
+                                )}
 
                                 <h2 className="py-2 text-center text-2xl font-bold capitalize">
                                     {profile.name}
@@ -156,6 +173,15 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                             fallbackLabel="GitHub"
                                         />
                                     )}
+                                    {content.links.map((link) => (
+                                        <ExternalLinkPill
+                                            key={link.url}
+                                            href={link.url}
+                                            icon={<Link2 className="size-5" />}
+                                            label={link.label}
+                                            fallbackLabel="Link"
+                                        />
+                                    ))}
                                     <ShareButton
                                         title={`${profile.name}'s UofT Webring Profile`}
                                         url={profileUrl(profile.slug)}
@@ -183,13 +209,30 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                     </aside>
 
                     <main className="space-y-10 lg:col-span-3">
+                        {isOwner && pageIsEmpty && (
+                            <p className="text-muted-foreground border-border rounded-2xl border border-dashed p-5 text-sm">
+                                This is your public page. Add a longer about section, your projects and your experience
+                                in{" "}
+                                <Link href="/dashboard/page" className="text-foreground underline underline-offset-4">
+                                    Customize page
+                                </Link>
+                                .
+                            </p>
+                        )}
                         <section className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-10">
                             <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold capitalize sm:text-3xl">
                                 <UserIcon className="text-primary h-7 w-7" />
                                 About {profile.name}
                             </h2>
-                            <div className="prose prose-xl prose-a:text-primary prose-strong:text-foreground max-w-none">
-                                {profile.tagline ? (
+                            <div className="space-y-5">
+                                {profile.tagline && content.about ? (
+                                    <>
+                                        <p className="text-foreground text-lg text-pretty break-words">{profile.tagline}</p>
+                                        <Markdown className="text-muted-foreground">{content.about}</Markdown>
+                                    </>
+                                ) : content.about ? (
+                                    <Markdown className="text-muted-foreground">{content.about}</Markdown>
+                                ) : profile.tagline ? (
                                     <p className="text-md text-muted-foreground flex-1 px-4 text-pretty break-all hyphens-auto normal-case">
                                         {profile.tagline}
                                     </p>
@@ -200,6 +243,8 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                 )}
                             </div>
                         </section>
+                        {content.projects.length > 0 && <ProjectsSection projects={content.projects} />}
+                        {content.experience.length > 0 && <ExperienceLine experience={content.experience} />}
                         {isLinkableDomain(profile.domain) && (
                             <section aria-label={`Preview of ${profile.name}'s website`}>
                                 <SitePreview ringId={profile.ringId} domain={profile.domain} className="shadow-lg" />
