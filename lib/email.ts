@@ -13,15 +13,18 @@ export type EmailMessage = {
 };
 
 /**
- * `rejected`: Resend refused it, so nothing was delivered and it's safe to retry later.
+ * `retryable`: not delivered, for a reason that may clear (no key yet, auth, rate limit): retry later.
+ * `permanent`: not delivered and never will be (e.g. 422 invalid recipient): don't retry.
  * `unknown`: a timeout, network error or 5xx; it may have been delivered, so never retry.
  */
-export type SendOutcome = "sent" | "rejected" | "unknown";
+export type SendOutcome = "sent" | "retryable" | "permanent" | "unknown";
+
+const RETRYABLE_STATUSES = new Set([401, 403, 429]);
 
 /** Sends through Resend's HTTP API. Never throws: callers decide what a failed send means. */
 export async function sendEmail(message: EmailMessage): Promise<SendOutcome> {
     const env = serverEnv();
-    if (!env.RESEND_API_KEY) return "rejected";
+    if (!env.RESEND_API_KEY) return "retryable";
 
     try {
         const response = await fetch("https://api.resend.com/emails", {
@@ -48,7 +51,8 @@ export async function sendEmail(message: EmailMessage): Promise<SendOutcome> {
         // Only the error name: Resend's messages can quote the recipient's address
         const { name } = (await response.json().catch(() => ({}))) as { name?: string };
         console.error("[email] Resend refused a message:", response.status, name ?? "");
-        return response.status < 500 ? "rejected" : "unknown";
+        if (response.status >= 500) return "unknown";
+        return RETRYABLE_STATUSES.has(response.status) ? "retryable" : "permanent";
     } catch (error) {
         console.error("[email] Resend request failed:", error instanceof Error ? error.name : "unknown error");
         return "unknown";

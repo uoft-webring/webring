@@ -91,9 +91,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
             continue;
         }
         failed++;
-        // Maybe delivered: keep the claim. Skipping someone for 8 months beats emailing them twice
-        if (outcome === "unknown") continue;
-        // Definitely not sent: un-claim so the next run retries this member
+        // Maybe delivered, or can never be: keep the claim. Skipping someone for 8 months beats
+        // emailing them twice or retrying a bad address forever
+        if (outcome !== "retryable") continue;
+        // Not sent, for a reason that may clear: un-claim so the next run retries this member
         const { error: releaseError } = await admin
             .from("member_email_pref")
             .update({ last_reminded_at: member.previous_reminded_at })
