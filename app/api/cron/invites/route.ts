@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { cronAuthError, cronMode, pauseBetweenSends } from "@/lib/cron";
+import { cronAuthError, cronMode, pauseBetweenSends, sendRefusal } from "@/lib/cron";
 import { sendEmail } from "@/lib/email";
-import { serverEnv, siteUrl } from "@/lib/env";
+import { siteUrl } from "@/lib/env";
 import { INVITE_BATCH_SIZE, inviteEmail } from "@/lib/invites";
 import { fail, ok, type Result } from "@/lib/result";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -20,9 +20,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<In
     if (authError) return authError;
 
     const mode = cronMode(request);
-    if (mode === "send" && !serverEnv().RESEND_API_KEY) {
-        return NextResponse.json(fail("RESEND_API_KEY is not set."), { status: 500 });
-    }
+    const refusal = sendRefusal(mode);
+    if (refusal) return refusal;
 
     const admin = createAdminClient();
     const { data, error } = await admin.rpc("claim_invites", { max_count: INVITE_BATCH_SIZE, dry_run: mode === "dry-run" });
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<In
             to: invite.email,
             ...message,
             oneClickUnsubscribeUrl: unsubscribe.oneClick,
-            idempotencyKey: `invite-${invite.id}`,
         });
 
         if (outcome === "sent") {

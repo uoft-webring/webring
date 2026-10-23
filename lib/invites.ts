@@ -2,7 +2,7 @@ import { z } from "zod";
 import { escapeHtml } from "@/lib/email";
 import { displayDomain } from "@/lib/site";
 
-/** Invites per run; shares Resend's free 100 a day with the 50 reminders. */
+/** Invites per run; with the 25 reminders this stays well inside SES's starting 200 a day. */
 export const INVITE_BATCH_SIZE = 25;
 
 /** The GitHub search is loose, so the server re-checks that the bio actually mentions UofT. */
