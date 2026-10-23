@@ -20,7 +20,7 @@ export function DomainVerificationCheck({ hasDomain }: { hasDomain: boolean }): 
                 setMessage(error);
             } else if (!verified) {
                 setMessage(
-                    "Verification failed. Please ensure your TXT record is correctly configured and DNS has propagated (this can take up to 48 hours)."
+                    "Verification failed. Please ensure your TXT record (or meta tag) is correctly configured and DNS has propagated (this can take up to 48 hours)."
                 );
             } else {
                 posthog.capture("domain_verified");
