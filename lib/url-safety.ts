@@ -81,6 +81,8 @@ type SafeFetchOptions = {
 };
 
 export type SafeResponse = {
+    /** Where the response came from, after redirects. */
+    url: string;
     status: number;
     ok: boolean;
     contentType: string;
@@ -179,6 +181,7 @@ export async function safeFetch(
             continue;
         }
         return {
+            url: url.toString(),
             status: response.status,
             ok: response.status >= 200 && response.status < 300,
             contentType: response.contentType,

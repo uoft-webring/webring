@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/env", () => ({ serverEnv: () => ({ DOMAIN_VALIDATION_SECRET_KEY: "test-secret" }) }));
 
 import { widgetSnippets } from "@/lib/join-snippets";
-import { hasRingWidget, txtRecordValue } from "@/lib/verification";
+import { hasRingWidget, hasVerificationMetaTag, txtRecordValue } from "@/lib/verification";
 
 describe("hasRingWidget", () => {
     it("detects the snippet we hand out", () => {
@@ -32,5 +32,37 @@ describe("txtRecordValue", () => {
         expect(txtRecordValue(3)).toBe(txtRecordValue(3));
         expect(txtRecordValue(3)).not.toBe(txtRecordValue(4));
         expect(txtRecordValue(3)).toMatch(/^[A-Za-z0-9_-]+$/);
+    });
+});
+
+describe("hasVerificationMetaTag", () => {
+    const value = "abc_123-XYZ";
+
+    it("detects the tag we hand out", () => {
+        expect(
+            hasVerificationMetaTag(`<head><meta name="uoft-webring" content="${value}" /></head>`, value)
+        ).toBe(true);
+    });
+
+    it("accepts any attribute order, quoting, case and extra attributes", () => {
+        expect(
+            hasVerificationMetaTag(`<META content='${value}' data-x="1" NAME="UofT-Webring">`, value)
+        ).toBe(true);
+        expect(hasVerificationMetaTag(`<meta name=uoft-webring content=${value}>`, value)).toBe(true);
+    });
+
+    it("requires the member's own value", () => {
+        expect(hasVerificationMetaTag(`<meta name="uoft-webring" content="someone-else">`, value)).toBe(
+            false
+        );
+        expect(hasVerificationMetaTag(`<meta name="uoft-webring" content="${value}extra">`, value)).toBe(
+            false
+        );
+    });
+
+    it("ignores the value outside a uoft-webring meta tag", () => {
+        expect(hasVerificationMetaTag(`<meta name="description" content="${value}">`, value)).toBe(false);
+        expect(hasVerificationMetaTag(`<p>uoft-webring ${value}</p>`, value)).toBe(false);
+        expect(hasVerificationMetaTag(`<meta name="uoft-webring">${value}`, value)).toBe(false);
     });
 });

@@ -7,7 +7,8 @@ import { safeFetch } from "@/lib/url-safety";
 /**
  * Two separate checks:
  * - Ring link (`validated_user_component`): the member's site embeds the prev/next widget.
- * - Domain verification (`is_verified`): the member controls DNS for the domain (TXT record).
+ * - Domain verification (`is_verified`): the member controls the domain, shown by a DNS TXT record
+ *   or, for hosts without DNS access (e.g. GitHub Pages), a meta tag on the page itself.
  */
 
 export const TXT_RECORD_NAME = "uoft-webring";
@@ -32,6 +33,50 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
         // ENOTFOUND / ENODATA: no record yet
         return false;
     }
+}
+
+const META_TAG = /<meta\b[^>]*>/gi;
+const ATTRIBUTE = /([a-z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/gi;
+
+/** Whether `html` has `<meta name="uoft-webring" content="…">` with `value`, attributes in any order. */
+export function hasVerificationMetaTag(html: string, value: string): boolean {
+    for (const [tag] of html.matchAll(META_TAG)) {
+        const attributes = new Map<string, string>();
+        for (const match of tag.matchAll(ATTRIBUTE)) {
+            attributes.set(match[1].toLowerCase(), (match[2] ?? match[3] ?? match[4]).trim());
+        }
+        if (
+            attributes.get("name")?.toLowerCase() === TXT_RECORD_NAME &&
+            attributes.get("content") === value
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function sameSite(a: URL, b: URL): boolean {
+    const host = (url: URL) => url.hostname.replace(/^www\./, "");
+    return host(a) === host(b);
+}
+
+export async function hasVerificationMeta(domain: string, ringId: number): Promise<boolean> {
+    // The tag belongs in <head>, so the first 1MB is plenty
+    const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 1024 * 1024 });
+    if (!response?.ok) return false;
+    // Redirects are fine within the site (http→https, www), but an open redirect elsewhere must not
+    // let someone verify a domain by pointing it at a page they control
+    if (!sameSite(new URL(domain), new URL(response.url))) return false;
+    return hasVerificationMetaTag(response.body.toString("utf8"), txtRecordValue(ringId));
+}
+
+/** Either proof of control is enough; both are checked at once so a slow DNS lookup doesn't add up. */
+export async function hasDomainOwnershipProof(domain: string, ringId: number): Promise<boolean> {
+    const [record, meta] = await Promise.all([
+        hasVerificationRecord(domain, ringId),
+        hasVerificationMeta(domain, ringId).catch(() => false),
+    ]);
+    return record || meta;
 }
 
 export async function isUrlReachable(url: string): Promise<boolean> {

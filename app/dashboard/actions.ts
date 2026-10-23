@@ -10,7 +10,7 @@ import { fail, ok, type Result } from "@/lib/result";
 import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { profileInputSchema } from "@/lib/validation";
-import { checkRingWidget, hasVerificationRecord, isUrlReachable } from "@/lib/verification";
+import { checkRingWidget, hasDomainOwnershipProof, isUrlReachable } from "@/lib/verification";
 
 const UNIQUE_VIOLATION = "23505";
 
@@ -96,7 +96,7 @@ export async function verifyDomainOwnership(): Promise<Result<boolean>> {
     if (!profile.domain) return fail("Add your portfolio link before verifying.");
     if (profile.isVerified) return ok(true);
 
-    if (!(await hasVerificationRecord(profile.domain, profile.ringId))) return ok(false);
+    if (!(await hasDomainOwnershipProof(profile.domain, profile.ringId))) return ok(false);
 
     // Members can't write is_verified themselves (column grants), so the server records it.
     // Matching the checked domain stops a concurrent domain change from inheriting this result.
