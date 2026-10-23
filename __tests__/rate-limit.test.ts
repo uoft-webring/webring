@@ -31,6 +31,13 @@ describe("clientIpFrom", () => {
         expect(clientIpFrom("203.0.113.7, 10.0.0.1")).toBe("203.0.113.7");
     });
 
+    it("groups IPv6 clients by /64 and unwraps IPv4-mapped addresses", () => {
+        expect(clientIpFrom("2001:db8:85a3:12:abcd::1")).toBe("2001:db8:85a3:12::/64");
+        expect(clientIpFrom("2001:0DB8:85a3:0012:ffff:1:2:3")).toBe("2001:db8:85a3:12::/64");
+        expect(clientIpFrom("2001:db8::1")).toBe("2001:db8:0:0::/64");
+        expect(clientIpFrom("::ffff:203.0.113.7")).toBe("203.0.113.7");
+    });
+
     it("returns null when there is no address", () => {
         expect(clientIpFrom(null)).toBeNull();
         expect(clientIpFrom("")).toBeNull();

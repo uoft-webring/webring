@@ -15,9 +15,9 @@ export const AUTH_LIMITS = {
     otpSendPerIp: { name: "otp-send:ip", max: 100, windowSeconds: 60 * 60 },
     // A 6-digit code has a million values; 10 guesses per 15 minutes per account makes brute force hopeless
     otpVerifyPerEmail: { name: "otp-verify:email", max: 10, windowSeconds: 15 * 60 },
-    // Guessing across many accounts at once: cap it per client and site-wide
-    otpVerifyPerIp: { name: "otp-verify:ip", max: 30, windowSeconds: 15 * 60 },
-    otpVerifyGlobal: { name: "otp-verify:all", max: 600, windowSeconds: 60 * 60 },
+    // Guessing across many accounts at once. Every code entry counts, so it sits above the send
+    // limit for a campus NAT. No site-wide cap: a few clients could fill it and lock everyone out.
+    otpVerifyPerIp: { name: "otp-verify:ip", max: 150, windowSeconds: 15 * 60 },
 } satisfies Record<string, RateLimit>;
 
 /** `alice+anything@x` reaches alice@x's inbox, so they share one budget. */
@@ -32,9 +32,24 @@ export function bucketKey(limit: RateLimit, subject: string): string {
     return `${limit.name}:${digest}`;
 }
 
-/** First hop of `x-forwarded-for`, which Vercel sets to the real client address. */
+/**
+ * The client from the first hop of `x-forwarded-for` (Vercel sets it to the real address): an IPv4
+ * address, or an IPv6 /64, since one user usually controls a whole /64.
+ */
 export function clientIpFrom(forwardedFor: string | null): string | null {
-    return forwardedFor?.split(",")[0]?.trim() || null;
+    const ip = forwardedFor?.split(",")[0]?.trim().toLowerCase();
+    if (!ip) return null;
+    if (!ip.includes(":")) return ip;
+    const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+    if (mapped) return mapped[1];
+    const [head, tail] = ip.split("::");
+    const headParts = head ? head.split(":") : [];
+    const tailParts = tail ? tail.split(":") : [];
+    const groups = [...headParts, ...Array(Math.max(0, 8 - headParts.length - tailParts.length)).fill("0"), ...tailParts];
+    return `${groups
+        .slice(0, 4)
+        .map((group) => group.replace(/^0+(?=.)/, ""))
+        .join(":")}::/64`;
 }
 
 /** Counts one hit against `limit` for `subject`; false once the subject is over the limit. */
@@ -66,10 +81,9 @@ export async function allowOtpSend(email: string): Promise<"ok" | "inbox" | "cli
     return (await consumeRateLimit(AUTH_LIMITS.otpSendPerEmail, inboxKey(email))) ? "ok" : "inbox";
 }
 
-/** Limits on guessing a code: per client and per account, then a site-wide ceiling. */
+/** Limits on guessing a code: per client first (so a blocked client can't burn accounts' budgets), then per account. */
 export async function allowOtpVerify(email: string): Promise<boolean> {
     const ip = await clientIp();
     if (ip && !(await consumeRateLimit(AUTH_LIMITS.otpVerifyPerIp, ip))) return false;
-    if (!(await consumeRateLimit(AUTH_LIMITS.otpVerifyPerEmail, inboxKey(email)))) return false;
-    return consumeRateLimit(AUTH_LIMITS.otpVerifyGlobal, "all");
+    return consumeRateLimit(AUTH_LIMITS.otpVerifyPerEmail, inboxKey(email));
 }

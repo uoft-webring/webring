@@ -45,9 +45,8 @@ describe("allowOtpVerify", () => {
         expect(spent).toEqual(["otp-verify:ip"]);
     });
 
-    it("applies the site-wide ceiling last", async () => {
-        full.add("otp-verify:all");
-        expect(await allowOtpVerify("a@utoronto.ca")).toBe(false);
-        expect(spent).toEqual(["otp-verify:ip", "otp-verify:email", "otp-verify:all"]);
+    it("has no site-wide budget that a few clients could exhaust", async () => {
+        expect(await allowOtpVerify("a@utoronto.ca")).toBe(true);
+        expect(spent).toEqual(["otp-verify:ip", "otp-verify:email"]);
     });
 });
