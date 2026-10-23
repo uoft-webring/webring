@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { Share2 } from "lucide-react";
 import posthog from "posthog-js";
 import { toast } from "sonner";
@@ -15,7 +16,19 @@ export function ShareButton({
     url: string;
     compact?: boolean;
 }): React.JSX.Element {
+    const sharing = useRef(false);
+
     const handleShare = async () => {
+        if (sharing.current) return;
+        sharing.current = true;
+        try {
+            await share();
+        } finally {
+            sharing.current = false;
+        }
+    };
+
+    const share = async () => {
         if (navigator.share) {
             try {
                 await navigator.share({ title, url });
@@ -23,7 +36,7 @@ export function ShareButton({
             } catch (error) {
                 // Closing the share sheet rejects with AbortError: not a failure
                 if (error instanceof DOMException && error.name === "AbortError") return;
-                toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 1000 });
+                toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 2000 });
             }
             return;
         }
@@ -33,7 +46,7 @@ export function ShareButton({
             posthog.capture("profile_shared", { method: "clipboard", url });
             toast.success("Profile link copied to clipboard!", { duration: 1000 });
         } catch {
-            toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 1000 });
+            toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 2000 });
         }
     };
 

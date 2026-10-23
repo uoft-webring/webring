@@ -27,10 +27,14 @@ function namesFor(profile: PublicProfile, kind: TopicKind): string[] {
 export function collectTopics(profiles: PublicProfile[], kind: TopicKind): Topic[] {
     const topics = new Map<string, Topic>();
     for (const profile of profiles) {
+        // Same rule as the directory: a member without a slug has no page to link to
+        if (!profile.slug || !profile.name) continue;
         for (const name of namesFor(profile, kind)) {
             const slug = topicSlug(name);
             if (!slug) continue;
             const topic = topics.get(slug) ?? { slug, name, members: [] };
+            // Two of a member's tags can share a slug ("C++" and "c plus plus")
+            if (topic.members.includes(profile)) continue;
             topic.members.push(profile);
             topics.set(slug, topic);
         }

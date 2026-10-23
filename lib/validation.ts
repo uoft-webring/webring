@@ -71,7 +71,9 @@ export const profileInputSchema = z.object({
     }),
     tags: z
         .array(z.string().trim().min(1).max(40))
-        .max(MAX_TAGS, { error: `You can choose up to ${MAX_TAGS} tags.` }),
+        // Counted after duplicates are dropped, matching what's stored
+        .refine((tags) => new Set(tags).size <= MAX_TAGS, { error: `You can choose up to ${MAX_TAGS} tags.` })
+        .transform((tags) => [...new Set(tags)]),
     graduationYear: z
         .number({ error: "Graduation year must be a number." })
         .int({ error: "Graduation year must be an integer." })
@@ -132,7 +134,7 @@ export const projectSchema = z.object({
         .trim()
         .min(1, { error: "Give the project a name." })
         .max(80, { error: "Project names can be at most 80 characters." }),
-    url: z.union([z.literal(""), linkUrlSchema]),
+    url: z.string().trim().pipe(z.union([z.literal(""), linkUrlSchema])),
     description: z.string().trim().max(280, { error: "Keep descriptions under 280 characters." }),
 });
 

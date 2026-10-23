@@ -10,8 +10,8 @@ export function ProjectsSection({ projects }: { projects: Project[] }): React.JS
                 Projects
             </h2>
             <ul className="grid gap-x-12 gap-y-8 sm:grid-cols-2">
-                {projects.map((project) => (
-                    <li key={project.title} className="min-w-0">
+                {projects.map((project, index) => (
+                    <li key={`${index}-${project.title}`} className="min-w-0">
                         <h3 className="text-lg font-semibold">
                             {project.url ? (
                                 <a

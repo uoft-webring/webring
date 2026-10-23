@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CircleCheck, Globe, Link2, UserIcon } from "lucide-react";
+import { CircleCheck, Globe, UserIcon } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { ExternalLinkPill } from "@/components/ExternalLinkPill";
-import { GitHubIcon } from "@/components/GitHubIcon";
+import { FiGithub } from "react-icons/fi";
+import { LinkIcon } from "@/components/LinkIcon";
 import { Markdown } from "@/components/Markdown";
 import { Navbar } from "@/components/Navbar";
 import { OpenToWorkBadge } from "@/components/OpenToWorkBadge";
@@ -20,7 +21,7 @@ import { getPostHogClient } from "@/lib/posthog-server";
 import { getPageContent } from "@/lib/profiles/page";
 import { getPublicProfileBySlug } from "@/lib/profiles/queries";
 import { isLinkableDomain } from "@/lib/profiles/ring";
-import { topicPath } from "@/lib/profiles/topics";
+import { topicPath, topicSlug } from "@/lib/profiles/topics";
 import { displayDomain, profileUrl } from "@/lib/site";
 
 export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Promise<Metadata> {
@@ -177,12 +178,16 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                 >
                                     {profile.tags.map((tagName) => (
                                         <li key={tagName}>
-                                            <Link
-                                                href={topicPath("tags", tagName)}
-                                                className="hover:opacity-80"
-                                            >
+                                            {topicSlug(tagName) ? (
+                                                <Link
+                                                    href={topicPath("tags", tagName)}
+                                                    className="hover:opacity-80"
+                                                >
+                                                    <SkillTag tagName={tagName} size="mini" className="text-sm" />
+                                                </Link>
+                                            ) : (
                                                 <SkillTag tagName={tagName} size="mini" className="text-sm" />
-                                            </Link>
+                                            )}
                                         </li>
                                     ))}
                                 </ul>
@@ -202,16 +207,16 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                         {profile.githubUsername && (
                             <ExternalLinkPill
                                 href={`https://github.com/${profile.githubUsername}`}
-                                icon={<GitHubIcon />}
+                                icon={<FiGithub />}
                                 label={profile.githubUsername}
                                 fallbackLabel="GitHub"
                             />
                         )}
-                        {content.links.map((link) => (
+                        {content.links.map((link, index) => (
                             <ExternalLinkPill
-                                key={link.url}
+                                key={`${index}-${link.url}`}
                                 href={link.url}
-                                icon={<Link2 className="size-5" />}
+                                icon={<LinkIcon url={link.url} />}
                                 label={link.label}
                                 fallbackLabel="Link"
                             />

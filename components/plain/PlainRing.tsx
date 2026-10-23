@@ -110,7 +110,7 @@ export function PlainRing({
                         {visible.length === 0 && (
                             <tr>
                                 <td colSpan={3} className="py-6 text-[#4a5a78] italic">
-                                    No sites match “{query.trim()}”.
+                                    {normalized ? `No sites match “${query.trim()}”.` : "No sites in the ring yet."}
                                 </td>
                             </tr>
                         )}

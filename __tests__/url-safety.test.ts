@@ -38,6 +38,9 @@ describe("isPublicAddress", () => {
         "fe80::1",
         "::ffff:127.0.0.1",
         "::ffff:7f00:1",
+        // IPv4-compatible and 6to4 forms embed 127.0.0.1
+        "::7f00:1",
+        "2002:7f00:1::1",
         "not-an-ip",
     ])("blocks %s", (address) => expect(isPublicAddress(address)).toBe(false));
 });

@@ -71,14 +71,6 @@ export default function RootLayout({
                 url: "https://uoftwebring.com/",
                 name: "UofT Webring",
                 description,
-                potentialAction: {
-                    "@type": "SearchAction",
-                    target: {
-                        "@type": "EntryPoint",
-                        urlTemplate: "https://uoftwebring.com/directory?q={search_term_string}",
-                    },
-                    "query-input": "required name=search_term_string",
-                },
             },
             {
                 "@type": "Organization",

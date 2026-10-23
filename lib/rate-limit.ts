@@ -22,6 +22,8 @@ export const AUTH_LIMITS = {
 
 /** Dashboard checks that make the server fetch a member's site (verify, ring link). Per member. */
 export const SITE_CHECK_LIMIT: RateLimit = { name: "site-check:member", max: 20, windowSeconds: 60 * 60 };
+// Each presigned upload can leave an unreferenced object in the bucket
+export const AVATAR_UPLOAD_LIMIT: RateLimit = { name: "avatar-upload:member", max: 20, windowSeconds: 60 * 60 };
 
 /** `alice+anything@x` reaches alice@x's inbox, so they share one budget. */
 export function inboxKey(email: string): string {

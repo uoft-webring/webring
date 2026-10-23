@@ -8,7 +8,7 @@ import { PAGE_CONTENT_COLUMNS, toPageContent, type PageContentRow } from "@/lib/
 import { PROFILES_TAG } from "@/lib/profiles/queries";
 import type { OwnProfile, RingStatus } from "@/lib/profiles/types";
 import { fail, ok, type Result } from "@/lib/result";
-import { consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/rate-limit";
+import { AVATAR_UPLOAD_LIMIT, consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/rate-limit";
 import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { pageContentSchema, profileInputSchema, type PageContent } from "@/lib/validation";
@@ -89,6 +89,9 @@ export async function createAvatarUpload(size: number): Promise<Result<{ uploadU
     if (!user) return fail("Please sign in again.");
     if (!Number.isInteger(size) || size <= 0 || size > MAX_AVATAR_BYTES) {
         return fail("That image is too large. Try a smaller crop.");
+    }
+    if (!(await consumeRateLimit(AVATAR_UPLOAD_LIMIT, user.id))) {
+        return fail("Too many uploads. Please try again in an hour.");
     }
     return ok(await createAvatarUploadUrl(user.id, size));
 }

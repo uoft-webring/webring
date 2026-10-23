@@ -11,6 +11,8 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // /redirect is embedded on every member's site, so it's the hottest path. Keep the ring in
 // instance memory for a minute instead of querying per click (Fluid Compute reuses instances).
 const RING_TTL_MS = 60_000;
+// During a DB outage, retry at most this often instead of paying a failing query on every click
+const RING_ERROR_BACKOFF_MS = 5_000;
 let ringCache: { members: PublicProfile[]; expires: number } | undefined;
 
 function adminClient() {
@@ -31,7 +33,9 @@ async function loadRing(): Promise<PublicProfile[]> {
     if (error) {
         console.error("[redirect] Failed to load ring:", error.message);
         // Serve stale data rather than dropping visitors on the home page
-        return ringCache?.members ?? [];
+        const members = ringCache?.members ?? [];
+        ringCache = { members, expires: Date.now() + RING_ERROR_BACKOFF_MS };
+        return members;
     }
     const members = ringMembers(data.map(toPublicProfile));
     ringCache = { members, expires: Date.now() + RING_TTL_MS };
@@ -39,7 +43,8 @@ async function loadRing(): Promise<PublicProfile[]> {
 }
 
 // Crawlers and link unfurlers follow widget links too; they'd swamp the members' stats
-const NON_HUMAN_AGENT = /bot|crawl|spider|slurp|preview|fetch|monitor|curl|wget|python|headless|lighthouse/i;
+const NON_HUMAN_AGENT =
+    /bot|crawl|spider|slurp|preview|fetch|monitor|curl|wget|python|headless|lighthouse|facebookexternalhit|whatsapp|go-http-client|axios|okhttp|java\/|libwww|httpclient/i;
 
 function isCountableVisit(request: NextRequest): boolean {
     const agent = request.headers.get("user-agent") ?? "";
@@ -55,9 +60,13 @@ async function recordHop(fromRingId: number | null, toRingId: number): Promise<v
 // e.g. https://uoftwebring.com/redirect?nav=prev&id=0. Never change this URL shape: it's on members' sites.
 async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
     const home = new URL("/", request.url);
-    const nav = request.nextUrl.searchParams.get("nav");
-    const id = Number.parseInt(request.nextUrl.searchParams.get("id") ?? "", 10);
-    if ((nav !== "next" && nav !== "prev") || Number.isNaN(id)) return NextResponse.redirect(home);
+    // A broken widget link should still land on a member: unknown nav means next, unknown id means the start
+    const nav = request.nextUrl.searchParams.get("nav")?.toLowerCase() === "prev" ? "prev" : "next";
+    const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
+    // Lenient for routing ("1abc" still lands on a neighbour), strict for crediting stats
+    const parsed = Number.parseInt(rawId, 10);
+    const id = Number.isNaN(parsed) ? 0 : parsed;
+    const exactId = /^\d{1,9}$/.test(rawId);
 
     const members = await loadRing();
     const destination = findRingDestination(members, id, nav);
@@ -65,9 +74,12 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
 
     if (isCountableVisit(request)) {
         // Only credit real members as the source, so made-up ids can't create stats rows
-        const from = members.some((member) => member.ringId === id) ? id : null;
-        // After the response: counting a visit must never slow the redirect down
-        event.waitUntil(recordHop(from, destination.ringId));
+        const from = exactId && members.some((member) => member.ringId === id) ? id : null;
+        // A one-member ring sends visitors back to the same site: not a hop between members
+        if (from !== destination.ringId) {
+            // After the response: counting a visit must never slow the redirect down
+            event.waitUntil(recordHop(from, destination.ringId));
+        }
     }
     return NextResponse.redirect(new URL(destination.domain));
 }

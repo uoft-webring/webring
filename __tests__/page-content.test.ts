@@ -52,6 +52,14 @@ describe("pageContentSchema", () => {
         expect(pageContentSchema.safeParse({ ...valid, accent: "neon" }).success).toBe(false);
     });
 
+    it("treats a whitespace-only project link as no link", () => {
+        const parsed = pageContentSchema.safeParse({
+            ...valid,
+            projects: [{ title: "Webring", url: "   ", description: "" }],
+        });
+        expect(parsed.success && parsed.data.projects[0].url).toBe("");
+    });
+
     it("caps list sizes like the database does", () => {
         const many = Array.from({ length: 7 }, () => valid.projects[0]);
         expect(pageContentSchema.safeParse({ ...valid, projects: many }).success).toBe(false);

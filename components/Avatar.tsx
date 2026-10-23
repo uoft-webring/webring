@@ -24,8 +24,9 @@ export function Avatar({
     size = 90,
     priority = false,
 }: AvatarProps): React.JSX.Element {
-    const [failed, setFailed] = useState(false);
-    const src = failed ? null : avatarUrl(profile.imageKey);
+    const [failedSrc, setFailedSrc] = useState<string | null>(null);
+    const imageSrc = avatarUrl(profile.imageKey);
+    const src = imageSrc === failedSrc ? null : imageSrc;
     const alt = `${profile.name}'s profile picture`;
     const classList = cn(
         "pointer-events-none aspect-square rounded-full object-cover select-none",
@@ -44,7 +45,7 @@ export function Avatar({
                     priority={priority}
                     draggable={false}
                     className={classList}
-                    onError={() => setFailed(true)}
+                    onError={() => setFailedSrc(src)}
                 />
             ) : (
                 // Only build the generated avatar when it's actually shown

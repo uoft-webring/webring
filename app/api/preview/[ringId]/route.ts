@@ -4,10 +4,11 @@ import { getPublicProfiles } from "@/lib/profiles/queries";
 import { ringMembers } from "@/lib/profiles/ring";
 import { previewVersion } from "@/lib/site";
 
-// Previews change rarely and are expensive to build: let the CDN keep them for a week
-const FOUND_CACHE = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=604800";
-// Sites without a preview may add one later; check again in a few hours
-const MISSING_CACHE = "public, max-age=3600, s-maxage=21600";
+// Previews are expensive to build: the CDN refreshes them daily in the background, so a new
+// og:image shows within a day without a visitor ever waiting on a rebuild
+const FOUND_CACHE = "public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800";
+// A missing preview may be a one-off fetch failure; check again within the hour
+const MISSING_CACHE = "public, max-age=3600, s-maxage=3600";
 
 function notFound(): NextResponse {
     return new NextResponse(null, { status: 404, headers: { "Cache-Control": MISSING_CACHE } });

@@ -24,6 +24,7 @@ export function TopicIndex({
             <main className="container mx-auto max-w-[75rem] px-4 py-6">
                 <h1 className="mb-2">{heading}</h1>
                 <p className="mb-8">{description}</p>
+                {topics.length === 0 && <p className="text-muted-foreground">No members yet.</p>}
                 <ul className="flex flex-wrap gap-3">
                     {topics.map((topic) => (
                         <li key={topic.slug}>

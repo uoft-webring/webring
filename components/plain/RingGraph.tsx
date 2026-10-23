@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cn } from "@/lib/cn";
 import { seededRandom } from "./seeded";
 import type { PlainMember } from "./types";
 
@@ -89,7 +90,10 @@ export function RingGraph({
                     return (
                         <g
                             key={node.ringId}
-                            className="cursor-pointer transition-opacity duration-150 motion-reduce:transition-none"
+                            className={cn(
+                                "transition-opacity duration-150 motion-reduce:transition-none",
+                                visible ? "cursor-pointer" : "pointer-events-none"
+                            )}
                             opacity={visible ? 1 : 0.15}
                             onPointerEnter={() => setHovered(node.ringId)}
                             onClick={() => openMemberSite(node.domain)}

@@ -65,7 +65,15 @@ export default async function VerifyPage() {
                 </ul>
             </Panel>
 
-            <StatusCard status={profile.isVerified ? "connected" : "unverified"}>
+            <StatusCard
+                status={
+                    profile.ringStatus !== "connected"
+                        ? profile.ringStatus
+                        : profile.isVerified
+                          ? "connected"
+                          : "unverified"
+                }
+            >
                 {!profile.isVerified && <DomainVerificationCheck hasDomain={Boolean(profile.domain)} />}
             </StatusCard>
         </section>

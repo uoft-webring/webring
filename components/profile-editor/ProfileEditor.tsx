@@ -42,6 +42,8 @@ const saveStatusText: Record<SaveStatus, string> = {
     error: "Couldn't save. Try again.",
 };
 
+const listFormat = new Intl.ListFormat("en", { type: "conjunction" });
+
 /**
  * Edits autosave a second after the last change. Each change is validated locally first so
  * invalid input shows inline instead of round-tripping; the server validates again regardless.
@@ -54,7 +56,9 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
 
     const persist = async (input: ProfileInput, explicit = false) => {
         setStatus("saving");
-        const { error } = await updateProfile(input);
+        const { error } = await updateProfile(input).catch(() => ({
+            error: "We couldn't reach the server. Please try again.",
+        }));
         if (error !== null) {
             setStatus("error");
             toast.error(error, { duration: 2000 });
@@ -97,6 +101,13 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
         await autosave.flush();
         await persist(valid, true);
     };
+
+    // Mirrors the Edit step's `done` check in app/dashboard/layout.tsx
+    const missingForStep = [
+        !values.domain && "portfolio link",
+        !values.graduationYear && "graduation year",
+        !values.program && "program",
+    ].filter((field) => field !== false);
 
     const preview = (
         <ProfileCard profile={{ ...initialProfile, ...values }} className="mt-0" linked={false} />
@@ -279,6 +290,11 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                 </div>
             </FormSection>
 
+            {missingForStep.length > 0 && (
+                <p className="text-muted-foreground text-sm">
+                    Add your {listFormat.format(missingForStep)} to finish this step.
+                </p>
+            )}
             <div className="flex items-center gap-4 border-t pt-5">
                 <p aria-live="polite" className="text-muted-foreground text-sm">
                     {saveStatusText[status]}

@@ -3,8 +3,12 @@ import { getPublicProfiles } from "@/lib/profiles/queries";
 import { collectTopics, topicPath, type TopicKind } from "@/lib/profiles/topics";
 import { profileUrl, SITE_ORIGIN } from "@/lib/site";
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const { data: profiles } = await getPublicProfiles();
+    const { data: profiles, error } = await getPublicProfiles();
+    // Throwing keeps the last good sitemap instead of caching one without members
+    if (error !== null) throw new Error(error);
     const now = new Date();
     const topicRoutes = (kind: TopicKind) =>
         collectTopics(profiles ?? [], kind).map((topic) => ({

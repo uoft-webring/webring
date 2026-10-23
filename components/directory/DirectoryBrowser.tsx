@@ -131,8 +131,16 @@ export function DirectoryBrowser({
                                     😕
                                 </span>
                             </div>
-                            <p className="text-sm">No profiles match your search or filters.</p>
-                            <span className="text-xs italic opacity-70">Try changing filters or search terms</span>
+                            {profiles.length === 0 ? (
+                                <p className="text-sm">No members yet.</p>
+                            ) : (
+                                <>
+                                    <p className="text-sm">No profiles match your search or filters.</p>
+                                    <span className="text-xs italic opacity-70">
+                                        Try changing filters or search terms
+                                    </span>
+                                </>
+                            )}
                         </div>
                     )}
                     {visibleCount < filtered.length && (

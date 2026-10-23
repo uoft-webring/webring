@@ -116,4 +116,9 @@ describe("profileInputSchema", () => {
     it("rejects programs with unexpected characters", () => {
         expect(parse({ program: "<script>" }).success).toBe(false);
     });
+
+    it("drops duplicate tags (the picker prevents them, but the action takes any input)", () => {
+        const parsed = parse({ tags: ["Go", "Go"] });
+        expect(parsed.success && parsed.data.tags).toEqual(["Go"]);
+    });
 });

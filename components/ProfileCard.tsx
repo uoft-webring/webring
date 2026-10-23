@@ -5,7 +5,7 @@ import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain, profilePath, profileUrl } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { ExternalLinkPill } from "./ExternalLinkPill";
-import { GitHubIcon } from "./GitHubIcon";
+import { FiGithub } from "react-icons/fi";
 import { OpenToWorkBadge } from "./OpenToWorkBadge";
 import { ShareButton } from "./ShareButton";
 import { SkillTag } from "./SkillTag";
@@ -32,8 +32,9 @@ export function ProfileCard({
                 className
             )}
         >
-            {/* Centred in any spare height (carousel slots share one min height), so short cards don't leave a gap above the links */}
-            <div className="flex w-full flex-1 flex-col items-center justify-center">
+            {/* Top-aligned so avatars and names line up across carousel cards; spare height (slots share one
+                min height) falls between the bio and the tags, which sit on the footer */}
+            <div className="flex w-full flex-1 flex-col items-center">
                 <Avatar
                     profile={profile}
                     className="ring-primary/20 size-20"
@@ -71,17 +72,18 @@ export function ProfileCard({
                         {profile.tagline}
                     </p>
                 )}
-
-                {profile.tags.length > 0 && (
-                    <div className="mt-4 flex flex-row flex-wrap justify-center gap-1.5">
-                        {profile.tags.map((tag) => (
-                            <SkillTag key={tag} tagName={tag} size="mini" className="text-sm" />
-                        ))}
-                    </div>
-                )}
             </div>
 
-            <div className="relative z-10 w-full pt-5">
+            {/* Tags sit on the footer, not in the centred block, so they line up across carousel cards */}
+            {profile.tags.length > 0 && (
+                <div className="mt-5 flex flex-row flex-wrap justify-center gap-1.5">
+                    {profile.tags.map((tag) => (
+                        <SkillTag key={tag} tagName={tag} size="mini" className="text-sm" />
+                    ))}
+                </div>
+            )}
+
+            <div className="relative z-10 w-full pt-4">
                 <div className="flex items-center gap-1 border-t pt-4">
                     {profile.domain && (
                         <ExternalLinkPill
@@ -96,7 +98,7 @@ export function ProfileCard({
                         // Label stays as (screen-reader) link text; visually it's an icon button
                         <ExternalLinkPill
                             href={`https://github.com/${profile.githubUsername}`}
-                            icon={<GitHubIcon className="size-6" />}
+                            icon={<FiGithub className="size-6" />}
                             label={`${profile.githubUsername} on GitHub`}
                             fallbackLabel="GitHub"
                             className="text-muted-foreground hover:text-foreground hover:bg-muted/50 ml-auto size-11 justify-center bg-transparent p-0 [&>.truncate]:sr-only"

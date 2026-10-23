@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { updatePageContent } from "@/app/dashboard/actions";
 import { PageHeader } from "@/components/dashboard/Panel";
@@ -48,8 +48,11 @@ const STATUS_TEXT: Record<SaveStatus, string> = {
     idle: "",
     saving: "Saving…",
     saved: "All changes saved",
-    error: "Couldn't save. Check the fields above and try again.",
+    error: "Couldn't save. We'll try again on your next change.",
 };
+
+// An invalid field blocks the whole save, so say so instead of showing the last save's status
+const INVALID_TEXT = "Not saved yet. Fix the highlighted fields.";
 
 function toEditorState(content: PageContent): EditorState {
     return {
@@ -150,6 +153,10 @@ function ItemControls({
     onMove?: (to: number) => void;
     onRemove: () => void;
 }): React.JSX.Element {
+    const upRef = useRef<HTMLButtonElement>(null);
+    const downRef = useRef<HTMLButtonElement>(null);
+
+    // A move to either end disables the button just pressed, which would drop focus to <body>
     return (
         <div className="flex gap-1">
             {onMove && (
@@ -158,7 +165,11 @@ function ItemControls({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => onMove(index - 1)}
+                        ref={upRef}
+                        onClick={() => {
+                            if (index - 1 === 0) downRef.current?.focus();
+                            onMove(index - 1);
+                        }}
                         disabled={index === 0}
                         aria-label={`Move ${label} up`}
                     >
@@ -168,7 +179,11 @@ function ItemControls({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => onMove(index + 1)}
+                        ref={downRef}
+                        onClick={() => {
+                            if (index + 1 === count - 1) upRef.current?.focus();
+                            onMove(index + 1);
+                        }}
                         disabled={index === count - 1}
                         aria-label={`Move ${label} down`}
                     >
@@ -217,7 +232,7 @@ export function PageEditor({
 
     const autosave = useAutosave<PageContent>(async (content) => {
         setStatus("saving");
-        const { error } = await updatePageContent(content);
+        const { error } = await updatePageContent(content).catch(() => ({ error: "unreachable" }));
         setStatus(error === null ? "saved" : "error");
     }, AUTOSAVE_DELAY_MS);
 
@@ -243,6 +258,8 @@ export function PageEditor({
 
     const removeItem = (list: "projects" | "experience" | "links", key: string) => {
         update({ ...state, [list]: (state[list] as { key: string }[]).filter((item) => item.key !== key) });
+        // The removed item took the focused button with it: hand focus to the section's Add button
+        requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-add="${list}"]`)?.focus());
     };
 
     return (
@@ -263,7 +280,7 @@ export function PageEditor({
                     }
                 />
                 <p role="status" aria-live="polite" className="text-muted-foreground min-h-5 text-sm">
-                    {STATUS_TEXT[status]}
+                    {Object.keys(errors).length > 0 ? INVALID_TEXT : STATUS_TEXT[status]}
                 </p>
             </div>
 
@@ -381,6 +398,7 @@ export function PageEditor({
                     type="button"
                     variant="secondary"
                     className="mt-4"
+                    data-add="projects"
                     disabled={state.projects.length >= MAX_PROJECTS}
                     onClick={() =>
                         update({
@@ -505,6 +523,7 @@ export function PageEditor({
                     type="button"
                     variant="secondary"
                     className="mt-4"
+                    data-add="experience"
                     disabled={state.experience.length >= MAX_EXPERIENCE}
                     onClick={() =>
                         update({
@@ -582,6 +601,7 @@ export function PageEditor({
                     type="button"
                     variant="secondary"
                     className="mt-4"
+                    data-add="links"
                     disabled={state.links.length >= MAX_LINKS}
                     onClick={() =>
                         update({

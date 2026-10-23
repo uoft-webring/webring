@@ -48,18 +48,25 @@ const HEAD_ELEMENTS = new Set(["html", "head", "meta", "link", "base", "title", 
 // A head is never this big; it bounds the work on a hostile page
 const MAX_SCAN = 256 * 1024;
 
+// Case-insensitive indexOf. Searching a lowercased copy would drift: some characters (e.g. "İ")
+// change length when lowercased, so its indices don't line up with the original
+function indexOfIgnoreCase(haystack: string, needle: string, from: number): number {
+    const pattern = new RegExp(needle.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&"), "gi");
+    pattern.lastIndex = from;
+    return pattern.exec(haystack)?.index ?? -1;
+}
+
 /** `html` without comments and raw-text elements, in one forward pass. An unclosed one runs to the end. */
 function withoutInert(html: string): string {
-    const lower = html.toLowerCase();
     let kept = "";
     let position = 0;
     INERT_START.lastIndex = 0;
     for (let match = INERT_START.exec(html); match; match = INERT_START.exec(html)) {
         kept += html.slice(position, match.index);
         const closer = match[1] ? `</${match[1].toLowerCase()}` : "-->";
-        const closeAt = lower.indexOf(closer, INERT_START.lastIndex);
+        const closeAt = indexOfIgnoreCase(html, closer, INERT_START.lastIndex);
         if (closeAt === -1) return kept;
-        position = match[1] ? lower.indexOf(">", closeAt) + 1 || html.length : closeAt + closer.length;
+        position = match[1] ? html.indexOf(">", closeAt) + 1 || html.length : closeAt + closer.length;
         INERT_START.lastIndex = position;
     }
     return kept + html.slice(position);
@@ -133,12 +140,14 @@ export async function isUrlReachable(url: string): Promise<boolean> {
     return get !== null && get.status < 400;
 }
 
-const WIDGET_LINK = /uoftwebring\.com\/redirect\?([^"'\s<>`]*)/gi;
+// The lookbehind keeps look-alike hosts out (evil-uoftwebring.com, notuoftwebring.com)
+const WIDGET_LINK = /(?<![\w.-])(?:www\.)?uoftwebring\.com\/redirect\?([^"'\s<>`]*)/gi;
 
 /** Whether `html` links to both the previous and next member from `ringId`. */
 export function hasRingWidget(html: string, ringId: number): boolean {
     const found = new Set<string>();
-    for (const match of html.matchAll(WIDGET_LINK)) {
+    // A commented-out widget, or one written by a script, isn't a working widget
+    for (const match of withoutInert(html).matchAll(WIDGET_LINK)) {
         const params = new URLSearchParams(match[1].replaceAll("&amp;", "&"));
         const nav = params.get("nav");
         if ((nav === "prev" || nav === "next") && params.get("id") === String(ringId)) found.add(nav);

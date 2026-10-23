@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { toast } from "sonner";
 import "prismjs/themes/prism-tomorrow.css";
 import { Button } from "./ui/button";
 
@@ -10,7 +11,12 @@ export function CodeBlock({ code, html }: { code: string; html: string }): React
     const [copied, setCopied] = useState(false);
 
     const copy = async () => {
-        await navigator.clipboard.writeText(code);
+        try {
+            await navigator.clipboard.writeText(code);
+        } catch {
+            toast.error("We're sorry! Something went wrong. Please try again later.", { duration: 2000 });
+            return;
+        }
         setCopied(true);
         setTimeout(() => setCopied(false), 1200);
     };

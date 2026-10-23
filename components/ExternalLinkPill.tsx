@@ -36,7 +36,7 @@ export function ExternalLinkPill({
                     {icon}
                 </span>
             )}
-            <span className="truncate">{label.length <= 30 ? label : fallbackLabel}</span>
+            <span className="truncate">{label.length <= 40 ? label : fallbackLabel}</span>
         </a>
     );
 }
