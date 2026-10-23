@@ -35,18 +35,39 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
     }
 }
 
+// These run on member-supplied HTML, so every pattern must stay linear: no two parts may be able to
+// match the same characters (that backtracks catastrophically on hostile input).
 // Opening tags, with quoted attribute values consumed whole so a `<meta` inside one isn't a tag
-const TAG = /<([a-zA-Z][^\s/>]*)((?:[^>"']|"[^"]*"|'[^']*')*)>/g;
-// Attribute names per the HTML tokenizer: anything up to whitespace, quotes, `>`, `/` or `=`
-const ATTRIBUTE = /([^\s"'>\/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
-// Text a browser never parses as tags: a <meta> inside these isn't a real meta element
-const INERT = /<!--[\s\S]*?-->|<(script|style|textarea|title|template|noscript|xmp)\b[\s\S]*?<\/\1\s*>/gi;
+const TAG = /<([a-zA-Z][^\s/<>]*)((?:[^<>"']|"[^"]*"|'[^']*')*)>/g;
+// Attribute names per the HTML tokenizer, starting at a boundary: up to whitespace, quotes, `>`, `/` or `=`
+const ATTRIBUTE = /(?<![^\s"'>/=])([^\s"'>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
+// Starts of text a browser never parses as tags: a <meta> inside these isn't a real meta element
+const INERT_START = /<!--|<(script|style|textarea|title|template|noscript|xmp)\b/gi;
 // Any other element ends the head, as it does in a browser
 const HEAD_ELEMENTS = new Set(["html", "head", "meta", "link", "base", "title", "style", "script", "noscript", "template"]);
+// A head is never this big; it bounds the work on a hostile page
+const MAX_SCAN = 256 * 1024;
+
+/** `html` without comments and raw-text elements, in one forward pass. An unclosed one runs to the end. */
+function withoutInert(html: string): string {
+    const lower = html.toLowerCase();
+    let kept = "";
+    let position = 0;
+    INERT_START.lastIndex = 0;
+    for (let match = INERT_START.exec(html); match; match = INERT_START.exec(html)) {
+        kept += html.slice(position, match.index);
+        const closer = match[1] ? `</${match[1].toLowerCase()}` : "-->";
+        const closeAt = lower.indexOf(closer, INERT_START.lastIndex);
+        if (closeAt === -1) return kept;
+        position = match[1] ? lower.indexOf(">", closeAt) + 1 || html.length : closeAt + closer.length;
+        INERT_START.lastIndex = position;
+    }
+    return kept + html.slice(position);
+}
 
 /** Attributes of each <meta> in the document's real head, in order. */
 function* headMetaTags(html: string): Generator<Map<string, string>> {
-    const cleaned = html.replace(INERT, "");
+    const cleaned = withoutInert(html.slice(0, MAX_SCAN));
     const headEnd = cleaned.search(/<\/head\s*>/i);
     for (const [, tagName, rawAttributes] of (headEnd === -1 ? cleaned : cleaned.slice(0, headEnd)).matchAll(TAG)) {
         const name = tagName.toLowerCase();

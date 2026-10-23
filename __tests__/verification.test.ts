@@ -95,5 +95,38 @@ describe("hasVerificationMetaTag", () => {
         const html = `<html><head><!-- hi --><script>var a = "<b>";</script><meta name="uoft-webring" content="${value}"></head><body></body></html>`;
         expect(hasVerificationMetaTag(html, value)).toBe(true);
     });
+
+    it("stays fast on hostile pages built to make the parser backtrack", () => {
+        const big = 256 * 1024;
+        for (const html of [
+            "<a".repeat(big / 2),
+            '<a"'.repeat(big / 3),
+            "<a '".repeat(big / 4),
+            `<meta ${"x".repeat(big)}`,
+            `<meta a=${"=".repeat(big)}`,
+            "<script ".repeat(big / 8),
+            "<!-- ".repeat(big / 5),
+            "</script>".repeat(big / 9),
+            `<meta name="uoft-webring" content="${"x".repeat(big)}`,
+        ]) {
+            const start = performance.now();
+            hasVerificationMetaTag(html + "x".repeat(1024 * 1024), value);
+            expect(performance.now() - start, html.slice(0, 12)).toBeLessThan(500);
+        }
+    });
+
+    it("treats an unclosed comment or script as running to the end", () => {
+        expect(hasVerificationMetaTag(`<!-- <meta name="uoft-webring" content="${value}">`, value)).toBe(false);
+        expect(hasVerificationMetaTag(`<script> <meta name="uoft-webring" content="${value}">`, value)).toBe(false);
+        expect(hasVerificationMetaTag(`<script></script><meta name="uoft-webring" content="${value}">`, value)).toBe(true);
+    });
+
+    it("accepts a typical generated page head", () => {
+        const html = `<!DOCTYPE html><HTML lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="preload" href="/_next/static/media/font.woff2" as="font" crossorigin=""/><script src="/_next/static/chunks/main.js" async=""></script>
+<title>Jane | Portfolio</title><meta property="og:image" content="https://jane.dev/og.png?a=1&amp;b=2"/>
+<META NAME="uoft-webring" CONTENT="${value}" /><noscript><img src="x"></noscript></head><body><div>hi</div></body></HTML>`;
+        expect(hasVerificationMetaTag(html, value)).toBe(true);
+    });
 });
 
