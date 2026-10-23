@@ -35,12 +35,31 @@ describe("inviteCandidateSchema", () => {
         expect(inviteCandidateSchema.safeParse({ ...candidate, website: "javascript:alert(1)" }).success).toBe(false);
         expect(inviteCandidateSchema.safeParse({ ...candidate, githubLogin: "-bad" }).success).toBe(false);
     });
+
+    it("only accepts public http(s) websites", () => {
+        for (const website of ["ftp://x.com", "https://x.com@evil.com", "http://localhost", "https://10.0.0.1", "x"]) {
+            expect(inviteCandidateSchema.safeParse({ ...candidate, website }).success, website).toBe(false);
+        }
+        expect(inviteCandidateSchema.parse({ ...candidate, website: "http://Jane.Dev/blog" }).website).toBe(
+            "http://Jane.Dev/blog"
+        );
+    });
+
+    it("truncates long names instead of dropping the candidate", () => {
+        expect(inviteCandidateSchema.parse({ ...candidate, name: "x".repeat(200) }).name).toHaveLength(80);
+    });
 });
 
 describe("siteKey", () => {
     it("treats www, scheme, case and paths as the same site", () => {
         expect(siteKey("https://www.Jane.dev/blog")).toBe("jane.dev");
         expect(siteKey("jane.dev")).toBe("jane.dev");
+    });
+
+    it("tells people apart on shared hosts", () => {
+        expect(siteKey("https://github.com/Jane/portfolio")).toBe("github.com/jane");
+        expect(siteKey("https://github.com/bob")).not.toBe(siteKey("https://github.com/jane"));
+        expect(siteKey("https://linktr.ee/")).toBeNull();
     });
 
     it("returns null for garbage", () => {

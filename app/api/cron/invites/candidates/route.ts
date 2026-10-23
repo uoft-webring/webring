@@ -26,11 +26,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Im
         return NextResponse.json(fail("Could not load members."), { status: 500 });
     }
     const memberEmails = new Set(members.map((member) => String(member.email ?? "").toLowerCase()));
-    const memberSites = new Set(members.map((member) => siteKey(String(member.domain ?? ""))));
-    const memberLogins = new Set(members.map((member) => String(member.github_url ?? "").toLowerCase()));
+    const memberSites = new Set(members.flatMap((member) => siteKey(String(member.domain ?? "")) ?? []));
+    // Legacy rows can carry stray whitespace (the column check is NOT VALID)
+    const memberLogins = new Set(members.map((member) => String(member.github_url ?? "").trim().toLowerCase()));
     const isMember = (candidate: InviteCandidate) =>
         memberEmails.has(candidate.email) ||
-        memberSites.has(siteKey(candidate.website)) ||
+        memberSites.has(siteKey(candidate.website) ?? "") ||
         memberLogins.has(candidate.githubLogin.toLowerCase());
     const fresh = candidates.filter((candidate) => !isMember(candidate));
 

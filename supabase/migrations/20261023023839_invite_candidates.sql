@@ -2,10 +2,10 @@
 -- after an owner approves them (set status to 'approved' in Studio). Server only.
 create table public.invite_candidate (
     id uuid primary key default gen_random_uuid(),
-    github_login text not null unique,
+    github_login text not null,
     name text,
-    -- Public GitHub profile email; unique so nobody is re-added under a second account
-    email text not null unique,
+    -- Public GitHub profile email
+    email text not null,
     website text not null,
     bio text,
     status text not null default 'pending'
@@ -14,6 +14,10 @@ create table public.invite_candidate (
     invited_at timestamptz
 );
 comment on table public.invite_candidate is 'Ring invite candidates; approve by setting status to approved';
+
+-- Case-insensitive, so nobody is re-added under a renamed login or a differently-cased email
+create unique index invite_candidate_github_login_key on public.invite_candidate (lower(github_login));
+create unique index invite_candidate_email_key on public.invite_candidate (lower(email));
 
 alter table public.invite_candidate enable row level security;
 revoke all on table public.invite_candidate from anon, authenticated;
@@ -46,6 +50,12 @@ as $$
         select c.id
         from public.invite_candidate c
         where c.status = 'approved'
+          -- They may have joined since they were found
+          and not exists (
+              select 1 from public.profile p
+              where lower(p.email) = lower(c.email)
+                 or lower(btrim(p.github_url)) = lower(c.github_login)
+          )
         order by c.found_at
         limit max_count
         for update skip locked

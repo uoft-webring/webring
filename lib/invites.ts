@@ -10,23 +10,38 @@ export function mentionsUofT(bio: string): boolean {
     return /\b(university of toronto|uoft|u of t|utoronto|utsc|utm)\b/i.test(bio);
 }
 
+// GitHub lets people write "jane.dev" without a scheme; anything with another scheme stays invalid
 function withScheme(url: string): string {
-    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    return /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
+}
+
+/** A public website: http(s), a real hostname (no localhost or bare IPs), no credentials. */
+function isPublicWebsite(raw: string): boolean {
+    try {
+        const url = new URL(raw);
+        return (
+            ["http:", "https:"].includes(url.protocol) &&
+            !url.username &&
+            !url.password &&
+            /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(url.hostname)
+        );
+    } catch {
+        return false;
+    }
 }
 
 /** What the discovery Action posts per GitHub user. */
 export const inviteCandidateSchema = z.object({
     githubLogin: z.string().regex(/^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/),
-    name: z.string().trim().max(80).nullable(),
-    email: z.email().max(254).transform((email) => email.toLowerCase()),
-    // GitHub lets people write "jane.dev" without a scheme
-    website: z
+    // Truncated rather than rejected: a long display name shouldn't drop the candidate
+    name: z
         .string()
         .trim()
-        .min(1)
-        .max(255)
-        .transform(withScheme)
-        .pipe(z.url({ protocol: /^https?$/ })),
+        .transform((name) => name.slice(0, 80))
+        .nullable(),
+    email: z.email().max(254).transform((email) => email.toLowerCase()),
+    // GitHub lets people write "jane.dev" without a scheme
+    website: z.string().trim().min(1).max(255).transform(withScheme).refine(isPublicWebsite, "Not a public website"),
     bio: z.string().max(500).refine(mentionsUofT, "Bio doesn't mention UofT"),
 });
 
@@ -34,10 +49,31 @@ export const inviteCandidatesSchema = z.array(z.unknown()).max(1000);
 
 export type InviteCandidate = z.infer<typeof inviteCandidateSchema>;
 
-/** "https://www.Jane.dev/blog" -> "jane.dev", to spot people who are already in the ring. */
+// Hosts where many people's pages share one hostname: compare their first path segment too
+const SHARED_HOSTS = new Set([
+    "github.com",
+    "gitlab.com",
+    "linktr.ee",
+    "linkedin.com",
+    "medium.com",
+    "bento.me",
+    "about.me",
+    "x.com",
+    "twitter.com",
+    "instagram.com",
+]);
+
+/**
+ * "https://www.Jane.dev/blog" -> "jane.dev", "https://github.com/Jane/x" -> "github.com/jane", to
+ * spot people who are already in the ring.
+ */
 export function siteKey(url: string): string | null {
     try {
-        return new URL(withScheme(url.trim())).hostname.toLowerCase().replace(/^www\./, "");
+        const parsed = new URL(withScheme(url.trim()));
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, "");
+        if (!SHARED_HOSTS.has(host)) return host;
+        const owner = parsed.pathname.split("/")[1]?.toLowerCase();
+        return owner ? `${host}/${owner}` : null;
     } catch {
         return null;
     }
@@ -52,7 +88,7 @@ export function inviteEmail(
     const pitch = `The UofT Webring links University of Toronto students' personal sites together, so visitors can hop from one to the next. We came across ${displayDomain(candidate.website)} through your GitHub profile and thought it would fit right in.`;
     const how = "Joining takes a couple of minutes: sign up with your UofT email, add your site, and you're in.";
     const footer =
-        "We found your email on your public GitHub profile. This is the only email we'll send you unless you join.";
+        "Sent by the UofT Webring (uoftwebring.com), a student-run project. We found your email on your public GitHub profile. This is the only email we'll send you unless you join.";
 
     const text = [
         `Hi ${firstName},`,

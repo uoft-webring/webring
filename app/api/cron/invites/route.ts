@@ -40,18 +40,27 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<In
 
         const unsubscribe = unsubscribeUrls("invite", invite.id);
         const message = inviteEmail(invite, { join: siteUrl("/signup"), site: siteUrl("/"), unsubscribe: unsubscribe.page });
-        const result = await sendEmail({ to: invite.email, ...message, oneClickUnsubscribeUrl: unsubscribe.oneClick });
+        const outcome = await sendEmail({
+            to: invite.email,
+            ...message,
+            oneClickUnsubscribeUrl: unsubscribe.oneClick,
+            idempotencyKey: `invite-${invite.id}`,
+        });
 
-        if (result.error === null) {
+        if (outcome === "sent") {
             sent++;
             continue;
         }
         failed++;
-        // Back to approved so the next run retries; they were never actually emailed
+        // Maybe delivered: leave it as invited. We promise strangers a single email
+        if (outcome === "unknown") continue;
+        // Definitely not sent: back to approved so the next run retries, unless the owner has
+        // changed the status in the meantime
         const { error: releaseError } = await admin
             .from("invite_candidate")
             .update({ status: "approved", invited_at: null })
-            .eq("id", invite.id);
+            .eq("id", invite.id)
+            .eq("status", "invited");
         if (releaseError) console.error("[invites] Failed to release a claim:", releaseError.message);
     }
 

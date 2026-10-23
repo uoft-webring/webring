@@ -11,7 +11,10 @@
 const QUERIES = ['"University of Toronto" in:bio', "UofT in:bio", "utoronto in:bio"];
 // GitHub search stops at 1000 results per query
 const MAX_PAGES = 10;
-const POST_CHUNK = 500;
+// Import as we go, so a failure late in the run keeps what was already found
+const POST_CHUNK = 100;
+// Waiting longer than this for a rate-limit reset isn't worth it; the next monthly run picks up
+const MAX_RATE_LIMIT_WAIT_MS = 15 * 60 * 1000;
 // Same check the server makes; filtering here saves a profile lookup per non-match
 const UOFT = /\b(university of toronto|uoft|u of t|utoronto|utsc|utm)\b/i;
 
@@ -27,17 +30,32 @@ const { GITHUB_TOKEN, CRON_SECRET, SITE_URL = "https://uoftwebring.com" } = proc
 if (!GITHUB_TOKEN) throw new Error("GITHUB_TOKEN is required");
 if (!dryRun && !CRON_SECRET) throw new Error("CRON_SECRET is required (or pass --dry-run)");
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** How long GitHub asks us to wait, from `retry-after` or the rate-limit reset time. */
+function rateLimitWaitMs(response) {
+    const retryAfter = Number(response.headers.get("retry-after"));
+    if (retryAfter > 0) return retryAfter * 1000;
+    if (response.headers.get("x-ratelimit-remaining") === "0") {
+        return Number(response.headers.get("x-ratelimit-reset")) * 1000 - Date.now() + 1000;
+    }
+    return 0;
+}
+
 // GitHub drops connections and rate-limits now and then over a run of ~1000 requests
 async function fetchWithRetry(url, init) {
     for (let attempt = 1; ; attempt++) {
         try {
             const response = await fetch(url, init);
-            const retryable = response.status >= 500 || response.status === 403 || response.status === 429;
-            if (!retryable || attempt === 4) return response;
+            const limited = response.status === 403 || response.status === 429;
+            if (!(limited || response.status >= 500) || attempt === 4) return response;
+            const wait = limited ? rateLimitWaitMs(response) : 0;
+            if (wait > MAX_RATE_LIMIT_WAIT_MS) return response;
+            await sleep(Math.max(wait, 2000 * 2 ** attempt));
         } catch (error) {
             if (attempt === 4) throw error;
+            await sleep(2000 * 2 ** attempt);
         }
-        await new Promise((resolve) => setTimeout(resolve, 2000 * 2 ** attempt));
     }
 }
 
@@ -47,6 +65,8 @@ async function publicEmail(login) {
     const response = await fetchWithRetry(`https://api.github.com/users/${encodeURIComponent(login)}`, {
         headers: { authorization: `Bearer ${GITHUB_TOKEN}`, accept: "application/vnd.github+json" },
     });
+    // Renamed or deleted since the search: just skip them
+    if (response.status === 404) return null;
     if (!response.ok) throw new Error(`GitHub profile lookup failed: ${response.status}`);
     return (await response.json()).email || null;
 }
@@ -78,39 +98,51 @@ for (const q of QUERIES) {
     }
 }
 
-const candidates = [];
-const users = [...matches.values()];
-// A few at a time to stay clear of GitHub's secondary rate limits
-for (let i = 0; i < users.length; i += 5) {
-    const batch = users.slice(i, i + 5);
-    const emails = await Promise.all(batch.map((user) => publicEmail(user.login)));
-    batch.forEach((user, index) => {
-        if (!emails[index]) return;
-        candidates.push({
-            githubLogin: user.login,
-            name: user.name || null,
-            email: emails[index],
-            website: user.websiteUrl,
-            bio: user.bio.slice(0, 500),
-        });
-    });
-}
-console.log(
-    `Scanned ${scanned} profiles; ${users.length} mention UofT and list a website; ${candidates.length} of those have a public email.`
-);
-if (dryRun) process.exit(0);
-
 const totals = { received: 0, valid: 0, alreadyMembers: 0, added: 0 };
-for (let i = 0; i < candidates.length; i += POST_CHUNK) {
+let pending = [];
+let withEmail = 0;
+
+async function flush() {
+    if (dryRun || pending.length === 0) return;
     const response = await fetch(new URL("/api/cron/invites/candidates", SITE_URL), {
         method: "POST",
         headers: { authorization: `Bearer ${CRON_SECRET}`, "content-type": "application/json" },
-        body: JSON.stringify(candidates.slice(i, i + POST_CHUNK)),
+        body: JSON.stringify(pending),
     });
     const { data, error } = await response.json();
     if (!response.ok || error) throw new Error(`Import failed: ${response.status} ${error}`);
     for (const key of Object.keys(totals)) totals[key] += data[key];
+    pending = [];
 }
-console.log(
-    `Sent ${totals.received}; ${totals.valid} passed validation; ${totals.alreadyMembers} already in the ring; ${totals.added} new pending candidates.`
-);
+
+const users = [...matches.values()];
+try {
+    // A few at a time to stay clear of GitHub's secondary rate limits
+    for (let i = 0; i < users.length; i += 5) {
+        const batch = users.slice(i, i + 5);
+        const emails = await Promise.all(batch.map((user) => publicEmail(user.login)));
+        batch.forEach((user, index) => {
+            if (!emails[index]) return;
+            withEmail++;
+            pending.push({
+                githubLogin: user.login,
+                name: user.name || null,
+                email: emails[index],
+                website: user.websiteUrl,
+                bio: user.bio.slice(0, 500),
+            });
+        });
+        if (pending.length >= POST_CHUNK) await flush();
+    }
+    await flush();
+} finally {
+    // Counts only, even when the run fails part-way
+    console.log(
+        `Scanned ${scanned} profiles; ${users.length} mention UofT and list a website; ${withEmail} of those have a public email.`
+    );
+    if (!dryRun) {
+        console.log(
+            `Sent ${totals.received}; ${totals.valid} passed validation; ${totals.alreadyMembers} already in the ring; ${totals.added} new pending candidates.`
+        );
+    }
+}
