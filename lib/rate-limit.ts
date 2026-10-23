@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
+import { clientIpFrom } from "@/lib/client-ip";
 import { createAdminClient } from "@/lib/supabase/server";
 
 export type RateLimit = { name: string; max: number; windowSeconds: number };
@@ -37,25 +38,7 @@ export function bucketKey(limit: RateLimit, subject: string): string {
     return `${limit.name}:${digest}`;
 }
 
-/**
- * The client from the first hop of `x-forwarded-for` (Vercel sets it to the real address): an IPv4
- * address, or an IPv6 /64, since one user usually controls a whole /64.
- */
-export function clientIpFrom(forwardedFor: string | null): string | null {
-    const ip = forwardedFor?.split(",")[0]?.trim().toLowerCase();
-    if (!ip) return null;
-    if (!ip.includes(":")) return ip;
-    const mapped = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-    if (mapped) return mapped[1];
-    const [head, tail] = ip.split("::");
-    const headParts = head ? head.split(":") : [];
-    const tailParts = tail ? tail.split(":") : [];
-    const groups = [...headParts, ...Array(Math.max(0, 8 - headParts.length - tailParts.length)).fill("0"), ...tailParts];
-    return `${groups
-        .slice(0, 4)
-        .map((group) => group.replace(/^0+(?=.)/, ""))
-        .join(":")}::/64`;
-}
+export { clientIpFrom } from "@/lib/client-ip";
 
 /** Counts one hit against `limit` for `subject`; false once the subject is over the limit. */
 export async function consumeRateLimit(limit: RateLimit, subject: string): Promise<boolean> {
