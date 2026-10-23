@@ -9,9 +9,9 @@ import type { Experience } from "@/lib/validation";
  */
 export function ExperienceLine({ experience }: { experience: Experience[] }): React.JSX.Element {
     return (
-        <section className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-10" aria-labelledby="experience">
-            <h2 id="experience" className="mb-8 flex items-center gap-3 text-2xl font-bold sm:text-3xl">
-                <TrainFront className="h-7 w-7 text-(--profile-accent)" aria-hidden />
+        <section className="bg-card rounded-xl border p-6 sm:p-8" aria-labelledby="experience">
+            <h2 id="experience" className="mb-6 flex items-center gap-3 text-xl font-semibold">
+                <TrainFront className="size-6 text-(--profile-accent)" aria-hidden />
                 Experience
             </h2>
             <ol className="ml-2.5 space-y-10 border-l-4 border-(--profile-accent) pl-8">

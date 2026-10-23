@@ -1,11 +1,11 @@
 import Link from "next/link";
-import gitHubIcon from "@/icons/gitHub.svg";
-import portfolioIcon from "@/icons/portfolio.svg";
+import { Globe } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain, profilePath, profileUrl } from "@/lib/site";
 import { Avatar } from "./Avatar";
 import { ExternalLinkPill } from "./ExternalLinkPill";
+import { GitHubIcon } from "./GitHubIcon";
 import { OpenToWorkBadge } from "./OpenToWorkBadge";
 import { ShareButton } from "./ShareButton";
 import { SkillTag } from "./SkillTag";
@@ -82,24 +82,24 @@ export function ProfileCard({
             </div>
 
             <div className="relative z-10 w-full pt-5">
-                <div className="flex items-center gap-1 border-t pt-4 [&_img]:size-5">
+                <div className="flex items-center gap-1 border-t pt-4">
                     {profile.domain && (
                         <ExternalLinkPill
                             href={profile.domain}
-                            icon={portfolioIcon}
+                            icon={<Globe className="size-5.5" />}
                             label={displayDomain(profile.domain)}
                             fallbackLabel="Portfolio"
-                            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 mr-auto min-h-10 bg-transparent px-3 py-2 text-sm"
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 mr-auto min-h-11 bg-transparent px-3 py-2 text-base"
                         />
                     )}
                     {profile.githubUsername && (
                         // Label stays as (screen-reader) link text; visually it's an icon button
                         <ExternalLinkPill
                             href={`https://github.com/${profile.githubUsername}`}
-                            icon={gitHubIcon}
+                            icon={<GitHubIcon className="size-6" />}
                             label={`${profile.githubUsername} on GitHub`}
                             fallbackLabel="GitHub"
-                            className="hover:bg-muted/50 ml-auto size-10 justify-center bg-transparent p-0 [&>span]:sr-only"
+                            className="text-muted-foreground hover:text-foreground hover:bg-muted/50 ml-auto size-11 justify-center bg-transparent p-0 [&>.truncate]:sr-only"
                         />
                     )}
                     {profile.slug && (

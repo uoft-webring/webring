@@ -29,7 +29,10 @@ export function ExternalLinkPill({
             {icon && typeof icon === "object" && "src" in icon ? (
                 <Image src={icon} alt="" width={20} height={20} className="size-5 shrink-0" />
             ) : (
-                <span className="flex size-5 shrink-0 items-center justify-center" aria-hidden>
+                <span
+                    className="flex shrink-0 items-center justify-center [&>svg:not([class*='size-'])]:size-5"
+                    aria-hidden
+                >
                     {icon}
                 </span>
             )}

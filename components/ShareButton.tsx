@@ -45,9 +45,9 @@ export function ShareButton({
                 variant="ghost"
                 size="icon"
                 aria-label="Share profile"
-                className="size-10"
+                className="text-muted-foreground hover:text-foreground size-11"
             >
-                <Share2 className="size-5" aria-hidden />
+                <Share2 className="size-6" aria-hidden />
             </Button>
         );
     }

@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChartColumn, Check } from "lucide-react";
+import { ChartColumn, Check, PanelsTopLeft } from "lucide-react";
 import { cn } from "@/lib/cn";
 
 type Step = { id: string; title: string; hint: string; done: boolean };
+
+const SITE_LINKS = [
+    { href: "/dashboard/page", title: "Page", hint: "About, projects, experience", icon: PanelsTopLeft },
+    { href: "/dashboard/stats", title: "Stats", hint: "Visitors from the ring", icon: ChartColumn },
+];
 
 const linkBase =
     "group focus-visible:ring-ring/50 flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center outline-none transition-colors focus-visible:ring-[3px] md:flex-row md:gap-3 md:px-3 md:py-2.5 md:text-left";
@@ -22,7 +27,6 @@ function linkState(active: boolean): string {
  */
 export function DashboardNav({ steps }: { steps: Step[] }): React.JSX.Element {
     const pathname = usePathname();
-    const statsActive = pathname.startsWith("/dashboard/stats");
 
     return (
         <nav aria-label="Dashboard" className="flex flex-col gap-6">
@@ -30,8 +34,8 @@ export function DashboardNav({ steps }: { steps: Step[] }): React.JSX.Element {
                 <p className="text-muted-foreground hidden px-3 text-sm font-medium tracking-wide uppercase md:block">
                     Get on the ring
                 </p>
-                {/* Four equal columns on small screens, a column beside the content from md up */}
-                <ol className="grid grid-cols-4 gap-1 md:flex md:flex-col">
+                {/* Equal columns on small screens, a column beside the content from md up */}
+                <ol className="grid grid-cols-5 gap-1 md:flex md:flex-col">
                     {steps.map((step, index) => {
                         const active = pathname.startsWith(`/dashboard/${step.id}`);
                         return (
@@ -65,18 +69,23 @@ export function DashboardNav({ steps }: { steps: Step[] }): React.JSX.Element {
                             </li>
                         );
                     })}
-                    <li className="md:hidden">
-                        <Link
-                            href="/dashboard/stats"
-                            aria-current={statsActive ? "page" : undefined}
-                            className={cn(linkBase, linkState(statsActive))}
-                        >
-                            <span className="flex size-8 shrink-0 items-center justify-center">
-                                <ChartColumn className="size-5" aria-hidden />
-                            </span>
-                            <span className="text-sm font-medium">Stats</span>
-                        </Link>
-                    </li>
+                    {SITE_LINKS.map(({ href, title, icon: Icon }) => {
+                        const active = pathname.startsWith(href);
+                        return (
+                            <li key={href} className="md:hidden">
+                                <Link
+                                    href={href}
+                                    aria-current={active ? "page" : undefined}
+                                    className={cn(linkBase, linkState(active))}
+                                >
+                                    <span className="flex size-8 shrink-0 items-center justify-center">
+                                        <Icon className="size-5" aria-hidden />
+                                    </span>
+                                    <span className="text-sm font-medium">{title}</span>
+                                </Link>
+                            </li>
+                        );
+                    })}
                 </ol>
             </div>
 
@@ -84,19 +93,25 @@ export function DashboardNav({ steps }: { steps: Step[] }): React.JSX.Element {
                 <p className="text-muted-foreground px-3 text-sm font-medium tracking-wide uppercase">
                     Your site
                 </p>
-                <Link
-                    href="/dashboard/stats"
-                    aria-current={statsActive ? "page" : undefined}
-                    className={cn(linkBase, linkState(statsActive))}
-                >
-                    <span className="flex size-8 shrink-0 items-center justify-center">
-                        <ChartColumn className="size-5" aria-hidden />
-                    </span>
-                    <span className="flex flex-col">
-                        <span className="text-base font-medium">Stats</span>
-                        <span className="text-muted-foreground text-sm">Visitors from the ring</span>
-                    </span>
-                </Link>
+                {SITE_LINKS.map(({ href, title, hint, icon: Icon }) => {
+                    const active = pathname.startsWith(href);
+                    return (
+                        <Link
+                            key={href}
+                            href={href}
+                            aria-current={active ? "page" : undefined}
+                            className={cn(linkBase, linkState(active))}
+                        >
+                            <span className="flex size-8 shrink-0 items-center justify-center">
+                                <Icon className="size-5" aria-hidden />
+                            </span>
+                            <span className="flex flex-col">
+                                <span className="text-base font-medium">{title}</span>
+                                <span className="text-muted-foreground text-sm">{hint}</span>
+                            </span>
+                        </Link>
+                    );
+                })}
             </div>
         </nav>
     );

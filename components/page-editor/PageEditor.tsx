@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { updatePageContent } from "@/app/dashboard/actions";
+import { PageHeader } from "@/components/dashboard/Panel";
 import { Markdown } from "@/components/Markdown";
 import { useAutosave } from "@/components/profile-editor/useAutosave";
 import { Button } from "@/components/ui/button";
@@ -55,7 +56,11 @@ function toEditorState(content: PageContent): EditorState {
         about: content.about,
         accent: content.accent,
         projects: content.projects.map((project) => ({ ...project, key: crypto.randomUUID() })),
-        experience: content.experience.map((entry) => ({ ...entry, key: crypto.randomUUID(), ongoing: !entry.end })),
+        experience: content.experience.map((entry) => ({
+            ...entry,
+            key: crypto.randomUUID(),
+            ongoing: !entry.end,
+        })),
         links: content.links.map((link) => ({ ...link, key: crypto.randomUUID() })),
     };
 }
@@ -73,8 +78,17 @@ function toContent(state: EditorState): PageContent {
             .filter((project) => !isBlank([project.title, project.url, project.description]))
             .map(({ title, url, description }) => ({ title, url, description })),
         experience: state.experience
-            .filter((entry) => !isBlank([entry.role, entry.organization, entry.start, entry.end, entry.description]))
-            .map(({ role, organization, start, end, description }) => ({ role, organization, start, end, description })),
+            .filter(
+                (entry) =>
+                    !isBlank([entry.role, entry.organization, entry.start, entry.end, entry.description])
+            )
+            .map(({ role, organization, start, end, description }) => ({
+                role,
+                organization,
+                start,
+                end,
+                description,
+            })),
         links: state.links
             .filter((link) => !isBlank([link.label, link.url]))
             .map(({ label, url }) => ({ label, url })),
@@ -90,7 +104,9 @@ function validate(state: EditorState): { errors: Record<string, string>; content
     if (!parsed.success) {
         const byPath = pageFieldErrors(parsed.error);
         const savedKeys = {
-            projects: state.projects.filter((p) => !isBlank([p.title, p.url, p.description])).map((p) => p.key),
+            projects: state.projects
+                .filter((p) => !isBlank([p.title, p.url, p.description]))
+                .map((p) => p.key),
             experience: state.experience
                 .filter((e) => !isBlank([e.role, e.organization, e.start, e.end, e.description]))
                 .map((e) => e.key),
@@ -160,7 +176,13 @@ function ItemControls({
                     </Button>
                 </>
             )}
-            <Button type="button" variant="ghost" size="icon" onClick={onRemove} aria-label={`Remove ${label}`}>
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onRemove}
+                aria-label={`Remove ${label}`}
+            >
                 <Trash2 aria-hidden />
             </Button>
         </div>
@@ -181,7 +203,13 @@ function SectionHeading({ id, title, hint }: { id: string; title: string; hint: 
 const itemClass = "border-border flex flex-col gap-3 rounded-xl border p-4";
 
 /** Edits the member's public page. Changes autosave a second after the last edit, like the profile editor. */
-export function PageEditor({ initialContent, slug }: { initialContent: PageContent; slug: string }): React.JSX.Element {
+export function PageEditor({
+    initialContent,
+    slug,
+}: {
+    initialContent: PageContent;
+    slug: string;
+}): React.JSX.Element {
     const [state, setState] = useState<EditorState>(() => toEditorState(initialContent));
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<SaveStatus>("idle");
@@ -207,7 +235,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
     ) => {
         update({
             ...state,
-            [list]: (state[list] as EditorState[K][number][]).map((item) => (item.key === key ? { ...item, ...patch } : item)),
+            [list]: (state[list] as EditorState[K][number][]).map((item) =>
+                item.key === key ? { ...item, ...patch } : item
+            ),
         });
     };
 
@@ -217,15 +247,22 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
 
     return (
         <section className="flex max-w-3xl flex-col gap-12">
-            <div>
-                <h2>Customize your page</h2>
-                <p className="lg:text-base">
-                    Everything here appears on your public page.{" "}
-                    <Link href={profilePath(slug)} className="text-foreground underline underline-offset-4">
-                        View your page
-                    </Link>
-                </p>
-                <p role="status" aria-live="polite" className="text-muted-foreground mt-2 min-h-5 text-sm">
+            <div className="flex flex-col gap-2">
+                <PageHeader
+                    title="Customize your page"
+                    description={
+                        <>
+                            Everything here appears on your public page.{" "}
+                            <Link
+                                href={profilePath(slug)}
+                                className="text-foreground underline underline-offset-4"
+                            >
+                                View your page
+                            </Link>
+                        </>
+                    }
+                />
+                <p role="status" aria-live="polite" className="text-muted-foreground min-h-5 text-sm">
                     {STATUS_TEXT[status]}
                 </p>
             </div>
@@ -259,7 +296,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                 {aboutPreview ? (
                     <div
                         className="border-border min-h-48 rounded-md border p-4"
-                        style={{ "--profile-accent": ACCENT_COLORS[state.accent].color } as React.CSSProperties}
+                        style={
+                            { "--profile-accent": ACCENT_COLORS[state.accent].color } as React.CSSProperties
+                        }
                     >
                         {state.about.trim() ? (
                             <Markdown className="text-muted-foreground">{state.about}</Markdown>
@@ -272,7 +311,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                         id="about"
                         aria-labelledby="about-heading"
                         rows={10}
-                        placeholder={"I'm a second-year CS student who likes compilers and coffee.\n\n**Right now** I'm building…"}
+                        placeholder={
+                            "I'm a second-year CS student who likes compilers and coffee.\n\n**Right now** I'm building…"
+                        }
                         remaining={MAX_ABOUT_LENGTH - state.about.length}
                         value={state.about}
                         onChange={(event) => update({ ...state, about: event.target.value })}
@@ -297,7 +338,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                         id={`${project.key}-title`}
                                         placeholder="UofT Webring"
                                         value={project.title}
-                                        onChange={(e) => patchItem("projects", project.key, { title: e.target.value })}
+                                        onChange={(e) =>
+                                            patchItem("projects", project.key, { title: e.target.value })
+                                        }
                                         error={errors[`${project.key}.title`]}
                                     />
                                 </div>
@@ -305,7 +348,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                     label={project.title || "project"}
                                     index={index}
                                     count={state.projects.length}
-                                    onMove={(to) => update({ ...state, projects: move(state.projects, index, to) })}
+                                    onMove={(to) =>
+                                        update({ ...state, projects: move(state.projects, index, to) })
+                                    }
                                     onRemove={() => removeItem("projects", project.key)}
                                 />
                             </div>
@@ -324,7 +369,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                 rows={2}
                                 remaining={DESCRIPTION_LIMIT - project.description.length}
                                 value={project.description}
-                                onChange={(e) => patchItem("projects", project.key, { description: e.target.value })}
+                                onChange={(e) =>
+                                    patchItem("projects", project.key, { description: e.target.value })
+                                }
                                 error={errors[`${project.key}.description`]}
                             />
                         </li>
@@ -338,7 +385,10 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                     onClick={() =>
                         update({
                             ...state,
-                            projects: [...state.projects, { key: crypto.randomUUID(), title: "", url: "", description: "" }],
+                            projects: [
+                                ...state.projects,
+                                { key: crypto.randomUUID(), title: "", url: "", description: "" },
+                            ],
                         })
                     }
                 >
@@ -365,7 +415,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                             id={`${entry.key}-role`}
                                             placeholder="Software Engineering Intern"
                                             value={entry.role}
-                                            onChange={(e) => patchItem("experience", entry.key, { role: e.target.value })}
+                                            onChange={(e) =>
+                                                patchItem("experience", entry.key, { role: e.target.value })
+                                            }
                                             error={errors[`${entry.key}.role`]}
                                         />
                                     </div>
@@ -376,7 +428,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                             placeholder="Company, lab or club"
                                             value={entry.organization}
                                             onChange={(e) =>
-                                                patchItem("experience", entry.key, { organization: e.target.value })
+                                                patchItem("experience", entry.key, {
+                                                    organization: e.target.value,
+                                                })
                                             }
                                             error={errors[`${entry.key}.organization`]}
                                         />
@@ -396,7 +450,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                         id={`${entry.key}-start`}
                                         type="month"
                                         value={entry.start}
-                                        onChange={(e) => patchItem("experience", entry.key, { start: e.target.value })}
+                                        onChange={(e) =>
+                                            patchItem("experience", entry.key, { start: e.target.value })
+                                        }
                                         error={errors[`${entry.key}.start`]}
                                     />
                                 </div>
@@ -407,7 +463,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                         type="month"
                                         value={entry.end}
                                         disabled={entry.ongoing}
-                                        onChange={(e) => patchItem("experience", entry.key, { end: e.target.value })}
+                                        onChange={(e) =>
+                                            patchItem("experience", entry.key, { end: e.target.value })
+                                        }
                                         error={errors[`${entry.key}.end`]}
                                     />
                                 </div>
@@ -435,7 +493,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                 rows={2}
                                 remaining={DESCRIPTION_LIMIT - entry.description.length}
                                 value={entry.description}
-                                onChange={(e) => patchItem("experience", entry.key, { description: e.target.value })}
+                                onChange={(e) =>
+                                    patchItem("experience", entry.key, { description: e.target.value })
+                                }
                                 error={errors[`${entry.key}.description`]}
                             />
                         </li>
@@ -486,7 +546,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                         id={`${link.key}-label`}
                                         placeholder="LinkedIn"
                                         value={link.label}
-                                        onChange={(e) => patchItem("links", link.key, { label: e.target.value })}
+                                        onChange={(e) =>
+                                            patchItem("links", link.key, { label: e.target.value })
+                                        }
                                         error={errors[`${link.key}.label`]}
                                     />
                                 </div>
@@ -497,7 +559,9 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                                         type="url"
                                         placeholder="https://linkedin.com/in/you"
                                         value={link.url}
-                                        onChange={(e) => patchItem("links", link.key, { url: e.target.value })}
+                                        onChange={(e) =>
+                                            patchItem("links", link.key, { url: e.target.value })
+                                        }
                                         error={errors[`${link.key}.url`]}
                                     />
                                 </div>
@@ -520,7 +584,10 @@ export function PageEditor({ initialContent, slug }: { initialContent: PageConte
                     className="mt-4"
                     disabled={state.links.length >= MAX_LINKS}
                     onClick={() =>
-                        update({ ...state, links: [...state.links, { key: crypto.randomUUID(), label: "", url: "" }] })
+                        update({
+                            ...state,
+                            links: [...state.links, { key: crypto.randomUUID(), label: "", url: "" }],
+                        })
                     }
                 >
                     <Plus aria-hidden />
