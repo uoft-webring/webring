@@ -23,7 +23,7 @@ const description =
     "The UofT Webring in plain text: every University of Toronto student site in the ring, in one list.";
 
 export const metadata: Metadata = {
-    title: "UofT Webring (plain)",
+    title: { absolute: "UofT Webring (plain)" },
     description,
     alternates: { canonical: "/plain" },
     openGraph: { title: "UofT Webring (plain)", description, url: "/plain" },

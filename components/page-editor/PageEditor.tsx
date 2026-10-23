@@ -55,17 +55,19 @@ const STATUS_TEXT: Record<SaveStatus, string> = {
 // An invalid field blocks the whole save, so say so instead of showing the last save's status
 const INVALID_TEXT = "Not saved yet. Fix the highlighted fields.";
 
+// Saved items get positional keys: the editor renders on the server too, so a random key would
+// differ between server and browser and break the hydrated ids/htmlFor pairs
 function toEditorState(content: PageContent): EditorState {
     return {
         about: content.about,
         accent: content.accent,
-        projects: content.projects.map((project) => ({ ...project, key: crypto.randomUUID() })),
-        experience: content.experience.map((entry) => ({
+        projects: content.projects.map((project, index) => ({ ...project, key: `project-${index}` })),
+        experience: content.experience.map((entry, index) => ({
             ...entry,
-            key: crypto.randomUUID(),
+            key: `experience-${index}`,
             ongoing: !entry.end,
         })),
-        links: content.links.map((link) => ({ ...link, key: crypto.randomUUID() })),
+        links: content.links.map((link, index) => ({ ...link, key: `link-${index}` })),
     };
 }
 
@@ -227,6 +229,10 @@ export function PageEditor({
     slug: string;
 }): React.JSX.Element {
     const [state, setState] = useState<EditorState>(() => toEditorState(initialContent));
+    // Keys for added items. Not crypto.randomUUID: it only exists on https/localhost, so the editor
+    // would throw when opened over plain http (e.g. a phone on the LAN dev server)
+    const addedCount = useRef(0);
+    const newKey = () => `new-${addedCount.current++}`;
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<SaveStatus>("idle");
     const [aboutPreview, setAboutPreview] = useState(false);
@@ -406,7 +412,7 @@ export function PageEditor({
                             ...state,
                             projects: [
                                 ...state.projects,
-                                { key: crypto.randomUUID(), title: "", url: "", description: "" },
+                                { key: newKey(), title: "", url: "", description: "" },
                             ],
                         })
                     }
@@ -528,7 +534,7 @@ export function PageEditor({
                             experience: [
                                 ...state.experience,
                                 {
-                                    key: crypto.randomUUID(),
+                                    key: newKey(),
                                     role: "",
                                     organization: "",
                                     start: "",
@@ -603,7 +609,7 @@ export function PageEditor({
                     onClick={() =>
                         update({
                             ...state,
-                            links: [...state.links, { key: crypto.randomUUID(), label: "", url: "" }],
+                            links: [...state.links, { key: newKey(), label: "", url: "" }],
                         })
                     }
                 >

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/Navbar";
 import { getViewerProfile } from "@/lib/auth";
 
-const description = "Explore the UofT Webring community directory.";
+const description =
+    "Browse the personal websites and portfolios of University of Toronto students. Search by name, program, graduation year or interests.";
 
 export const metadata: Metadata = {
     title: "The Directory",
