@@ -18,12 +18,35 @@ Webring of University of Toronto student sites (uoftwebring.com): signup with Uo
 - Search before reading; read only relevant files/ranges.
 - Don't reread established context or load lockfiles, build output, generated files, or unrelated docs.
 - Flow: `search → inspect → edit → targeted verification`. Stop gathering context once the change is safe.
+- Use Haiku 5.5 subagents for exploratory or testing work, so only their conclusion enters context.
+- If a tool call fails or something unexpected happens, ask the owner to help or explain.
+
+## Context budget and loops
+
+- Never dump raw output into context. Filter it at the source: `| grep`, `| head -40`, `| tail -30`, or save to the scratchpad and grep the file. This applies to curl, test and build logs, SQL results and API JSON.
+- `curl` of one URL is fine if the output is filtered (status, a header, a grep match). No crawling multiple pages.
+- Two strikes: if an approach fails twice, stop and report what you know and the next step. Do not try a third variant of the same idea.
+- Time-box investigations: after about 5 tool calls with no new finding, stop and report findings, the open hypothesis, and what would settle it.
+- No polling or waiting loops (deploys, CI, cron). Ask the owner, or check once later.
 
 ## Sources of truth
 
 - Next.js: relevant files under `node_modules/next/dist/docs/`
 - Database: `supabase/migrations/` is canonical; keep `supabase/schemas/` (declarative) in sync with it. Never trust seed files.
 - Validation: `lib/validation.ts` mirrors the `public.profile` check constraints. Change both together.
+
+## Owner rules (no exceptions)
+
+- Never touch Supabase prod (read or write) without the owner's approval for that one operation. Name the exact command and whether it reads or writes.
+- Before any database write, local or prod (migration, data write, `supabase db reset`, seed reload): take a backup, show the exact change, and wait for an explicit go.
+- Never delete, move or gitignore image or asset files the owner added, even when no code uses them. The owner stages assets for future features. Ask.
+- No half features: if UI copy promises a behaviour, the code must deliver it. Otherwise cut the copy.
+
+| Access | What |
+| --- | --- |
+| Free | The local `webring` DB (reads), Vercel API reads, `curl` of one URL (filtered) |
+| Ask first | Anything on Supabase prod, including `scripts/db-pull-prod.sh` |
+| Explicit go | Any DB write; pushing to `main` or a tag; any settings change in PostHog, Vercel or Supabase |
 
 ## Architecture
 
@@ -40,7 +63,7 @@ Webring of University of Toronto student sites (uoftwebring.com): signup with Uo
 ## React/UI
 
 - React Compiler is enabled (`reactCompiler: true`): avoid `useMemo`, `useCallback`, `React.memo`.
-- Don't edit generated `components/ui/` primitives.
+- Don't edit generated `components/ui/` primitives, except radius classes that keep them on the theme's scale in `app/globals.css` (controls `rounded-md`, tab lists `rounded-lg`, cards `rounded-xl`).
 - Interactive UI needs loading, error, empty, focus, reduced-motion, and non-colour-only states.
 - The landing page 3D scene must degrade gracefully (WebGL error fallback, reduced motion renders it still, no SSR of browser-only code). Keep it cheap: shared geometries/materials, one `useFrame`, capped `dpr`, no post-processing.
 - Never show raw error messages. Errors render `app/error.tsx` / `app/global-error.tsx`, which always link home.
