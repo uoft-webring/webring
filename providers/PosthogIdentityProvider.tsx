@@ -10,10 +10,8 @@ export function PosthogIdentityProvider({ children }: { children: React.ReactNod
     useEffect(() => {
         const { data } = createClient().auth.onAuthStateChange((event, session) => {
             if (session) {
-                posthog.identify(session.user.id, {
-                    email: session.user.email,
-                    name: session.user.user_metadata.name,
-                });
+                // No email: member emails stay private, including from analytics
+                posthog.identify(session.user.id, { name: session.user.user_metadata.name });
             } else if (event === "SIGNED_OUT") {
                 posthog.reset();
             }

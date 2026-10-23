@@ -35,7 +35,10 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
 }
 
 export async function isUrlReachable(url: string): Promise<boolean> {
-    const response = (await safeFetch(url, { method: "HEAD" })) ?? (await safeFetch(url, { method: "GET" }));
+    // Real sites chain http→https→www→trailing slash→locale; main accepted any redirect, so allow plenty
+    const response =
+        (await safeFetch(url, { method: "HEAD", maxRedirects: 8 })) ??
+        (await safeFetch(url, { method: "GET", maxRedirects: 8 }));
     return response !== null && response.status < 400;
 }
 

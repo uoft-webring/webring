@@ -1,13 +1,16 @@
 import "server-only";
 import { z } from "zod";
 
+// `KEY=` in a .env file arrives as "": treat it as unset instead of failing every request
+const optionalString = z.preprocess((value) => (value === "" ? undefined : value), z.string().min(1).optional());
+
 const serverEnvSchema = z.object({
     NEXT_PUBLIC_SUPABASE_URL: z.url(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     NEXT_PUBLIC_HOME_DOMAIN: z.url(),
     DOMAIN_VALIDATION_SECRET_KEY: z.string().min(1),
-    REVALIDATION_SECRET_TOKEN: z.string().min(1).optional(),
+    REVALIDATION_SECRET_TOKEN: optionalString,
     AWS_REGION: z.string().min(1),
     AWS_ACCESS_KEY_ID: z.string().min(1),
     AWS_SECRET_ACCESS_KEY: z.string().min(1),

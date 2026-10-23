@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import sharp from "sharp";
 import { safeFetch } from "@/lib/url-safety";
 
@@ -23,6 +24,18 @@ export function extractPreviewImageUrl(html: string, pageUrl: string): string | 
     }
     return null;
 }
+
+export const PREVIEWS_TAG = "previews";
+
+/**
+ * `renderSitePreview` cached per domain, as base64 (the data cache stores JSON). Without this every
+ * CDN miss would refetch the member's site and re-run sharp.
+ */
+export const cachedSitePreview = unstable_cache(
+    async (domain: string): Promise<string | null> => (await renderSitePreview(domain))?.toString("base64") ?? null,
+    ["site-preview"],
+    { revalidate: 86400, tags: [PREVIEWS_TAG] }
+);
 
 /**
  * A small WebP of the member's own preview image, or null if their site doesn't declare one.

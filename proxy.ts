@@ -64,13 +64,12 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {
-        const to = members.find((member) => member.domain === destination);
         // Only credit real members as the source, so made-up ids can't create stats rows
         const from = members.some((member) => member.ringId === id) ? id : null;
         // After the response: counting a visit must never slow the redirect down
-        if (to) event.waitUntil(recordHop(from, to.ringId));
+        event.waitUntil(recordHop(from, destination.ringId));
     }
-    return NextResponse.redirect(new URL(destination));
+    return NextResponse.redirect(new URL(destination.domain));
 }
 
 /** Refreshes the Supabase session cookie so Server Components always see a valid session. */

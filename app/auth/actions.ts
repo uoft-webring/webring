@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { siteUrl } from "@/lib/env";
 import { clearPendingEmail, getPendingEmail, setPendingEmail } from "@/lib/pending-email";
@@ -55,7 +56,12 @@ export async function requestSignUp(_prev: AuthFormState, formData: FormData): P
     }
 
     await setPendingEmail(email.data);
-    getPostHogClient().capture({ distinctId: email.data, event: "signup_otp_sent" });
+    // Not keyed by email (private); the account doesn't exist yet, so skip creating a person
+    getPostHogClient().capture({
+        distinctId: randomUUID(),
+        event: "signup_otp_sent",
+        properties: { $process_person_profile: false },
+    });
     return { error: null, sent: true };
 }
 

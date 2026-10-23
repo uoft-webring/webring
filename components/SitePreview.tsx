@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { previewVersion } from "@/lib/site";
 
 /**
  * Thumbnail of a member's site, built from the preview image the site declares (og:image).
@@ -23,7 +24,7 @@ export function SitePreview({
         <a href={domain} target="_blank" rel="noopener noreferrer" className={cn("block overflow-hidden rounded-xl border", className)}>
             {/* eslint-disable-next-line @next/next/no-img-element -- already a sized WebP from /api/preview */}
             <img
-                src={`/api/preview/${ringId}`}
+                src={`/api/preview/${ringId}?v=${previewVersion(domain)}`}
                 alt=""
                 width={640}
                 height={336}
