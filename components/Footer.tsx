@@ -1,15 +1,11 @@
-import React, { Suspense } from "react";
 import pkg from "@/package.json";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Image from "next/image";
 import logo from "@/public/logo.png";
 import Link from "next/link";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
-import { getAuthUserProfile } from "@/app/actions";
 
-// The data array for footer links has been removed.
-
-function Logo() {
+function Logo(): React.JSX.Element {
     return (
         <Link href="/" prefetch={false}>
             <Image src={logo} alt="UofT Webring Logo" width={1368} height={230} sizes="200px" className="h-auto w-[200px]" />
@@ -17,39 +13,34 @@ function Logo() {
     );
 }
 
-export default async function Footer() {
+// Static on purpose: the footer is in the root layout, so reading the session here would make every page dynamic.
+export function Footer(): React.JSX.Element {
     return (
         <footer className="text-gray-700 dark:text-gray-300">
             <div className="mx-auto max-w-[85rem] px-6 py-12">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-5">
-                    {/* Branding Section - Now takes up 3 columns on medium screens and up */}
+                    {/* Branding: 3 of 5 columns from md up */}
                     <div className="flex flex-col items-start md:col-span-3">
                         <div className="flex w-full max-w-md items-center justify-between gap-4">
                             <Logo />
                             <div className="bg-secondary/40 flex items-center justify-center gap-2 rounded-full px-2.5 py-1.5">
-                                <Link
-                                    href="https://uoftwebring.com/redirect?nav=prev&id=0"
-                                    aria-label="Previous Site"
-                                >
+                                {/* Plain anchors: /redirect leaves the site, so client navigation/prefetch don't apply */}
+                                <a href="/redirect?nav=prev&id=0" aria-label="Previous Site">
                                     <ArrowLeftIcon />
-                                </Link>
+                                </a>
                                 <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
-                                <Link
-                                    href="https://uoftwebring.com/redirect?nav=next&id=0"
-                                    aria-label="Next Site"
-                                >
+                                <a href="/redirect?nav=next&id=0" aria-label="Next Site">
                                     <ArrowRightIcon />
-                                </Link>
+                                </a>
                             </div>
                         </div>
-                        {/* Added paragraph text below the logo */}
                         <p className="mt-4 max-w-md text-base text-gray-600 dark:text-gray-400">
                             The UofT Webring is a community of University of Toronto student websites, and
                             ultimately a movement to build more than just a resume.
                         </p>
                     </div>
 
-                    {/* Desktop: Multi-column Layout - Hard-coded */}
+                    {/* Desktop: link columns */}
                     <div className="hidden md:col-span-2 md:grid md:grid-cols-2 md:gap-8">
                         {/* Profile Section */}
                         <div>
@@ -65,7 +56,14 @@ export default async function Footer() {
                                         Dashboard
                                     </Link>
                                 </li>
-                                <Suspense fallback={null}>{profileLink()}</Suspense>
+                                <li>
+                                    <Link
+                                        href="/me"
+                                        className="dark:text-muted-foreground text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
+                                    >
+                                        Profile
+                                    </Link>
+                                </li>
                             </ul>
                         </div>
                         {/* Learn more Section */}
@@ -91,10 +89,18 @@ export default async function Footer() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link
+                                        href="/plain"
+                                        className="dark:text-muted-foreground text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
+                                    >
+                                        Plain version
+                                    </Link>
+                                </li>
+                                <li>
                                     <a
                                         href="https://uoftindex.com"
                                         target="_blank"
-                                        rel="noopener"
+                                        rel="noopener noreferrer"
                                         className="dark:text-muted-foreground inline-flex items-center gap-1 text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
                                     >
                                         UofT Index
@@ -105,7 +111,7 @@ export default async function Footer() {
                         </div>
                     </div>
 
-                    {/* Mobile: Accordion Layout - Hard-coded */}
+                    {/* Mobile: accordion */}
                     <div className="md:hidden">
                         <Accordion type="single" collapsible className="w-full">
                             {/* Profile Section */}
@@ -123,7 +129,11 @@ export default async function Footer() {
                                                 Dashboard
                                             </Link>
                                         </li>
-                                        <Suspense fallback={null}>{profileLink()}</Suspense>
+                                        <li>
+                                            <Link href="/me" className="text-base text-gray-600 dark:text-gray-400">
+                                                Profile
+                                            </Link>
+                                        </li>
                                     </ul>
                                 </AccordionContent>
                             </AccordionItem>
@@ -151,10 +161,18 @@ export default async function Footer() {
                                             </Link>
                                         </li>
                                         <li>
+                                            <Link
+                                                href="/plain"
+                                                className="text-base text-gray-600 dark:text-gray-400"
+                                            >
+                                                Plain version
+                                            </Link>
+                                        </li>
+                                        <li>
                                             <a
                                                 href="https://uoftindex.com"
                                                 target="_blank"
-                                                rel="noopener"
+                                                rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-base text-gray-600 dark:text-gray-400"
                                             >
                                                 UofT Index
@@ -181,22 +199,3 @@ export default async function Footer() {
         </footer>
     );
 }
-
-const profileLink = async () => {
-    const { data: userData, error } = await getAuthUserProfile();
-
-    if (!userData?.slug || error) {
-        return null;
-    }
-
-    return (
-        <li>
-            <Link
-                href={`/u/${userData.slug}`}
-                className="dark:text-muted-foreground text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
-            >
-                Profile
-            </Link>
-        </li>
-    );
-};

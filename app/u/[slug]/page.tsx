@@ -1,83 +1,81 @@
-import { getUserProfile, getAuthUserProfile } from "@/app/actions";
-import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
-import { getPostHogClient } from "@/lib/posthog-server";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import Avatar from "@/components/Avatar";
-import { Book, BookOpen, CheckCircle, Clock, Globe, GraduationCap, TagIcon, UserIcon } from "lucide-react";
-import SkillTag from "@/components/SkillTag";
-
+import { Book, CircleCheck, GraduationCap, TagIcon, UserIcon } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
+import { ExternalLinkPill } from "@/components/ExternalLinkPill";
+import { Navbar } from "@/components/Navbar";
+import { OpenToWorkBadge } from "@/components/OpenToWorkBadge";
+import { ShareButton } from "@/components/ShareButton";
+import { SitePreview } from "@/components/SitePreview";
+import { SkillTag } from "@/components/SkillTag";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
-import Image from "next/image";
-import ShareButton from "@/components/ShareButton";
+import { getViewerProfile } from "@/lib/auth";
+import { avatarUrl } from "@/lib/avatar";
+import { getPostHogClient } from "@/lib/posthog-server";
+import { getPublicProfileBySlug } from "@/lib/profiles/queries";
+import { isLinkableDomain } from "@/lib/profiles/ring";
+import { topicPath } from "@/lib/profiles/topics";
+import { displayDomain, profileUrl } from "@/lib/site";
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Promise<Metadata> {
     const { slug } = await params;
-    const { data } = await getUserProfile(slug);
+    const { data: profile } = await getPublicProfileBySlug(slug);
+    if (!profile) return { title: "User not found" };
 
-    if (!data) return { title: "User not found" };
-
-    const pageUrl = `https://uoftwebring.com/u/${slug}`;
-
+    const url = profileUrl(profile.slug);
     return {
-        title: `${data.name} - UofT Webring`,
-        description: data.tagline || undefined,
+        title: `${profile.name} - UofT Webring`,
+        description: profile.tagline || undefined,
         openGraph: {
-            title: data.name,
-            description: data.tagline || undefined,
-            images: data.image_key ? [data.image_key] : undefined,
-            url: pageUrl,
+            title: profile.name,
+            description: profile.tagline || undefined,
+            url,
         },
         twitter: {
-            title: data.name,
-            description: data.tagline || undefined,
-            images: data.image_key ? [data.image_key] : undefined,
+            title: profile.name,
+            description: profile.tagline || undefined,
             card: "summary_large_image",
         },
-        robots: { index: true, follow: true },
-        alternates: { canonical: pageUrl },
+        alternates: { canonical: url },
     };
 }
 
-export default async function User({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
     const { slug } = await params;
-    const [{ data, error }, { data: authUser }] = await Promise.all([
-        getUserProfile(slug),
-        getAuthUserProfile(),
-    ]);
+    const [{ data: profile, error }, viewer] = await Promise.all([getPublicProfileBySlug(slug), getViewerProfile()]);
 
-    if (error || !data) notFound();
+    if (error !== null) throw new Error(error);
+    if (!profile) notFound();
 
     getPostHogClient().capture({
-        distinctId: authUser?.id ?? `anon_${slug}`,
+        distinctId: viewer?.id ?? `anon_${slug}`,
         event: "profile_viewed",
         properties: {
             profile_slug: slug,
-            profile_name: data.name,
-            is_verified: data.is_verified,
-            viewer_is_owner: authUser?.id === data.id,
+            profile_name: profile.name,
+            is_verified: profile.isVerified,
+            viewer_is_owner: viewer?.ringId === profile.ringId,
         },
     });
 
     const jsonLd = {
         "@context": "https://schema.org",
         "@type": "ProfilePage",
-        dateModified: new Date().toISOString(),
         mainEntity: {
             "@type": "Person",
-            name: data.name,
-            identifier: data.ring_id,
-            ...(data.tagline && { description: data.tagline }),
-            ...(data.image_key && { image: data.image_key }),
+            name: profile.name,
+            identifier: profile.ringId,
+            ...(profile.tagline && { description: profile.tagline }),
+            ...(avatarUrl(profile.imageKey) && { image: avatarUrl(profile.imageKey) }),
             sameAs: [
-                ...(data.github_url ? [`https://github.com/${data.github_url}`] : []),
-                ...(data.domain ? [data.domain] : []),
+                ...(profile.githubUsername ? [`https://github.com/${profile.githubUsername}`] : []),
+                ...(profile.domain ? [profile.domain] : []),
             ],
         },
-        ...(data.domain && { relatedLink: data.domain }),
+        ...(profile.domain && { relatedLink: profile.domain }),
     };
-    const domainLabel = data.domain?.replace(/^https?:\/\/(www\.)?/i, "");
 
     return (
         <div className="bg-background text-foreground flex min-h-screen flex-col">
@@ -88,7 +86,7 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                 }}
             />
 
-            <Navbar user={authUser} />
+            <Navbar user={viewer} />
 
             <div className="container mx-auto max-w-7xl flex-1 px-6 py-5">
                 <div className="grid grid-cols-1 gap-12 lg:grid-cols-4">
@@ -96,39 +94,42 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                     <aside className="space-y-8 self-start lg:sticky lg:top-8 lg:col-span-1">
                         <div className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-8">
                             <div className="flex flex-col items-center text-center">
-                                {data.image_key && <Avatar user={data} className="h-32 w-32" />}
+                                {profile.imageKey && <Avatar profile={profile} className="h-32 w-32" priority />}
 
                                 <h2 className="py-2 text-center text-2xl font-bold capitalize">
-                                    {data.name}
+                                    {profile.name}
                                 </h2>
 
-                                {data.is_verified && (
+                                {profile.isVerified && (
                                     <div className="mt-2 flex items-center gap-1 text-sm font-semibold text-green-500">
-                                        <CheckCircle className="stroke-background h-4 w-4 fill-green-500" />
+                                        <CircleCheck className="stroke-background h-4 w-4 fill-green-500" />
                                         Verified
                                     </div>
                                 )}
+                                {profile.openToWork && <OpenToWorkBadge className="mt-2" />}
 
                                 <div className="border-border my-6 w-full border-t" />
 
                                 <div className="text-muted-foreground w-full space-y-4">
-                                    {data.program && (
+                                    {profile.program && (
                                         <div className="flex items-center gap-5">
                                             <Book className="text-primary h-5 w-5 shrink-0" />
                                             <div>
                                                 <p className="text-foreground font-semibold">
-                                                    {data.program}
+                                                    <Link href={topicPath("programs", profile.program)} className="hover:underline">
+                                                        {profile.program}
+                                                    </Link>
                                                 </p>
                                                 <p className="text-sm">Program</p>
                                             </div>
                                         </div>
                                     )}
-                                    {data.graduation_year && (
+                                    {profile.graduationYear && (
                                         <div className="flex items-center gap-5">
                                             <GraduationCap className="text-primary h-5 w-5 shrink-0" />
                                             <div>
                                                 <p className="text-foreground font-semibold">
-                                                    Class of {data.graduation_year}
+                                                    Class of {profile.graduationYear}
                                                 </p>
                                                 <p className="text-sm">Graduation Year</p>
                                             </div>
@@ -139,53 +140,31 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                                 <div className="border-border my-6 w-full border-t" />
 
                                 <div className="flex w-full flex-col gap-3">
-                                    {data.domain && (
-                                        <a
-                                            href={data.domain}
-                                            target="_blank"
-                                            rel="noopener"
-                                            className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
-                                        >
-                                            <Image
-                                                src={portfolioIcon}
-                                                alt=""
-                                                width={20}
-                                                height={20}
-                                                decoding="async"
-                                                className="mr-2"
-                                            />
-                                            {domainLabel && domainLabel.length <= 30
-                                                ? domainLabel
-                                                : "Portfolio"}
-                                        </a>
+                                    {profile.domain && (
+                                        <ExternalLinkPill
+                                            href={profile.domain}
+                                            icon={portfolioIcon}
+                                            label={displayDomain(profile.domain)}
+                                            fallbackLabel="Portfolio"
+                                        />
                                     )}
-                                    {data.github_url && (
-                                        <a
-                                            href={`https://github.com/${data.github_url}`}
-                                            target="_blank"
-                                            rel="noopener"
-                                            className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
-                                        >
-                                            <Image
-                                                src={gitHubIcon}
-                                                alt=""
-                                                width={20}
-                                                height={20}
-                                                decoding="async"
-                                                className="mr-2"
-                                            />
-                                            {data.github_url.length <= 30 ? data.github_url : "GitHub"}
-                                        </a>
+                                    {profile.githubUsername && (
+                                        <ExternalLinkPill
+                                            href={`https://github.com/${profile.githubUsername}`}
+                                            icon={gitHubIcon}
+                                            label={profile.githubUsername}
+                                            fallbackLabel="GitHub"
+                                        />
                                     )}
                                     <ShareButton
-                                        title={`${data.name}'s UofT Webring Profile`}
-                                        url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${data.slug}`}
+                                        title={`${profile.name}'s UofT Webring Profile`}
+                                        url={profileUrl(profile.slug)}
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        {!!data.tags?.length && (
+                        {profile.tags.length > 0 && (
                             <div className="bg-card border-border rounded-2xl border p-6 shadow">
                                 <h3 className="border-border mb-3 flex items-center gap-2 border-b pb-2 text-lg font-semibold">
                                     <TagIcon className="text-primary h-5 w-5" />
@@ -193,8 +172,10 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                                 </h3>
 
                                 <div className="flex flex-row flex-wrap justify-center gap-2">
-                                    {data.tags.map((tagName: string) => (
-                                        <SkillTag key={tagName} tagName={tagName} />
+                                    {profile.tags.map((tagName) => (
+                                        <Link key={tagName} href={topicPath("tags", tagName)} className="hover:opacity-80">
+                                            <SkillTag tagName={tagName} />
+                                        </Link>
                                     ))}
                                 </div>
                             </div>
@@ -205,20 +186,25 @@ export default async function User({ params }: { params: Promise<{ slug: string 
                         <section className="bg-card border-border rounded-3xl border p-5 shadow-lg sm:p-10">
                             <h2 className="mb-6 flex items-center gap-3 text-2xl font-bold capitalize sm:text-3xl">
                                 <UserIcon className="text-primary h-7 w-7" />
-                                About {data.name}
+                                About {profile.name}
                             </h2>
                             <div className="prose prose-xl prose-a:text-primary prose-strong:text-foreground max-w-none">
-                                {data.tagline ? (
+                                {profile.tagline ? (
                                     <p className="text-md text-muted-foreground flex-1 px-4 text-pretty break-all hyphens-auto normal-case">
-                                        {data.tagline}
+                                        {profile.tagline}
                                     </p>
                                 ) : (
                                     <p className="text-md text-muted-foreground italic">
-                                        {data.name} thinks they're too cool to write a bio...
+                                        {profile.name} thinks they&apos;re too cool to write a bio...
                                     </p>
                                 )}
                             </div>
                         </section>
+                        {isLinkableDomain(profile.domain) && (
+                            <section aria-label={`Preview of ${profile.name}'s website`}>
+                                <SitePreview ringId={profile.ringId} domain={profile.domain} className="shadow-lg" />
+                            </section>
+                        )}
                     </main>
                 </div>
             </div>

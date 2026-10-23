@@ -1,28 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
 import posthog from "posthog-js";
-import { posthogIdentifyUser } from "@/utils/posthog";
-import { PostHogProvider as PHProvider } from "posthog-js/react";
+import { PostHogProvider } from "posthog-js/react";
+import { createClient } from "@/lib/supabase/client";
 
-export default function PosthogIdentityProvider({ children }: { children: React.ReactNode }) {
+/** Ties PostHog's anonymous visitor to the Supabase user once they sign in. */
+export function PosthogIdentityProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
     useEffect(() => {
-        const supabase = createClient();
-        const { data } = supabase.auth.onAuthStateChange((_, session) => {
+        const { data } = createClient().auth.onAuthStateChange((event, session) => {
             if (session) {
-                posthogIdentifyUser({
-                    email: session.user.email!,
-                    name: session.user.user_metadata.name,
-                    userId: session.user.id,
-                });
+                // No email: member emails stay private, including from analytics
+                posthog.identify(session.user.id, { name: session.user.user_metadata.name });
+            } else if (event === "SIGNED_OUT") {
+                posthog.reset();
             }
         });
-
-        return () => {
-            data.subscription.unsubscribe();
-        };
+        return () => data.subscription.unsubscribe();
     }, []);
 
-    return <PHProvider client={posthog}>{children}</PHProvider>;
+    return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
 }

@@ -1,55 +1,35 @@
 import type { MetadataRoute } from "next";
-import { getAllUserProfiles } from "./actions";
-import { SafeUserType } from "@/utils/zod";
-
-const ORIGIN = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://uoftwebring.com").origin;
-
-type PublicProfile = { slug: string };
-
-async function getPublicUserSlugs(): Promise<PublicProfile[]> {
-    const res = await getAllUserProfiles();
-    const rows: SafeUserType[] = res?.data ?? [];
-
-    // slug is unique - just need to filter out any user's without it and format the slug
-    return rows
-        .filter((u) => u?.slug)
-        .map((u) => {
-            const slug = String(u.slug).trim().toLowerCase();
-            return { slug };
-        });
-}
+import { getPublicProfiles } from "@/lib/profiles/queries";
+import { collectTopics, topicPath, type TopicKind } from "@/lib/profiles/topics";
+import { profileUrl, SITE_ORIGIN } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const users = await getPublicUserSlugs();
+    const { data: profiles } = await getPublicProfiles();
     const now = new Date();
-
-    const staticRoutes = [
-        {
-            url: `${ORIGIN}/`,
+    const topicRoutes = (kind: TopicKind) =>
+        collectTopics(profiles ?? [], kind).map((topic) => ({
+            url: `${SITE_ORIGIN}${topicPath(kind, topic.name)}`,
             lastModified: now,
-            changeFrequency: "daily",
-            priority: 1,
-        },
-        {
-            url: `${ORIGIN}/manifesto`,
-            lastModified: now,
-            changeFrequency: "monthly",
-            priority: 0.8,
-        },
-        {
-            url: `${ORIGIN}/directory`,
-            lastModified: now,
-            changeFrequency: "daily",
-            priority: 0.9,
-        },
-    ] satisfies MetadataRoute.Sitemap;
+            changeFrequency: "weekly" as const,
+            priority: 0.5,
+        }));
 
-    const userRoutes = users.map(({ slug }) => ({
-        url: `${ORIGIN}/u/${encodeURIComponent(slug)}`,
-        lastModified: now, // no nulls
-        changeFrequency: "weekly",
-        priority: 0.6,
-    })) satisfies MetadataRoute.Sitemap;
-
-    return [...staticRoutes, ...userRoutes] satisfies MetadataRoute.Sitemap;
+    return [
+        { url: `${SITE_ORIGIN}/`, lastModified: now, changeFrequency: "daily", priority: 1 },
+        { url: `${SITE_ORIGIN}/manifesto`, lastModified: now, changeFrequency: "monthly", priority: 0.8 },
+        { url: `${SITE_ORIGIN}/directory`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
+        { url: `${SITE_ORIGIN}/plain`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
+        { url: `${SITE_ORIGIN}/tags`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+        { url: `${SITE_ORIGIN}/programs`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+        ...topicRoutes("tags"),
+        ...topicRoutes("programs"),
+        ...(profiles ?? [])
+            .filter((profile) => profile.slug)
+            .map((profile) => ({
+                url: profileUrl(profile.slug),
+                lastModified: now,
+                changeFrequency: "weekly" as const,
+                priority: 0.6,
+            })),
+    ];
 }

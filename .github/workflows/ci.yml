@@ -1,0 +1,32 @@
+name: CI
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        # Placeholders, no secrets: next.config needs them to load (typegen and build), and
+        # data-backed pages fall back gracefully when the DB is unreachable
+        env:
+            NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN: example.cloudfront.net
+            NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54621
+            NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version-file: .nvmrc
+                  cache: npm
+
+            - run: npm ci
+            - run: npm run lint
+            - run: npm run typecheck
+            - run: npm test
+            - run: npm run build

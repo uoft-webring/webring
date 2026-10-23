@@ -1,99 +1,76 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { parseEmail, parseName } from "@/utils/zod";
-import React, { FormEvent, useRef, useState } from "react";
-import { signUpAction } from "./actions";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
 import posthog from "posthog-js";
+import { requestSignUp, type AuthFormState } from "@/app/auth/actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-export default function SignupForm() {
+export function SignupForm(): React.JSX.Element {
     const router = useRouter();
-    const [nameError, setNameError] = useState<string | undefined>(undefined);
-    const [emailError, setEmailError] = useState<string | undefined>(undefined);
-
-    const [isFormDisabled, setIsFormDisabled] = useState(false);
-
-    const emailRef = useRef<HTMLInputElement>(null);
-    const nameRef = useRef<HTMLInputElement>(null);
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setIsFormDisabled(true);
-
-        if (emailRef.current && nameRef.current) {
-            const email = emailRef.current.value.trim().toLowerCase();
-            const emailParseResult = parseEmail(email);
-
-            const name = nameRef.current.value;
-            const nameParseResult = parseName(name);
-
-            // Parsing success or failure
-            if (emailParseResult.success && nameParseResult.success) {
-                try {
-                    const { error } = await signUpAction(name, email);
-                    if (error) {
-                        setEmailError(typeof error === "string" ? error : "Email already registered.");
-                        setIsFormDisabled(false);
-                    } else {
-                        posthog.capture("signup_submitted", { email });
-                        // Keep disabled during navigation to prevent double-submit
-                        router.push(`/auth/confirm?email=${email}`);
-                    }
-                } catch (err: any) {
-                    const isNetwork = err?.message?.includes("fetch") || err?.message?.includes("network");
-                    console.error("Signup action failed:", err?.message, err);
-                    setEmailError(
-                        isNetwork
-                            ? "Could not reach the server. Please reload and try again."
-                            : "Something went wrong. Please try again."
-                    );
-                    setIsFormDisabled(false);
-                }
-            } else {
-                setEmailError(emailParseResult?.error?.errors[0]?.message || "");
-                setNameError(nameParseResult?.error?.errors[0]?.message || "");
-                setIsFormDisabled(false);
+    const [state, formAction, pending] = useActionState<AuthFormState, FormData>(
+        async (prev, formData) => {
+            try {
+                return await requestSignUp(prev, formData);
+            } catch {
+                // The action never ran (offline, deploy in progress): keep the user on the form
+                return { error: "Could not reach the server. Please reload and try again.", values: prev.values };
             }
-        } else {
-            setIsFormDisabled(false);
-        }
-    };
+        },
+        { error: null }
+    );
+
+    useEffect(() => {
+        if (!state.sent) return;
+        posthog.capture("signup_submitted");
+        router.push("/auth/confirm");
+    }, [state, router]);
+
+    const disabled = pending || state.sent;
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form action={formAction} className="flex flex-col gap-6" noValidate>
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="name">Name</Label>
                     <Input
+                        id="name"
                         name="name"
                         type="text"
-                        ref={nameRef}
+                        autoComplete="name"
                         placeholder="John Doe"
-                        error={nameError}
-                        disabled={isFormDisabled}
-                        onChange={() => nameError && setNameError(undefined)}
+                        defaultValue={state.values?.name}
+                        error={state.fieldErrors?.name}
+                        disabled={disabled}
+                        required
                     />
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
+                        id="email"
                         name="email"
-                        type="text"
-                        ref={emailRef}
+                        type="email"
+                        autoComplete="email"
                         placeholder="your.email@mail.utoronto.ca"
-                        error={emailError}
-                        disabled={isFormDisabled}
-                        onChange={() => emailError && setEmailError(undefined)}
+                        defaultValue={state.values?.email}
+                        error={state.fieldErrors?.email}
+                        disabled={disabled}
+                        required
                     />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isFormDisabled}>
-                    Continue
+                {state.error && (
+                    <p role="alert" className="text-destructive text-sm">
+                        {state.error}
+                    </p>
+                )}
+                <Button type="submit" className="w-full" disabled={disabled}>
+                    {pending ? "Sending code..." : "Continue"}
                 </Button>
             </div>
 

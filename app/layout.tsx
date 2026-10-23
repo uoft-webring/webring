@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Oxanium } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/Footer";
+import { UoftIndexPromo } from "@/components/promo/UoftIndexPromo";
 import { Toaster } from "@/components/ui/sonner";
-import "prismjs/themes/prism-tomorrow.css"; //find solution to this blocking thread
-import Footer from "@/components/Footer";
-import PosthogIdentityProvider from "@/providers/PosthogIdentityProvider";
-import UoftIndexPromo from "@/components/promo/UoftIndexPromo";
+import { SITE_ORIGIN } from "@/lib/site";
+import { PosthogIdentityProvider } from "@/providers/PosthogIdentityProvider";
 
 const oxanium = Oxanium({
     variable: "--font-oxanium",
@@ -17,7 +17,7 @@ const description =
     "Join the UofT Webring to connect with other University of Toronto students and showcase your personal website.";
 
 export const metadata: Metadata = {
-    metadataBase: new URL("https://uoftwebring.com"),
+    metadataBase: new URL(SITE_ORIGIN),
     title: "UofT Webring",
     description,
     keywords: ["UofT Webring", "University of Toronto", "Webring", "Student Community"],
@@ -120,8 +120,6 @@ export default function RootLayout({
     };
     return (
         <html lang="en" className={oxanium.variable}>
-            <head>
-            </head>
             <body className="dark scroll-smooth antialiased">
                 <script
                     type="application/ld+json"

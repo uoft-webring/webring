@@ -1,10 +1,9 @@
-import Navbar from "@/components/Navbar";
-import { getAuthUserProfile } from "../actions";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { Navbar } from "@/components/Navbar";
+import { getViewerProfile } from "@/lib/auth";
 
 export const metadata: Metadata = {
     title: "Manifesto - UofT Webring",
-    metadataBase: new URL("https://uoftwebring.com/manifesto"),
     description: "Explore the UofT Webring community manifesto.",
     keywords: ["UofT Webring", "Manifesto", "University of Toronto", "Student Profiles"],
     openGraph: {
@@ -12,25 +11,24 @@ export const metadata: Metadata = {
         type: "website",
         siteName: "UofT Webring",
         description: "Explore the UofT Webring community Manifesto.",
-        url: "https://uoftwebring.com/manifesto",
+        url: "/manifesto",
     },
     twitter: {
         card: "summary_large_image",
         title: "UofT Webring Manifesto",
         description: "Explore the UofT Webring community manifesto.",
     },
-    referrer: "origin-when-cross-origin",
     alternates: {
         canonical: "/manifesto",
     },
 };
 
 export default async function ManifestoLayout({ children }: { children: React.ReactNode }) {
-    const { data: userData } = await getAuthUserProfile();
+    const viewer = await getViewerProfile();
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
-            <Navbar user={userData} />
+            <Navbar user={viewer} />
             {children}
         </div>
     );

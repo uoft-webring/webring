@@ -1,25 +1,24 @@
-import Loading from "./LoadingComponent";
-import Image from "next/image";
-import SkillTag from "./SkillTag";
+import Link from "next/link";
 import gitHubIcon from "@/icons/gitHub.svg";
 import portfolioIcon from "@/icons/portfolio.svg";
-import { cn } from "@/lib/utils";
-import { SafeUserType } from "@/utils/zod";
-import Avatar from "./Avatar";
-import ShareButton from "./ShareButton";
-import Link from "next/link";
+import { cn } from "@/lib/cn";
+import type { PublicProfile } from "@/lib/profiles/types";
+import { displayDomain, profilePath, profileUrl } from "@/lib/site";
+import { Avatar } from "./Avatar";
+import { ExternalLinkPill } from "./ExternalLinkPill";
+import { OpenToWorkBadge } from "./OpenToWorkBadge";
+import { ShareButton } from "./ShareButton";
+import { SkillTag } from "./SkillTag";
 
-export default function ProfileCard({
-    user,
+export function ProfileCard({
+    profile,
     className,
+    priority = false,
 }: {
-    user: SafeUserType;
+    profile: PublicProfile;
     className?: string;
-} & React.ComponentPropsWithoutRef<"div">) {
-    if (!user) return <Loading />;
-
-    const domainLabel = user.domain?.replace(/^https?:\/\/(www\.)?/i, "");
-
+    priority?: boolean;
+}): React.JSX.Element {
     return (
         <div
             className={cn(
@@ -27,76 +26,48 @@ export default function ProfileCard({
                 className
             )}
         >
-            <Avatar
-                user={user}
-                className="ring-primary/20 h-26 w-26 rounded-full"
-                lazyLoading={user.ring_id < 3 ? false : true}
-            />
+            <Avatar profile={profile} className="ring-primary/20 h-26 w-26 rounded-full" priority={priority} />
 
             <h2 className="text-center text-2xl font-bold capitalize hover:underline">
-                <Link href={`/u/${user.slug}`}>{user.name}</Link>
+                {profile.slug ? <Link href={profilePath(profile.slug)}>{profile.name}</Link> : profile.name}
             </h2>
 
             <div className="text-muted-foreground flex flex-wrap justify-center gap-2 text-sm">
-                {user.program && <span>{user.program}</span>}
-                {user.program && user.graduation_year && <p>·</p>}
-                {user.graduation_year && <span>{user.graduation_year}</span>}
+                {profile.program && <span>{profile.program}</span>}
+                {profile.program && profile.graduationYear && <span aria-hidden>·</span>}
+                {profile.graduationYear && <span>{profile.graduationYear}</span>}
             </div>
+            {profile.openToWork && <OpenToWorkBadge />}
 
-            {!!user.tags?.length && (
+            {profile.tags.length > 0 && (
                 <div className="flex flex-row flex-wrap justify-center gap-2">
-                    {user.tags.map((tagName: string) => (
-                        <SkillTag key={tagName} tagName={tagName} />
+                    {profile.tags.map((tag) => (
+                        <SkillTag key={tag} tagName={tag} />
                     ))}
                 </div>
             )}
 
             <p className="text-muted-foreground max-w-md flex-1 px-4 text-center text-sm text-pretty break-words hyphens-auto normal-case">
-                {user.tagline && user.tagline}
+                {profile.tagline}
             </p>
             <div className="mb-2 flex flex-row flex-wrap items-center justify-center gap-4">
-                {user.github_url && (
-                    <a
-                        href={`https://github.com/${user.github_url}`}
-                        target="_blank"
-                        rel="noopener"
-                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
-                    >
-                        <Image
-                            src={gitHubIcon}
-                            alt=""
-                            width={20}
-                            height={20}
-                            decoding="async"
-                            className="mr-2"
-                        />
-                        {user.github_url.length <= 30 ? user.github_url : "GitHub"}
-                    </a>
+                {profile.githubUsername && (
+                    <ExternalLinkPill
+                        href={`https://github.com/${profile.githubUsername}`}
+                        icon={gitHubIcon}
+                        label={profile.githubUsername}
+                        fallbackLabel="GitHub"
+                    />
                 )}
-
-                {user.domain && (
-                    <a
-                        href={user.domain}
-                        target="_blank"
-                        rel="noopener"
-                        className="bg-popover hover:bg-secondary/80 flex items-center rounded-full px-3 py-2.5 text-sm transition"
-                    >
-                        <Image
-                            src={portfolioIcon}
-                            alt=""
-                            width={20}
-                            height={20}
-                            decoding="async"
-                            className="mr-2"
-                        />
-                        {domainLabel && domainLabel.length <= 30 ? domainLabel : "Portfolio"}
-                    </a>
+                {profile.domain && (
+                    <ExternalLinkPill
+                        href={profile.domain}
+                        icon={portfolioIcon}
+                        label={displayDomain(profile.domain)}
+                        fallbackLabel="Portfolio"
+                    />
                 )}
-
-                <ShareButton
-                    title={`${user.name}'s Profile`}
-                    url={`${process.env.NEXT_PUBLIC_HOME_DOMAIN}/u/${user.slug}`}
-                />
+                {profile.slug && <ShareButton title={`${profile.name}'s Profile`} url={profileUrl(profile.slug)} />}
             </div>
         </div>
     );

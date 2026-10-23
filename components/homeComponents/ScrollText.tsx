@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useCallback } from "react";
-import { useScroll, useTransform, useMotionValueEvent, MotionValue } from "framer-motion";
+import { useRef } from "react";
+import { useScroll, useTransform, useMotionValueEvent, MotionValue } from "motion/react";
 
-export const ScrollText = ({ content }: { content: string[] }) => {
+export function ScrollText({ content }: { content: string[] }): React.JSX.Element {
     const contentRef = useRef<HTMLHeadingElement | null>(null);
 
     const { scrollYProgress } = useScroll({
@@ -32,7 +32,7 @@ export const ScrollText = ({ content }: { content: string[] }) => {
             </div>
         </div>
     );
-};
+}
 
 const ContentLine = ({
     content,
@@ -61,17 +61,17 @@ const ContentLine = ({
         }
     });
 
-    const setRef = useCallback(
-        (i: number) => (el: HTMLSpanElement | null) => {
-            wordsRef.current[i] = el;
-        },
-        []
-    );
-
     return (
         <span className="flex flex-wrap justify-center font-light not-last:mb-10">
             {words.map((word, i) => (
-                <span key={i} ref={setRef(i)} className="ml-2" style={{ opacity: 0.1 }}>
+                <span
+                    key={i}
+                    ref={(el) => {
+                        wordsRef.current[i] = el;
+                    }}
+                    className="ml-2 motion-reduce:opacity-100!"
+                    style={{ opacity: 0.1 }}
+                >
                     {word}
                 </span>
             ))}

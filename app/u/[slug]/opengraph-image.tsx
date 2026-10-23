@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og";
+import { getPublicProfileBySlug } from "@/lib/profiles/queries";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default async function Image({ params }: { params: { slug: string } }) {
-    const title = decodeURIComponent((params.slug ?? "Untitled").replace(/[-_]+/g, " ")) || "Untitled";
+export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
+    // params is a Promise since Next 16; the old sync read always fell back to "Untitled".
+    // Prefer the member's name: new accounts have UUID slugs.
+    const { slug } = await params;
+    const { data: profile } = await getPublicProfileBySlug(slug);
+    const title = profile?.name || slug.replace(/[-_]+/g, " ") || "Untitled";
 
     return new ImageResponse(
         (

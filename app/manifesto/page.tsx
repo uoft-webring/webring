@@ -1,7 +1,8 @@
-import TypingAnimation from "./components/TypingAnimation";
+import Image from "next/image";
 import resume from "@/public/resume.png";
+import { TypingAnimation } from "./components/TypingAnimation";
 
-export default function Page() {
+export default function ManifestoPage() {
     return (
         <section className="mx-auto mt-8 w-full max-w-[45rem] px-4 [&>p]:text-base md:[&>p]:text-xl">
             <p className="mb-[1.25ch] text-base font-medium tracking-[.1em] uppercase opacity-60">
@@ -17,10 +18,10 @@ export default function Page() {
                 invisible. Another line item in a sea of sameness.
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
-                <img src={resume.src} alt="(Insert your boring resume)" className="rounded-2xl" />
+                <Image src={resume} alt="(Insert your boring resume)" className="rounded-2xl" />
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">
-                But your work isn't a line item. It's a story. Your portfolio is your{" "}
+                But your work isn&apos;t a line item. It&apos;s a story. Your portfolio is your{" "}
                 <span className="animate-pulse-text font-semibold">pulse</span>.
             </p>
             <p className="leading-7 [&:not(:first-child)]:mt-6">This is a rebellion.</p>

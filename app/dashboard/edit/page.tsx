@@ -1,52 +1,8 @@
-"use client";
-import { useState } from "react";
-import EditForm from "./Form";
+import { ProfileEditor } from "@/components/profile-editor/ProfileEditor";
+import { requireOwnProfile } from "@/lib/auth";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserType, SafeUserType } from "@/utils/zod";
-import ProfileCard from "@/components/ProfileCard";
-import { useUser } from "../../../providers/UserProvider";
-
-export default function Edit() {
-    const user = useUser();
-    const [data, setData] = useState<UserType | null>(user);
-
-    if (!data) {
-        return null;
-    }
-
-    return (
-        <>
-            <Tabs defaultValue="edit" className="w-full lg:hidden">
-                <TabsList className="mb-2 grid w-full grid-cols-2">
-                    <TabsTrigger value="edit">Edit</TabsTrigger>
-                    <TabsTrigger value="preview">Preview</TabsTrigger>
-                </TabsList>
-                <TabsContent value="edit">
-                    <h2>Edit your profile</h2>
-                    <p className="mb-6">Complete the information below to complete your profile.</p>
-                    <EditForm formData={data} setFormDataAction={setData} />
-                </TabsContent>
-                <TabsContent value="preview">
-                    <h2>Preview</h2>
-                    <p className="mb-6">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data as unknown as SafeUserType} />
-                </TabsContent>
-            </Tabs>
-            <section className="hidden items-start justify-center gap-12 lg:flex [&>*]:shrink [&>*]:grow [&>*]:basis-0">
-                <div>
-                    <h2>Edit your profile</h2>
-                    <p className="mb-6 lg:text-base">
-                        Complete the information below to complete your profile.
-                    </p>
-                    <EditForm formData={data} setFormDataAction={setData} />
-                </div>
-                <div className="justify-left flex h-full flex-col items-start">
-                    <h2>Preview</h2>
-                    <p className="mb-6 lg:text-base">Preview your profile live, as you make changes.</p>
-                    <ProfileCard user={data as unknown as SafeUserType} />
-                </div>
-            </section>
-        </>
-    );
+export default async function EditPage() {
+    // Same cached read as the dashboard layout: no extra query
+    const profile = await requireOwnProfile();
+    return <ProfileEditor initialProfile={profile} />;
 }

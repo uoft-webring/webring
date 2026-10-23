@@ -1,50 +1,43 @@
-import { getDomainValidity } from "../actions";
-import StatusCard from "@/components/StatusCard";
-import Form from "next/form";
-import RecheckButton from "@/components/RecheckButton";
-import { getAuthUserProfile } from "@/app/actions";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Status } from "@/components/StatusCard";
-import JoinCodeSnippets from "@/components/JoinCodeSnippets";
+import { JoinCodeSnippets } from "@/components/dashboard/JoinCodeSnippets";
+import { RingLinkCheck } from "@/components/dashboard/RingLinkCheck";
+import { StatusCard } from "@/components/StatusCard";
+import { Button } from "@/components/ui/button";
+import { requireOwnProfile } from "@/lib/auth";
+import { highlightMarkup } from "@/lib/highlight";
+import { LOGO_COLORS, LOGO_FORMATS, widgetSnippets, type LogoColor, type Snippet } from "@/lib/join-snippets";
 
-export default async function Join() {
-    const { data: userData, error: userError } = await getAuthUserProfile();
-
-    if (userError || !userData) {
-        console.error("[Join] Error fetching user profile:", userError);
-        redirect("/signup");
+function allSnippets(ringId: number): Record<string, Snippet[]> {
+    const result: Record<string, Snippet[]> = {};
+    for (const format of LOGO_FORMATS) {
+        for (const color of Object.keys(LOGO_COLORS) as LogoColor[]) {
+            result[`${format}-${color}`] = widgetSnippets(ringId, format, color).map((snippet) => ({
+                ...snippet,
+                html: highlightMarkup(snippet.code),
+            }));
+        }
     }
-    const validPortfolioStatus: Status = await getDomainValidity(); // Returns
+    return result;
+}
 
-    const id: number = userData.ring_id;
-
-    const action = async () => {
-        "use server";
-        // TODO: add this back in later when this is automated, going with manual process first
-        //const result = await checkAddedCodeToPortfolio();
-    };
+export default async function JoinPage() {
+    const profile = await requireOwnProfile();
 
     return (
         <section>
             <h2>Join the community</h2>
             <p className="mb-4">Copy the code and paste it into your portfolio to join the community.</p>
 
-            <JoinCodeSnippets id={id} />
+            <JoinCodeSnippets snippets={allSnippets(profile.ringId)} />
 
-            <StatusCard showCTA={false} showButton={false} status={validPortfolioStatus} />
-            {validPortfolioStatus == "disconnected" && (
-                <Form action={action}>
-                    <RecheckButton />
-                </Form>
-            )}
+            <StatusCard status={profile.ringStatus} className="mt-4" />
+            {profile.ringStatus !== "connected" && <RingLinkCheck hasDomain={Boolean(profile.domain)} />}
 
-            {["pending", "connected"].includes(validPortfolioStatus) && (
+            {profile.ringStatus !== "disconnected" && (
                 <div className="flex">
-                    <Link href="/dashboard/verify" className="ml-auto">
-                        <Button type="button">Continue</Button>
-                    </Link>
+                    <Button asChild className="ml-auto">
+                        <Link href="/dashboard/verify">Continue</Link>
+                    </Button>
                 </div>
             )}
         </section>

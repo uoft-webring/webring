@@ -1,3 +1,9 @@
 # Dashboard
 
-The flow of state and usage of server/client components is very unique here. `/dashboard/edit` requires a lot of interactivity and state sharing and thus to minimize performance loss it uses a context with data that is server fetched. `/dashboard/join` and `/dashboard/verify` don't use the useContext and simply call the server function to obtain the data, even though a context exists. Still there is no performance loss, even though we call the backend again for the same data, as these are server components.
+Onboarding is three steps: **edit** your profile, **join** the ring (embed the prev/next widget on your
+site) and **verify** domain ownership (DNS TXT record).
+
+The layout and every page read the signed-in member through `requireOwnProfile()` (`lib/auth.ts`). It is
+wrapped in React `cache`, so the profile is fetched once per request no matter how many server components
+ask for it. `/dashboard/edit` hands that profile to a client editor that autosaves through the
+`updateProfile` server action; the action re-validates everything on the server.

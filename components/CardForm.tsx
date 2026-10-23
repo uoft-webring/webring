@@ -1,14 +1,14 @@
-import React, { Children } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
-export default function CardForm({
+export function CardForm({
     cardTitle,
     cardDescription,
     children,
 }: {
     cardTitle?: string;
     cardDescription?: string;
-} & React.ComponentPropsWithoutRef<"div">) {
+    children: React.ReactNode;
+}): React.JSX.Element {
     return (
         <div className="bg-background flex min-h-svh flex-1 flex-col items-center justify-center gap-6 rounded-xl p-6 md:p-10">
             <div className="flex w-full max-w-sm flex-col gap-6">
@@ -17,24 +17,21 @@ export default function CardForm({
                         <CardHeader className="text-center">
                             {cardTitle && (
                                 <CardTitle>
-                                    {/* For semanticity */}
                                     <h1 className="m-0 p-0 text-3xl leading-normal">{cardTitle}</h1>
                                 </CardTitle>
                             )}
                             {cardDescription && (
                                 <CardDescription>
-                                    {cardDescription.split("\n").map((line) => {
-                                        return (
-                                            <div key={line}>
-                                                {line}
-                                                <br />
-                                            </div>
-                                        );
-                                    })}
+                                    {cardDescription.split("\n").map((line) => (
+                                        <div key={line}>
+                                            {line}
+                                            <br />
+                                        </div>
+                                    ))}
                                 </CardDescription>
                             )}
                         </CardHeader>
-                        <CardContent>{Children && children}</CardContent>
+                        <CardContent>{children}</CardContent>
                     </Card>
                 </div>
             </div>
