@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => ({ headers: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({ createAdminClient: vi.fn() }));
 
-const { AUTH_LIMITS, bucketKey, clientIpFrom } = await import("@/lib/rate-limit");
+const { AUTH_LIMITS, bucketKey, clientIpFrom, inboxKey } = await import("@/lib/rate-limit");
 
 describe("bucketKey", () => {
     it("never stores the raw subject", () => {
@@ -35,5 +35,13 @@ describe("clientIpFrom", () => {
         expect(clientIpFrom(null)).toBeNull();
         expect(clientIpFrom("")).toBeNull();
         expect(clientIpFrom(" , 10.0.0.1")).toBeNull();
+    });
+});
+
+describe("inboxKey", () => {
+    it("gives plus-addressed variants one shared budget", () => {
+        expect(inboxKey("Alice+1@mail.utoronto.ca")).toBe("alice@mail.utoronto.ca");
+        expect(inboxKey(" alice+promo+x@utoronto.ca ")).toBe("alice@utoronto.ca");
+        expect(inboxKey("alice@utoronto.ca")).toBe("alice@utoronto.ca");
     });
 });

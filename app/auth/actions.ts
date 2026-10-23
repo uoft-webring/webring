@@ -5,12 +5,15 @@ import { redirect } from "next/navigation";
 import { siteUrl } from "@/lib/env";
 import { clearPendingEmail, getPendingEmail, setPendingEmail } from "@/lib/pending-email";
 import { getPostHogClient } from "@/lib/posthog-server";
-import { AUTH_LIMITS, allowOtpSend, consumeRateLimit } from "@/lib/rate-limit";
+import { allowOtpSend, allowOtpVerify } from "@/lib/rate-limit";
 import { fail, ok, type Result } from "@/lib/result";
 import { createAdminClient, createAnonClient, createClient } from "@/lib/supabase/server";
 import { emailSchema, nameSchema, otpSchema } from "@/lib/validation";
 
-const TOO_MANY_CODES = "Too many codes requested. Please try again in an hour.";
+const SEND_LIMIT_MESSAGES = {
+    inbox: "Too many codes requested. Please try again in an hour.",
+    client: "Too many requests from your network. Please try again later.",
+} as const;
 
 export type AuthFormState = {
     error: string | null;
@@ -44,7 +47,8 @@ export async function requestSignUp(_prev: AuthFormState, formData: FormData): P
     }
 
     // Before the lookup, so this also throttles probing which emails are registered
-    if (!(await allowOtpSend(email.data))) return { error: TOO_MANY_CODES, values };
+    const sendLimit = await allowOtpSend(email.data);
+    if (sendLimit !== "ok") return { error: SEND_LIMIT_MESSAGES[sendLimit], values };
 
     const { data: existing } = await createAdminClient()
         .from("profile")
@@ -78,7 +82,8 @@ export async function requestSignIn(_prev: AuthFormState, formData: FormData): P
         return { error: null, values, fieldErrors: { email: email.error.issues[0]?.message } };
     }
 
-    if (!(await allowOtpSend(email.data))) return { error: TOO_MANY_CODES, values };
+    const sendLimit = await allowOtpSend(email.data);
+    if (sendLimit !== "ok") return { error: SEND_LIMIT_MESSAGES[sendLimit], values };
 
     const { error } = await sendOtp(email.data, { createUser: false });
     if (error) {
@@ -100,7 +105,7 @@ export async function verifyOtp(code: string): Promise<Result<null>> {
 
     const email = await getPendingEmail();
     if (!email) return fail("Your code expired. Please request a new one.");
-    if (!(await consumeRateLimit(AUTH_LIMITS.otpVerifyPerEmail, email))) {
+    if (!(await allowOtpVerify(email))) {
         return fail("Too many attempts. Please wait 15 minutes and try again.");
     }
 
@@ -118,7 +123,8 @@ export async function verifyOtp(code: string): Promise<Result<null>> {
 export async function resendOtp(): Promise<Result<null>> {
     const email = await getPendingEmail();
     if (!email) return fail("Your session expired. Please start again.");
-    if (!(await allowOtpSend(email))) return fail(TOO_MANY_CODES);
+    const sendLimit = await allowOtpSend(email);
+    if (sendLimit !== "ok") return fail(SEND_LIMIT_MESSAGES[sendLimit]);
 
     // Never create accounts here: sign-up must go through requestSignUp so the name is captured
     const { error } = await sendOtp(email, { createUser: false });

@@ -5,6 +5,7 @@ create table public.auth_rate_limit (
     hits integer not null default 1,
     primary key (bucket, window_start)
 );
+comment on table public.auth_rate_limit is 'Auth rate-limit counters per hashed bucket and window, written by consume_rate_limit';
 
 create index auth_rate_limit_window_start_idx on public.auth_rate_limit (window_start);
 
