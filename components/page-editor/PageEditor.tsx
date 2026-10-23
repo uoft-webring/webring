@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { updatePageContent } from "@/app/dashboard/actions";
 import { PageHeader } from "@/components/dashboard/Panel";
 import { Markdown } from "@/components/Markdown";
+import { MonthInput } from "@/components/page-editor/MonthInput";
 import { useAutosave } from "@/components/profile-editor/useAutosave";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -464,26 +465,22 @@ export function PageEditor({
                             <div className="grid gap-3 sm:grid-cols-2">
                                 <div className="flex flex-col gap-2">
                                     <Label htmlFor={`${entry.key}-start`}>Started</Label>
-                                    <Input
+                                    <MonthInput
                                         id={`${entry.key}-start`}
-                                        type="month"
+                                        label="Started"
                                         value={entry.start}
-                                        onChange={(e) =>
-                                            patchItem("experience", entry.key, { start: e.target.value })
-                                        }
+                                        onChange={(start) => patchItem("experience", entry.key, { start })}
                                         error={errors[`${entry.key}.start`]}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-2">
                                     <Label htmlFor={`${entry.key}-end`}>Ended</Label>
-                                    <Input
+                                    <MonthInput
                                         id={`${entry.key}-end`}
-                                        type="month"
+                                        label="Ended"
                                         value={entry.end}
                                         disabled={entry.ongoing}
-                                        onChange={(e) =>
-                                            patchItem("experience", entry.key, { end: e.target.value })
-                                        }
+                                        onChange={(end) => patchItem("experience", entry.key, { end })}
                                         error={errors[`${entry.key}.end`]}
                                     />
                                 </div>
