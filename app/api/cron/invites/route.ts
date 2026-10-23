@@ -52,10 +52,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<In
             continue;
         }
         failed++;
-        // Maybe delivered: leave it as invited. We promise strangers a single email
-        if (outcome === "unknown") continue;
-        // Definitely not sent: back to approved so the next run retries, unless the owner has
-        // changed the status in the meantime
+        // Maybe delivered, or can never be: leave it as invited. We promise strangers a single
+        // email, and a bad address shouldn't be retried forever
+        if (outcome !== "retryable") continue;
+        // Not sent, for a reason that may clear: back to approved so the next run retries, unless
+        // the owner has changed the status in the meantime
         const { error: releaseError } = await admin
             .from("invite_candidate")
             .update({ status: "approved", invited_at: null })
