@@ -1,4 +1,5 @@
 import "server-only";
+import { SendEmailCommand, SESv2Client } from "@aws-sdk/client-sesv2";
 import { serverEnv } from "@/lib/env";
 
 export type EmailMessage = {
@@ -8,54 +9,79 @@ export type EmailMessage = {
     text: string;
     /** One-click unsubscribe endpoint (RFC 8058); Gmail and Yahoo require it for bulk mail. */
     oneClickUnsubscribeUrl: string;
-    /** Resend drops a repeat of the same key within 24h, so a retried send can't deliver twice. */
-    idempotencyKey: string;
 };
 
 /**
- * `retryable`: not delivered, for a reason that may clear (no key yet, auth, rate limit): retry later.
- * `permanent`: not delivered and never will be (e.g. 422 invalid recipient): don't retry.
+ * `retryable`: not delivered, for a reason that may clear (throttling, credentials, SES sandbox or
+ * paused sending): retry later.
+ * `permanent`: not delivered and never will be (e.g. a malformed address): don't retry.
  * `unknown`: a timeout, network error or 5xx; it may have been delivered, so never retry.
  */
 export type SendOutcome = "sent" | "retryable" | "permanent" | "unknown";
 
-const RETRYABLE_STATUSES = new Set([401, 403, 429]);
+// SES refusals that say nothing about the message itself. MessageRejected is here because the SES
+// sandbox uses it for "recipient not verified", which clears once production access is granted.
+const RETRYABLE_ERRORS = new Set([
+    "TooManyRequestsException",
+    "LimitExceededException",
+    "ThrottlingException",
+    "SendingPausedException",
+    "AccountSuspendedException",
+    "MailFromDomainNotVerifiedException",
+    "MessageRejected",
+    "AccessDeniedException",
+    "UnrecognizedClientException",
+    "InvalidClientTokenId",
+    "ExpiredTokenException",
+    "SignatureDoesNotMatch",
+]);
 
-/** Sends through Resend's HTTP API. Never throws: callers decide what a failed send means. */
-export async function sendEmail(message: EmailMessage): Promise<SendOutcome> {
+/** What a failed SES call means for retrying. Exported for tests. */
+export function classifySendError(error: unknown): Exclude<SendOutcome, "sent"> {
+    const name = error instanceof Error ? error.name : "";
+    if (RETRYABLE_ERRORS.has(name)) return "retryable";
+    const status = (error as { $metadata?: { httpStatusCode?: number } } | null)?.$metadata?.httpStatusCode;
+    return status !== undefined && status < 500 ? "permanent" : "unknown";
+}
+
+let client: SESv2Client | undefined;
+
+function ses(): SESv2Client {
     const env = serverEnv();
-    if (!env.RESEND_API_KEY) return "retryable";
+    client ??= new SESv2Client({
+        region: env.AWS_SES_REGION ?? env.AWS_REGION,
+        credentials: { accessKeyId: env.AWS_ACCESS_KEY_ID, secretAccessKey: env.AWS_SECRET_ACCESS_KEY },
+        // The SDK retries timeouts and 5xx by default, which could deliver a message twice
+        maxAttempts: 1,
+    });
+    return client;
+}
 
+/** Sends through Amazon SES. Never throws: callers decide what a failed send means. */
+export async function sendEmail(message: EmailMessage): Promise<SendOutcome> {
     try {
-        const response = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                authorization: `Bearer ${env.RESEND_API_KEY}`,
-                "content-type": "application/json",
-                "idempotency-key": message.idempotencyKey,
-            },
-            body: JSON.stringify({
-                from: env.EMAIL_FROM,
-                to: [message.to],
-                subject: message.subject,
-                html: message.html,
-                text: message.text,
-                headers: {
-                    "List-Unsubscribe": `<${message.oneClickUnsubscribeUrl}>`,
-                    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+        await ses().send(
+            new SendEmailCommand({
+                FromEmailAddress: serverEnv().EMAIL_FROM,
+                Destination: { ToAddresses: [message.to] },
+                Content: {
+                    Simple: {
+                        Subject: { Data: message.subject, Charset: "UTF-8" },
+                        Body: { Html: { Data: message.html, Charset: "UTF-8" }, Text: { Data: message.text, Charset: "UTF-8" } },
+                        Headers: [
+                            { Name: "List-Unsubscribe", Value: `<${message.oneClickUnsubscribeUrl}>` },
+                            { Name: "List-Unsubscribe-Post", Value: "List-Unsubscribe=One-Click" },
+                        ],
+                    },
                 },
             }),
-            signal: AbortSignal.timeout(8_000),
-        });
-        if (response.ok) return "sent";
-        // Only the error name: Resend's messages can quote the recipient's address
-        const { name } = (await response.json().catch(() => ({}))) as { name?: string };
-        console.error("[email] Resend refused a message:", response.status, name ?? "");
-        if (response.status >= 500) return "unknown";
-        return RETRYABLE_STATUSES.has(response.status) ? "retryable" : "permanent";
+            { abortSignal: AbortSignal.timeout(8_000) }
+        );
+        return "sent";
     } catch (error) {
-        console.error("[email] Resend request failed:", error instanceof Error ? error.name : "unknown error");
-        return "unknown";
+        // Only the error name: SES messages can quote the recipient's address
+        console.error("[email] SES send failed:", error instanceof Error ? error.name : "unknown error");
+        return classifySendError(error);
     }
 }
 

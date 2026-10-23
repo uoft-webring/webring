@@ -26,8 +26,8 @@ type ClaimedMember = {
 // Counts only: Actions logs on a public repo are public, so this must never include emails
 type ReminderRun = { mode: "dry-run" | "send"; due: number; sent: number; failed: number };
 
-// Resend's default limit is 2 requests a second
-const SEND_GAP_MS = 600;
+// SES starts accounts at 1 email a second
+const SEND_GAP_MS = 1100;
 
 /** Called by .github/workflows/reminders.yml. `?mode=send` emails people; anything else is a dry run. */
 export async function POST(request: NextRequest): Promise<NextResponse<Result<ReminderRun>>> {
@@ -41,8 +41,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
     }
 
     const mode = request.nextUrl.searchParams.get("mode") === "send" ? "send" : "dry-run";
-    if (mode === "send" && !env.RESEND_API_KEY) {
-        return NextResponse.json(fail("RESEND_API_KEY is not set."), { status: 500 });
+    // Local and preview deployments can hold real members' data and AWS keys: only production emails
+    if (mode === "send" && env.VERCEL_ENV !== "production") {
+        return NextResponse.json(fail("Sending only runs on the production deployment."), { status: 403 });
     }
 
     const admin = createAdminClient();
@@ -82,8 +83,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
             to: member.email,
             ...message,
             oneClickUnsubscribeUrl: unsubscribe.oneClick,
-            // Same key for every attempt in this 8-month cycle
-            idempotencyKey: `reminder-${member.id}-${member.previous_reminded_at ?? "first"}`,
         });
 
         if (outcome === "sent") {

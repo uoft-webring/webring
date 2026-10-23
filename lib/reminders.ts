@@ -3,8 +3,8 @@ import { isLinkableDomain } from "@/lib/profiles/ring";
 import type { RingStatus } from "@/lib/profiles/types";
 
 /**
- * Members claimed per run. Small enough that 25 × (8s timeout + pause) fits Vercel's 300s limit,
- * and inside Resend's free 100 emails a day alongside invites.
+ * Members claimed per run: small enough that 25 × (8s timeout + pause) fits Vercel's 300s limit,
+ * and well inside SES's starting quota of 200 emails a day, invites included.
  */
 export const REMINDER_BATCH_SIZE = 25;
 
