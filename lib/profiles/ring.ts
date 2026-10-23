@@ -5,6 +5,24 @@ export function ringMembers(profiles: PublicProfile[]): PublicProfile[] {
     return profiles.filter((profile) => isLinkableDomain(profile.domain));
 }
 
+/**
+ * Whether a /redirect request is a real visitor clicking the member's widget on their own site:
+ * the browser says it's a cross-site navigation (fetch metadata a page's script can't forge), and
+ * the referring page is on the member's domain (ignoring www.).
+ */
+export function isOwnSiteReferral(
+    headers: { referer: string | null; fetchMode: string | null; fetchSite: string | null },
+    memberDomain: string
+): boolean {
+    if (headers.fetchMode !== "navigate" || headers.fetchSite !== "cross-site" || !headers.referer) return false;
+    try {
+        const host = (url: string) => new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+        return host(headers.referer) === host(memberDomain);
+    } catch {
+        return false;
+    }
+}
+
 export function isLinkableDomain(domain: string): boolean {
     try {
         return ["http:", "https:"].includes(new URL(domain).protocol);
