@@ -5,7 +5,18 @@ if (!cloudfrontDomain) {
     throw new Error("Missing env var: NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN");
 }
 
+// Only directives that can't break rendering. A script-src policy would need per-request nonces,
+// which forces every page dynamic (the root layout must stay static), and would have to track
+// PostHog and the 3D scene's runtime-loaded font and workers.
+const contentSecurityPolicy = [
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+].join("; ");
+
 const securityHeaders = [
+    { key: "Content-Security-Policy", value: contentSecurityPolicy },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
     { key: "X-Frame-Options", value: "DENY" },
