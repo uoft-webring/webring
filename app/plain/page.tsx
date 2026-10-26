@@ -90,17 +90,18 @@ export default async function PlainPage() {
         >
             <nav
                 aria-label="About the webring"
-                className="absolute top-4 right-4 z-10 flex flex-col items-end gap-1 font-[family-name:var(--font-plain-mono)] text-xs italic sm:top-6 sm:right-6"
+                // Phones: a row above the header, since pinned top-right it covered the "University of Toronto" line
+                className="flex justify-end gap-4 px-4 pt-3 font-[family-name:var(--font-plain-mono)] text-xs italic sm:absolute sm:top-6 sm:right-6 sm:z-10 sm:flex-col sm:items-end sm:gap-1 sm:p-0"
             >
-                <Link href="/manifesto" className={`${linkClass} bg-[#f3f6fb]/80 px-1`}>
+                <Link href="/manifesto" className={`${linkClass} bg-[#f3f6fb]/80 px-1 py-1 sm:py-0`}>
                     what&apos;s a webring?
                 </Link>
-                <Link href="/signup" className={`${linkClass} bg-[#f3f6fb]/80 px-1`}>
+                <Link href="/signup" className={`${linkClass} bg-[#f3f6fb]/80 px-1 py-1 sm:py-0`}>
                     how can i join?
                 </Link>
             </nav>
 
-            <main className="mx-auto max-w-[110rem] px-4 pt-6 pb-20 sm:px-6">
+            <main className="mx-auto max-w-[110rem] px-4 pt-3 pb-20 sm:px-6 sm:pt-6">
                 <PlainRing
                     members={members}
                     intro={intro}

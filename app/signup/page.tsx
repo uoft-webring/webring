@@ -34,7 +34,7 @@ export default async function SignUpPage() {
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
-            <Navbar authAction="signin" />
+            <Navbar authAction="signin" crossPromo={false} />
             <CardForm
                 cardTitle="Welcome"
                 cardDescription="Enter your full name and your email to join the community."

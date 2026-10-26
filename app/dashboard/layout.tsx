@@ -18,7 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
-            <Navbar user={profile} />
+            <Navbar user={profile} crossPromo={false} />
             <div className="mx-auto flex w-full max-w-[85rem] flex-1 flex-col gap-6 px-6 pt-4 pb-16 md:flex-row md:gap-10">
                 <aside className="flex flex-col gap-5 md:sticky md:top-6 md:-ml-3 md:w-56 md:shrink-0 md:self-start lg:w-64">
                     <p className="flex flex-col md:px-3">

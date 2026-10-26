@@ -1,8 +1,9 @@
 "use client";
 
 import { Billboard, OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 // Import the module directly: the examples/jsm/Addons.js barrel pulls in every three.js addon
@@ -12,12 +13,16 @@ import type { PublicProfile } from "@/lib/profiles/types";
 import { displayDomain } from "@/lib/site";
 import { Button } from "../ui/button";
 import {
+    CAMERA_DIP,
+    CAMERA_LIFT,
+    cameraDistanceScale,
     getSpherePosition,
     getXPosition,
     PLANE_DENSITY,
     PLANE_NOISE_AMPLITUDE,
     PLANE_SIZE,
     ROTATION_SPEED,
+    SCENE_HEIGHT_CLASS,
 } from "./ringUtils";
 
 // One geometry and material shared by every sphere instead of one pair per member
@@ -92,6 +97,13 @@ function NoisyPlane() {
 function Scene({ members, still }: { members: PublicProfile[]; still: boolean }) {
     const ringRef = useRef<THREE.Group>(null);
     const spins = members.map((_, index) => sphereSpin(index));
+    // Measured once: tying it to the live size would re-render the scene on every resize and snap the
+    // camera back (losing the user's orbit) whenever the canvas changes shape, e.g. the expand animation
+    const getState = useThree((state) => state.get);
+    const [distance] = useState(() => {
+        const { width, height } = getState().size;
+        return cameraDistanceScale(width / height);
+    });
 
     // One frame callback for the whole ring instead of one per member
     useFrame((_, delta) => {
@@ -109,8 +121,21 @@ function Scene({ members, still }: { members: PublicProfile[]; still: boolean })
 
     return (
         <>
-            <PerspectiveCamera makeDefault fov={40} position={[getXPosition(members.length), 0, 20]} />
-            <OrbitControls makeDefault enablePan={false} rotateSpeed={0.3} />
+            <PerspectiveCamera
+                makeDefault
+                fov={40}
+                position={[
+                    getXPosition(members.length) * distance,
+                    (distance - 1) * CAMERA_LIFT,
+                    20 * distance,
+                ]}
+            />
+            <OrbitControls
+                makeDefault
+                enablePan={false}
+                rotateSpeed={0.3}
+                target={[0, -(distance - 1) * CAMERA_DIP, 0]}
+            />
             <NoisyPlane />
             <group ref={ringRef} position={[0, -2, 0]}>
                 {members.map((member, index) => (
@@ -126,7 +151,13 @@ function Scene({ members, still }: { members: PublicProfile[]; still: boolean })
 }
 
 /** `still` (reduced motion) renders the same scene without the constant spin; dragging still works. */
-export function WebRing({ members, still = false }: { members: PublicProfile[]; still?: boolean }): React.JSX.Element {
+export function WebRing({
+    members,
+    still = false,
+}: {
+    members: PublicProfile[];
+    still?: boolean;
+}): React.JSX.Element {
     const [fullSize, setFullSize] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(true);
@@ -147,7 +178,7 @@ export function WebRing({ members, still = false }: { members: PublicProfile[]; 
             ref={containerRef}
             className={cn(
                 "relative mb-8 flex w-full max-w-svw flex-col items-center justify-center transition-all",
-                fullSize ? "h-[calc(100svh-6rem)]" : "h-[max(12rem,calc(100svh-36rem))]"
+                fullSize ? "h-[calc(100svh-6rem)]" : SCENE_HEIGHT_CLASS
             )}
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
@@ -156,14 +187,17 @@ export function WebRing({ members, still = false }: { members: PublicProfile[]; 
                 // Cap the pixel ratio: 3x phone screens otherwise render 9x the pixels for no visible gain
                 dpr={[1, 1.5]}
                 gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-                className="h-full w-full"
+                // OrbitControls sets an inline touch-action: none on this wrapper (r3f's event target), so a swipe
+                // starting on the scene couldn't scroll the page on phones. pan-y (important beats inline) hands
+                // vertical swipes back to the browser; horizontal drags still spin the ring.
+                className="h-full w-full touch-pan-y!"
                 // "demand" only re-renders on interaction, so a still ring costs nothing at rest
                 frameloop={!isVisible ? "never" : still ? "demand" : "always"}
                 aria-label="3D view of the sites in the ring"
             >
                 <Scene members={members} still={still} />
             </Canvas>
-            <div className="mt-2 flex max-h-fit w-full flex-col items-center justify-center">
+            <div className="mt-2 flex max-h-fit w-full items-center justify-center gap-3">
                 <Button
                     className="rounded-xl px-8 py-2 sm:px-6"
                     size="icon"
@@ -173,6 +207,10 @@ export function WebRing({ members, still = false }: { members: PublicProfile[]; 
                     aria-expanded={fullSize}
                 >
                     {fullSize ? <ChevronUp className="size-8" /> : <ChevronDown className="size-8" />}
+                </Button>
+                {/* The way out for anyone who'd rather skip the 3D scene; the footer link is buried on phones */}
+                <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
+                    <Link href="/plain">Plain version</Link>
                 </Button>
             </div>
         </div>
