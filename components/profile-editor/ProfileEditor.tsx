@@ -162,15 +162,17 @@ export function ProfileEditor({ initialProfile }: { initialProfile: OwnProfile }
                         <Input
                             id="graduationYear"
                             name="graduationYear"
-                            type="number"
+                            // Not type="number": Firefox accepts letters there and reports the value as empty,
+                            // so "2029a" would silently save no year. Keep digits only instead.
+                            type="text"
                             inputMode="numeric"
+                            autoComplete="off"
+                            maxLength={4}
                             placeholder="2029"
-                            min={1900}
-                            max={2100}
                             value={values.graduationYear ?? ""}
                             onChange={(e) => {
-                                const year = e.currentTarget.valueAsNumber;
-                                update({ graduationYear: Number.isNaN(year) ? null : year });
+                                const digits = e.currentTarget.value.replace(/\D/g, "").slice(0, 4);
+                                update({ graduationYear: digits ? Number(digits) : null });
                             }}
                             error={errors.graduationYear}
                         />

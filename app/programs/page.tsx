@@ -6,11 +6,15 @@ import { collectTopics } from "@/lib/profiles/topics";
 
 const description = "UofT Webring members by program of study.";
 
+// Search snippet: says who and what in words people search for. The page keeps its shorter intro
+const metaDescription =
+    "Personal websites of University of Toronto students, grouped by program: Computer Science, Engineering, Mathematics and more.";
+
 export const metadata: Metadata = {
     title: "Programs",
-    description,
+    description: metaDescription,
     alternates: { canonical: "/programs" },
-    openGraph: { title: "Programs - UofT Webring", description, url: "/programs" },
+    openGraph: { title: "Programs - UofT Webring", description: metaDescription, url: "/programs" },
 };
 
 export default async function ProgramsIndexPage() {

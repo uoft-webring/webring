@@ -1,3 +1,4 @@
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 
 const cloudfrontDomain = process.env.NEXT_PUBLIC_AWS_CLOUDFRONT_DOMAIN;
@@ -63,4 +64,45 @@ const nextConfig: NextConfig = {
     skipTrailingSlashRedirect: true,
 };
 
-export default nextConfig;
+const posthogPersonalApiKey = process.env.POSTHOG_PERSONAL_API_KEY;
+
+// Uploads source maps to PostHog so error stack traces read as source, not minified chunks. Only builds
+// with the key (Vercel production) upload; elsewhere the build is unchanged. Maps are deleted after
+// upload so they're never served publicly.
+// withPostHogConfig's types say NextConfig, but it returns Next's (phase, ctx) config function
+const withPostHog = withPostHogConfig(nextConfig, {
+    personalApiKey: posthogPersonalApiKey ?? "",
+    projectId: "419642",
+    host: "https://us.posthog.com",
+    sourcemaps: {
+        enabled: Boolean(posthogPersonalApiKey),
+        deleteAfterUpload: true,
+    },
+}) as unknown as (phase: string, ctx: { defaultConfig: NextConfig }) => Promise<NextConfig>;
+
+// An analytics side task must never block a deploy: under Turbopack the plugin fails the build on any
+// upload error (PostHog down, key revoked), so a failure only logs and the build carries on.
+export default async function config(phase: string, ctx: { defaultConfig: NextConfig }): Promise<NextConfig> {
+    let withUpload: NextConfig;
+    try {
+        withUpload = await withPostHog(phase, ctx);
+    } catch (error) {
+        console.warn("[posthog] Source map setup failed; building without upload.", error);
+        return nextConfig;
+    }
+    const upload = withUpload.compiler?.runAfterProductionCompile;
+    if (!upload) return withUpload;
+    return {
+        ...withUpload,
+        compiler: {
+            ...withUpload.compiler,
+            runAfterProductionCompile: async (...args) => {
+                try {
+                    await upload(...args);
+                } catch (error) {
+                    console.warn("[posthog] Source map upload failed; deploying without it.", error);
+                }
+            },
+        },
+    };
+}

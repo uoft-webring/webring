@@ -255,3 +255,14 @@ body {
         }
     }
 }
+
+/* Home carousel: alice lays slides out as inline-blocks, so the stage takes the tallest slide's height and
+   a short visible card leaves a gap under it. A flex stage stretches every slide to that one height. */
+.profile-carousel .alice-carousel__stage {
+    display: flex;
+}
+
+.profile-carousel .alice-carousel__stage-item {
+    flex-shrink: 0;
+    height: auto;
+}

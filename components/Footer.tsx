@@ -1,4 +1,5 @@
 import pkg from "@/package.json";
+import { uoftIndexUrl } from "@/lib/uoftindex";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Image from "next/image";
 import logo from "@/public/logo.png";
@@ -98,7 +99,7 @@ export function Footer(): React.JSX.Element {
                                 </li>
                                 <li>
                                     <a
-                                        href="https://uoftindex.com"
+                                        href={uoftIndexUrl("footer")}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="dark:text-muted-foreground inline-flex items-center gap-1 text-base text-gray-600 hover:text-gray-900 dark:hover:text-white"
@@ -170,7 +171,7 @@ export function Footer(): React.JSX.Element {
                                         </li>
                                         <li>
                                             <a
-                                                href="https://uoftindex.com"
+                                                href={uoftIndexUrl("footer")}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-base text-gray-600 dark:text-gray-400"
