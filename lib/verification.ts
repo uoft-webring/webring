@@ -211,10 +211,6 @@ export function hasRingWidget(html: string, ringId: number): boolean {
     return analyzeRingWidget(html, ringId) === "found";
 }
 
-export async function checkRingWidget(domain: string, ringId: number): Promise<RingWidgetResult> {
-    return (await probeRingWidget(domain, ringId)).result;
-}
-
 /** A widget check plus how the site answered, for link-health stats. */
 export type RingProbe = { result: RingWidgetResult; httpStatus: number | null; latencyMs: number };
 

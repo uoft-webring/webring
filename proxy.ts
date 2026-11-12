@@ -2,14 +2,14 @@ import { createHmac } from "node:crypto";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
-import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
-import { clientIpFrom } from "@/lib/client-ip";
 import {
-    DOWN_AFTER_FAILED_CHECKS,
-    findRingDestination,
-    isOwnSiteReferral,
-    ringMembers,
-} from "@/lib/profiles/ring";
+    PUBLIC_PROFILE_COLUMNS,
+    RING_HEALTH_COLUMNS,
+    toPublicProfile,
+    type PublicProfileRow,
+} from "@/lib/profiles/mapper";
+import { clientIpFrom } from "@/lib/client-ip";
+import { findRingDestination, isLinkableDomain, isOwnSiteReferral, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -20,7 +20,10 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const RING_TTL_MS = 60_000;
 // During a DB outage, retry at most this often instead of paying a failing query on every click
 const RING_ERROR_BACKOFF_MS = 5_000;
-let ringCache: { members: PublicProfile[]; expires: number } | undefined;
+// `members` is the ring (down sites left out); `sources` also keeps down sites, because a click from a
+// member's site still credits them (and proves the site is up) even while the checker thinks it's down
+type Ring = { members: PublicProfile[]; sources: PublicProfile[] };
+let ringCache: (Ring & { expires: number }) | undefined;
 
 function adminClient() {
     return createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -28,31 +31,32 @@ function adminClient() {
     });
 }
 
-type RingRow = PublicProfileRow & { ring_link_state: { consecutive_unreachable: number } | null };
-
-async function loadRing(): Promise<PublicProfile[]> {
-    if (ringCache && ringCache.expires > Date.now()) return ringCache.members;
+async function loadRing(): Promise<Ring> {
+    if (ringCache && ringCache.expires > Date.now()) return ringCache;
 
     const { data, error } = await adminClient()
         .from("profile")
-        .select(`${PUBLIC_PROFILE_COLUMNS}, ring_link_state(consecutive_unreachable)`)
+        .select(`${PUBLIC_PROFILE_COLUMNS}, ${RING_HEALTH_COLUMNS}`)
         .order("ring_id", { ascending: true })
-        .returns<RingRow[]>();
+        .returns<PublicProfileRow[]>();
 
     if (error) {
         console.error("[redirect] Failed to load ring:", error.message);
         // Serve stale data rather than dropping visitors on the home page
-        const members = ringCache?.members ?? [];
-        ringCache = { members, expires: Date.now() + RING_ERROR_BACKOFF_MS };
-        return members;
+        ringCache = {
+            members: ringCache?.members ?? [],
+            sources: ringCache?.sources ?? [],
+            expires: Date.now() + RING_ERROR_BACKOFF_MS,
+        };
+        return ringCache;
     }
-    const isUp = (row: RingRow) =>
-        (row.ring_link_state?.consecutive_unreachable ?? 0) < DOWN_AFTER_FAILED_CHECKS;
-    const up = ringMembers(data.filter(isUp).map(toPublicProfile));
-    // Every site down at once means the checker broke, not the sites: keep the whole ring
-    const members = up.length > 0 ? up : ringMembers(data.map(toPublicProfile));
-    ringCache = { members, expires: Date.now() + RING_TTL_MS };
-    return members;
+    const profiles = data.map(toPublicProfile);
+    ringCache = {
+        members: ringMembers(profiles),
+        sources: profiles.filter((profile) => isLinkableDomain(profile.domain)),
+        expires: Date.now() + RING_TTL_MS,
+    };
+    return ringCache;
 }
 
 // Crawlers and link unfurlers follow widget links too; they'd swamp the members' stats
@@ -98,13 +102,13 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     const id = Number.isNaN(parsed) ? 0 : parsed;
     const exactId = /^\d{1,9}$/.test(rawId);
 
-    const members = await loadRing();
+    const { members, sources } = await loadRing();
     const destination = findRingDestination(members, id, nav);
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {
         // Only credit real members as the source, so made-up ids can't create stats rows
-        const source = exactId ? members.find((member) => member.ringId === id) : undefined;
+        const source = exactId ? sources.find((member) => member.ringId === id) : undefined;
         const from = source ? id : null;
         // A one-member ring sends visitors back to the same site: not a hop between members
         if (from !== destination.ringId) {

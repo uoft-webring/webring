@@ -60,3 +60,16 @@ describe("ringMembers", () => {
         expect(ringMembers(profiles).map((profile) => profile.ringId)).toEqual([1]);
     });
 });
+
+describe("ringMembers: link health", () => {
+    const down = (ringId: number) => ({ ...member(ringId), siteDown: true });
+
+    it("leaves out sites that are down", () => {
+        expect(ringMembers([member(0), down(1), member(2)]).map((m) => m.ringId)).toEqual([0, 2]);
+    });
+
+    it("ignores health when over half the ring looks down", () => {
+        expect(ringMembers([member(0), down(1), down(2)]).map((m) => m.ringId)).toEqual([0, 1, 2]);
+        expect(ringMembers([down(0), member(1)]).map((m) => m.ringId)).toEqual([1]);
+    });
+});

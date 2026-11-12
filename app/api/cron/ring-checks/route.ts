@@ -46,6 +46,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
             run.failed++;
             return;
         }
+        // Others get a health check only: never reverse an admin's rejection or connect an unreviewed site
+        if (member.status !== "connected" && member.status !== "pending") return;
         const next = statusAfterRecheck(member.status, result, state.consecutiveFailures, state.lastClickVerifiedAt);
         if (next === member.status) return;
         const { error: updateError } = await admin

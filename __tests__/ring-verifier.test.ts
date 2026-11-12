@@ -61,6 +61,11 @@ describe("statusAfterCheck", () => {
 });
 
 describe("statusAfterRecheck", () => {
+    it("never moves a member on an outage: that's the health streak's job", () => {
+        expect(statusAfterRecheck("connected", "unreachable", 5, null)).toBe("connected");
+        expect(statusAfterRecheck("pending", "unreachable", 5, null)).toBe("pending");
+    });
+
     const now = new Date("2026-10-23T12:00:00Z");
     const daysAgo = (days: number) => new Date(now.getTime() - days * 86_400_000);
 

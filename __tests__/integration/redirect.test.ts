@@ -216,23 +216,27 @@ describe("/redirect visit recording", () => {
 });
 
 describe("/redirect link health", () => {
-    it("skips a site that failed its last two checks, and keeps one that failed once", async () => {
-        setRing([
-            member(1, ALICE),
-            { ...member(2, BOB), ring_link_state: { consecutive_unreachable: 2 } },
-            { ...member(3, CAROL), ring_link_state: { consecutive_unreachable: 1 } },
-        ]);
+    const down = (row: Record<string, unknown>, checks: number) => ({
+        ...row,
+        ring_link_state: { consecutive_down: checks },
+    });
+
+    it("skips a site that was down on its last two checks, and keeps one that was down once", async () => {
+        setRing([member(1, ALICE), down(member(2, BOB), 2), down(member(3, CAROL), 1)]);
         expect((await visit("?nav=next&id=1")).location).toBe(`${CAROL}/`);
         expect((await visit("?nav=prev&id=3")).location).toBe(`${ALICE}/`);
     });
 
-    it("keeps the whole ring when every site looks down (the checker is the likelier fault)", async () => {
-        setRing(
-            [1, 2, 3].map((id) => ({
-                ...member(id, [ALICE, BOB, CAROL][id - 1]),
-                ring_link_state: { consecutive_unreachable: 5 },
-            }))
-        );
+    it("ignores health when over half the ring looks down (the checker is the likelier fault)", async () => {
+        setRing([member(1, ALICE), down(member(2, BOB), 2), down(member(3, CAROL), 5)]);
         expect((await visit("?nav=next&id=1")).location).toBe(`${BOB}/`);
+    });
+
+    it("still credits the hop when the visitor clicks from a site marked down", async () => {
+        setRing([member(1, ALICE), down(member(2, BOB), 2), member(3, CAROL)]);
+        const { location, waits } = await visit("?nav=next&id=2");
+        await Promise.all(waits);
+        expect(location).toBe(`${CAROL}/`);
+        expect(ring.rpc).toHaveBeenCalledWith("record_ring_hop", { from_ring_id: 2, to_ring_id: 3 });
     });
 });

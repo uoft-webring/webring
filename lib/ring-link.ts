@@ -54,7 +54,8 @@ export function statusAfterRecheck(
     now: Date = new Date()
 ): RingStatus {
     if (result === "found") return "connected";
-    if (current !== "connected") return current;
+    // An outage says nothing about the widget (and has its own streak, which takes the site out of the ring)
+    if (result === "unreachable" || current !== "connected") return current;
     const recentClick =
         lastClickVerifiedAt !== null && now.getTime() - lastClickVerifiedAt.getTime() < CLICK_PROOF_DAYS * 86_400_000;
     return consecutiveFailures >= 2 && !recentClick ? "pending" : "connected";

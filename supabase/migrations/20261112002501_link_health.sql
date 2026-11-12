@@ -1,11 +1,12 @@
 -- Link health: how each ring site answered its last check, plus a 90-day log for uptime stats.
--- A site that fails to load on two checks in a row is skipped by /redirect until it loads again
--- (DOWN_AFTER_FAILED_CHECKS in lib/profiles/ring.ts); down sites are re-checked daily so they rejoin fast.
+-- A site that is down (no answer, 5xx, 404/410) on two checks in a row leaves the ring until it's back
+-- (ringMembers in lib/profiles/ring.ts); down sites are re-checked daily, first, so they rejoin fast.
 
 alter table public.ring_link_state
     add column last_http_status integer,
     add column last_latency_ms integer,
-    add column consecutive_unreachable integer not null default 0;
+    -- Checks in a row with no answer, a 5xx, or 404/410. A 401/403/429 is bot protection, not a dead site
+    add column consecutive_down integer not null default 0;
 
 create table public.ring_check_log (
     -- Surrogate key: now() is per transaction, so two checks in one transaction share a timestamp
@@ -38,25 +39,31 @@ as $$
         where l.profile_id = member and l.checked_at < now() - interval '90 days'
     )
     insert into public.ring_link_state as s
-        (profile_id, last_checked_at, last_result, consecutive_failures, last_http_status, last_latency_ms, consecutive_unreachable)
+        (profile_id, last_checked_at, last_result, consecutive_failures, last_http_status, last_latency_ms, consecutive_down)
     values (
         member, now(), record_ring_check.result,
-        case when record_ring_check.result = 'found' then 0 else 1 end,
+        -- An outage says nothing about the widget: it has its own streak below
+        case when record_ring_check.result in ('found', 'unreachable') then 0 else 1 end,
         status_code, elapsed_ms,
-        case when record_ring_check.result = 'unreachable' then 1 else 0 end
+        case when record_ring_check.result = 'unreachable'
+              and (status_code is null or status_code >= 500 or status_code in (404, 410)) then 1 else 0 end
     )
     on conflict (profile_id) do update set
         last_checked_at = now(),
         last_result = excluded.last_result,
-        consecutive_failures = case when excluded.last_result = 'found' then 0 else s.consecutive_failures + 1 end,
+        consecutive_failures = case excluded.last_result
+            when 'found' then 0
+            when 'unreachable' then s.consecutive_failures
+            else s.consecutive_failures + 1 end,
         last_http_status = excluded.last_http_status,
         last_latency_ms = excluded.last_latency_ms,
-        consecutive_unreachable = case when excluded.last_result = 'unreachable' then s.consecutive_unreachable + 1 else 0 end
+        -- excluded.consecutive_down is 1 exactly when this check counts as down
+        consecutive_down = case when excluded.consecutive_down = 1 then s.consecutive_down + 1 else 0 end
     returning s.consecutive_failures, s.last_click_verified_at;
 $$;
 
--- Every site /redirect can land on (any http(s) domain, not only connected ones) is due weekly;
--- a site that's down is due again after 20 hours, so it rejoins the ring within a day of coming back.
+-- Every site the ring can land on (any http(s) domain) is due weekly for a health check; only connected
+-- and pending members' statuses change (the route skips the rest). Down sites are due again after 20 hours.
 create or replace function public.ring_checks_due(max_count integer)
 returns table (id uuid, ring_id integer, domain text, status public.validation_state)
 language sql
@@ -69,8 +76,9 @@ as $$
     where p.domain ~ '^https?://'
       and (s.last_checked_at is null
            or s.last_checked_at < now() - interval '6 days'
-           or (s.consecutive_unreachable > 0 and s.last_checked_at < now() - interval '20 hours'))
-    order by s.last_checked_at nulls first, p.ring_id
+           or (s.consecutive_down > 0 and s.last_checked_at < now() - interval '20 hours'))
+    -- Down sites first, so a busy week can't delay the re-check that brings them back
+    order by coalesce(s.consecutive_down, 0) > 0 desc, s.last_checked_at nulls first, p.ring_id
     limit max_count;
 $$;
 

@@ -7,7 +7,8 @@ create table public.ring_link_state (
     last_click_verified_at timestamptz,
     last_http_status integer,
     last_latency_ms integer,
-    consecutive_unreachable integer not null default 0
+    -- Checks in a row with no answer, a 5xx, or 404/410. A 401/403/429 is bot protection, not a dead site
+    consecutive_down integer not null default 0
 );
 
 create table public.ring_check_log (
@@ -20,6 +21,9 @@ create table public.ring_check_log (
     latency_ms integer
 );
 create index ring_check_log_profile_checked on public.ring_check_log (profile_id, checked_at);
+comment on table public.ring_check_log is 'Every ring site check, kept 90 days, for uptime and latency stats';
+
+comment on table public.ring_link_state is 'Ring widget checks per member, written by the server';
 
 create table public.ring_click_evidence (
     profile_id uuid not null references public.profile (id) on delete cascade,
@@ -28,6 +32,7 @@ create table public.ring_click_evidence (
     seen_at timestamptz not null default now(),
     primary key (profile_id, client_hash)
 );
+comment on table public.ring_click_evidence is 'Hashed clients who clicked a member''s widget on their own site';
 
 alter table public.ring_link_state enable row level security;
 alter table public.ring_click_evidence enable row level security;
@@ -92,20 +97,26 @@ as $$
         where l.profile_id = member and l.checked_at < now() - interval '90 days'
     )
     insert into public.ring_link_state as s
-        (profile_id, last_checked_at, last_result, consecutive_failures, last_http_status, last_latency_ms, consecutive_unreachable)
+        (profile_id, last_checked_at, last_result, consecutive_failures, last_http_status, last_latency_ms, consecutive_down)
     values (
         member, now(), record_ring_check.result,
-        case when record_ring_check.result = 'found' then 0 else 1 end,
+        -- An outage says nothing about the widget: it has its own streak below
+        case when record_ring_check.result in ('found', 'unreachable') then 0 else 1 end,
         status_code, elapsed_ms,
-        case when record_ring_check.result = 'unreachable' then 1 else 0 end
+        case when record_ring_check.result = 'unreachable'
+              and (status_code is null or status_code >= 500 or status_code in (404, 410)) then 1 else 0 end
     )
     on conflict (profile_id) do update set
         last_checked_at = now(),
         last_result = excluded.last_result,
-        consecutive_failures = case when excluded.last_result = 'found' then 0 else s.consecutive_failures + 1 end,
+        consecutive_failures = case excluded.last_result
+            when 'found' then 0
+            when 'unreachable' then s.consecutive_failures
+            else s.consecutive_failures + 1 end,
         last_http_status = excluded.last_http_status,
         last_latency_ms = excluded.last_latency_ms,
-        consecutive_unreachable = case when excluded.last_result = 'unreachable' then s.consecutive_unreachable + 1 else 0 end
+        -- excluded.consecutive_down is 1 exactly when this check counts as down
+        consecutive_down = case when excluded.consecutive_down = 1 then s.consecutive_down + 1 else 0 end
     returning s.consecutive_failures, s.last_click_verified_at;
 $$;
 
@@ -122,8 +133,9 @@ as $$
     where p.domain ~ '^https?://'
       and (s.last_checked_at is null
            or s.last_checked_at < now() - interval '6 days'
-           or (s.consecutive_unreachable > 0 and s.last_checked_at < now() - interval '20 hours'))
-    order by s.last_checked_at nulls first, p.ring_id
+           or (s.consecutive_down > 0 and s.last_checked_at < now() - interval '20 hours'))
+    -- Down sites first, so a busy week can't delay the re-check that brings them back
+    order by coalesce(s.consecutive_down, 0) > 0 desc, s.last_checked_at nulls first, p.ring_id
     limit max_count;
 $$;
 
