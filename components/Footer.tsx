@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Image from "next/image";
 import logo from "@/public/logo.png";
 import Link from "next/link";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, ShuffleIcon } from "lucide-react";
 
 function Logo(): React.JSX.Element {
     return (
@@ -25,12 +25,17 @@ export function Footer(): React.JSX.Element {
                         <div className="flex w-full max-w-md items-center justify-between gap-4">
                             <Logo />
                             <div className="bg-secondary/40 flex items-center justify-center gap-2 rounded-full px-2.5 py-1.5">
-                                {/* Plain anchors: /redirect leaves the site, so client navigation/prefetch don't apply */}
-                                <a href="/redirect?nav=prev&id=0" aria-label="Previous Site">
+                                {/* Plain anchors: /redirect leaves the site, so client navigation/prefetch don't apply.
+                                    No id: ring ids start at 0, so id=0 would credit member 0 with every footer click */}
+                                <a href="/redirect?nav=prev" aria-label="Previous Site">
                                     <ArrowLeftIcon />
                                 </a>
                                 <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
-                                <a href="/redirect?nav=next&id=0" aria-label="Next Site">
+                                <a href="/redirect?nav=random" aria-label="Surprise me: random site">
+                                    <ShuffleIcon />
+                                </a>
+                                <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
+                                <a href="/redirect?nav=next" aria-label="Next Site">
                                     <ArrowRightIcon />
                                 </a>
                             </div>

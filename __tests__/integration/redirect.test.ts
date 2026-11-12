@@ -1,5 +1,5 @@
 import { NextRequest, type NextFetchEvent } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Outer boundary only: the service-role client that proxy.ts builds for ring reads and record_ring_hop.
 const ring = vi.hoisted(() => ({
@@ -212,5 +212,87 @@ describe("/redirect visit recording", () => {
         expect(location).toBe(`${ALICE}/`);
         const [outcome] = await Promise.allSettled(waits);
         expect(outcome.status).toBe("rejected");
+    });
+});
+
+describe("/redirect surprise me (nav=random)", () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it("never returns the source member, and can reach every other one", async () => {
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random&id=2")).location).toBe(`${ALICE}/`);
+        vi.spyOn(Math, "random").mockReturnValue(0.99);
+        expect((await visit("?nav=random&id=2")).location).toBe(`${CAROL}/`);
+    });
+
+    it("can land on member 0 from the footer link, which has no id", async () => {
+        setRing([member(0, ALICE), member(1, BOB), member(2, CAROL)]);
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random")).location).toBe(`${ALICE}/`);
+    });
+
+    it("credits the hop to the source member", async () => {
+        await Promise.all((await visit("?nav=random&id=1")).waits);
+        expect(ring.rpc).toHaveBeenCalledWith(
+            "record_ring_hop",
+            expect.objectContaining({ from_ring_id: 1 })
+        );
+    });
+
+    // One visit per test: proxy.ts caches the ring per module, and modules reset only between tests
+    it.each(["?nav=random", "?nav=next", "?nav=random&id=0abc", "?nav=random&id=-0"])(
+        "credits %s to no member, even when member 0 exists",
+        async (search) => {
+            setRing([member(0, ALICE), member(1, BOB)]);
+            await Promise.all((await visit(search)).waits);
+            expect(ring.rpc).toHaveBeenCalledWith(
+                "record_ring_hop",
+                expect.objectContaining({ from_ring_id: null })
+            );
+        }
+    );
+
+    it("lets a malformed id reach member 0 (it's no source, so nobody is skipped)", async () => {
+        setRing([member(0, ALICE), member(1, BOB)]);
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random&id=0abc")).location).toBe(`${ALICE}/`);
+    });
+});
+
+describe("/redirect without an id (the footer links)", () => {
+    beforeEach(() => setRing([member(0, ALICE), member(1, BOB), member(2, CAROL)]));
+
+    it("next lands on member 0, the first in the ring", async () => {
+        expect((await visit("?nav=next")).location).toBe(`${ALICE}/`);
+    });
+
+    it("prev lands on the last member", async () => {
+        expect((await visit("?nav=prev")).location).toBe(`${CAROL}/`);
+    });
+});
+
+// The verifier and random-hop changes share the source lookup: credit the real member in both.
+describe("/redirect widget verification", () => {
+    it.each(["next", "prev", "random"])("credits a visitor's %s click from their own site", async (nav) => {
+        await Promise.all((await visit(`?nav=${nav}&id=1`, { headers: {
+            referer: `${ALICE}/portfolio`,
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "203.0.113.1",
+        } })).waits);
+        expect(ring.rpc).toHaveBeenCalledWith("record_widget_click", {
+            member_ring_id: 1,
+            client: expect.any(String),
+        });
+    });
+
+    it("doesn't verify a malformed source id", async () => {
+        await Promise.all((await visit("?nav=random&id=1abc", { headers: {
+            referer: ALICE,
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "203.0.113.1",
+        } })).waits);
+        expect(ring.rpc).not.toHaveBeenCalledWith("record_widget_click", expect.anything());
     });
 });
