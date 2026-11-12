@@ -214,3 +214,21 @@ describe("/redirect visit recording", () => {
         expect(outcome.status).toBe("rejected");
     });
 });
+
+describe("/redirect surprise me (nav=random)", () => {
+    it("sends the visitor to a member other than the one they came from", async () => {
+        for (let i = 0; i < 10; i++) {
+            const { location } = await visit("?nav=random&id=2");
+            expect([ALICE, CAROL]).toContain(location?.replace(/\/$/, ""));
+        }
+    });
+
+    it("counts the hop from the source member", async () => {
+        const { waits } = await visit("?nav=random&id=1");
+        await Promise.all(waits);
+        expect(ring.rpc).toHaveBeenCalledWith(
+            "record_ring_hop",
+            expect.objectContaining({ from_ring_id: 1 })
+        );
+    });
+});

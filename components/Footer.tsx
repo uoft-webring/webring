@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import Image from "next/image";
 import logo from "@/public/logo.png";
 import Link from "next/link";
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, ShuffleIcon } from "lucide-react";
 
 function Logo(): React.JSX.Element {
     return (
@@ -28,6 +28,10 @@ export function Footer(): React.JSX.Element {
                                 {/* Plain anchors: /redirect leaves the site, so client navigation/prefetch don't apply */}
                                 <a href="/redirect?nav=prev&id=0" aria-label="Previous Site">
                                     <ArrowLeftIcon />
+                                </a>
+                                <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
+                                <a href="/redirect?nav=random&id=0" aria-label="Random Site" title="Surprise me">
+                                    <ShuffleIcon />
                                 </a>
                                 <div className="bg-muted-foreground/10 h-5 w-[1px]"></div>
                                 <a href="/redirect?nav=next&id=0" aria-label="Next Site">

@@ -29,3 +29,14 @@ export function findRingDestination(
     }
     return members.findLast((member) => member.ringId < ringId) ?? members[members.length - 1];
 }
+
+/** A random member other than `ringId` ("Surprise me"); the only member if there's just one. */
+export function pickRandomMember(
+    members: PublicProfile[],
+    ringId: number,
+    random: () => number = Math.random
+): PublicProfile | null {
+    const others = members.filter((member) => member.ringId !== ringId);
+    const pool = others.length > 0 ? others : members;
+    return pool[Math.floor(random() * pool.length)] ?? null;
+}

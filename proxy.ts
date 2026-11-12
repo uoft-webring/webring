@@ -2,7 +2,7 @@ import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
-import { findRingDestination, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, pickRandomMember, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -61,7 +61,9 @@ async function recordHop(fromRingId: number | null, toRingId: number): Promise<v
 async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
     const home = new URL("/", request.url);
     // A broken widget link should still land on a member: unknown nav means next, unknown id means the start
-    const nav = request.nextUrl.searchParams.get("nav")?.toLowerCase() === "prev" ? "prev" : "next";
+    const navParam = request.nextUrl.searchParams.get("nav")?.toLowerCase();
+    // random: the "Surprise me" link
+    const nav = navParam === "prev" || navParam === "random" ? navParam : "next";
     const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
     // Lenient for routing ("1abc" still lands on a neighbour), strict for crediting stats
     const parsed = Number.parseInt(rawId, 10);
@@ -69,7 +71,8 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     const exactId = /^\d{1,9}$/.test(rawId);
 
     const members = await loadRing();
-    const destination = findRingDestination(members, id, nav);
+    const destination =
+        nav === "random" ? pickRandomMember(members, id) : findRingDestination(members, id, nav);
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findRingDestination, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, pickRandomMember, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 function member(ringId: number, domain = `https://site${ringId}.dev`): PublicProfile {
@@ -58,5 +58,24 @@ describe("ringMembers", () => {
     it("drops members without a linkable http(s) site", () => {
         const profiles = [member(1), member(2, ""), member(3, "javascript:alert(1)"), member(4, "not a url")];
         expect(ringMembers(profiles).map((profile) => profile.ringId)).toEqual([1]);
+    });
+});
+
+describe("pickRandomMember", () => {
+    it("never sends a visitor back to the site they came from", () => {
+        for (const roll of [0, 0.34, 0.5, 0.99]) {
+            expect(pickRandomMember(ring, 3, () => roll)?.ringId).not.toBe(3);
+        }
+    });
+
+    it("can land on any other member", () => {
+        expect(pickRandomMember(ring, 3, () => 0)?.ringId).toBe(0);
+        expect(pickRandomMember(ring, 3, () => 0.99)?.ringId).toBe(7);
+        expect(pickRandomMember(ring, -1, () => 0.99)?.ringId).toBe(7);
+    });
+
+    it("returns the only member of a one-member ring, and null for an empty ring", () => {
+        expect(pickRandomMember([member(4)], 4)?.ringId).toBe(4);
+        expect(pickRandomMember([], 0)).toBeNull();
     });
 });
