@@ -7,6 +7,10 @@ import { Button } from "@/components/ui/button";
 import { requireOwnProfile } from "@/lib/auth";
 import { highlightMarkup } from "@/lib/highlight";
 import { LOGO_COLORS, LOGO_FORMATS, widgetSnippets, type LogoColor, type Snippet } from "@/lib/join-snippets";
+import { getRingLinkState } from "@/lib/profiles/ring-link-state";
+import { ringCheckMessage } from "@/lib/ring-link";
+
+const checkedOn = new Intl.DateTimeFormat("en-CA", { dateStyle: "medium" });
 
 function allSnippets(ringId: number): Record<string, Snippet[]> {
     const result: Record<string, Snippet[]> = {};
@@ -23,6 +27,7 @@ function allSnippets(ringId: number): Record<string, Snippet[]> {
 
 export default async function JoinPage() {
     const profile = await requireOwnProfile();
+    const linkState = await getRingLinkState(profile.id);
 
     return (
         <section className="flex flex-col gap-6">
@@ -36,6 +41,21 @@ export default async function JoinPage() {
             </Panel>
 
             <StatusCard status={profile.ringStatus}>
+                {linkState?.lastClickVerifiedAt ? (
+                    <p className="text-muted-foreground text-sm">
+                        Confirmed by visitors clicking your widget on{" "}
+                        {checkedOn.format(linkState.lastClickVerifiedAt)}.
+                    </p>
+                ) : (
+                    profile.ringStatus !== "connected" &&
+                    linkState?.lastResult &&
+                    linkState.lastCheckedAt && (
+                        <p className="text-muted-foreground text-sm">
+                            Last checked {checkedOn.format(linkState.lastCheckedAt)}:{" "}
+                            {ringCheckMessage(linkState.lastResult, profile.ringId)}
+                        </p>
+                    )
+                )}
                 {profile.ringStatus !== "connected" && <RingLinkCheck hasDomain={Boolean(profile.domain)} />}
             </StatusCard>
 

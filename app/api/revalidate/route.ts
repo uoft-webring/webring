@@ -1,15 +1,9 @@
-import { timingSafeEqual } from "node:crypto";
 import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
+import { isAuthorized } from "@/lib/bearer";
 import { serverEnv } from "@/lib/env";
 import { PROFILES_TAG } from "@/lib/profiles/queries";
 import type { Result } from "@/lib/result";
-
-function isAuthorized(header: string | null, secret: string): boolean {
-    const expected = Buffer.from(`Bearer ${secret}`);
-    const actual = Buffer.from(header ?? "");
-    return actual.length === expected.length && timingSafeEqual(actual, expected);
-}
 
 /** Called by the Supabase database webhook when profiles change outside the app (e.g. manual edits). */
 export async function POST(request: NextRequest): Promise<NextResponse<Result<{ revalidated: true }>>> {

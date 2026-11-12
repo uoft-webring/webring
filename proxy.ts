@@ -1,8 +1,10 @@
+import { createHmac } from "node:crypto";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
-import { findRingDestination, ringMembers, type RingDirection } from "@/lib/profiles/ring";
+import { clientIpFrom } from "@/lib/client-ip";
+import { findRingDestination, isOwnSiteReferral, ringMembers, type RingDirection } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -60,6 +62,20 @@ async function recordHop(fromRingId: number | null, toRingId: number): Promise<v
     if (error) console.error("[redirect] Failed to record hop:", error.message);
 }
 
+/** The visitor as an opaque id (IPv4 or IPv6 /64, keyed with a server secret); never the address. */
+function clientHash(request: NextRequest): string | null {
+    const client = clientIpFrom(request.headers.get("x-forwarded-for"));
+    if (!client) return null;
+    return createHmac("sha256", process.env.DOMAIN_VALIDATION_SECRET_KEY ?? "")
+        .update(`widget-click:${client}`)
+        .digest("hex");
+}
+
+async function recordWidgetClick(ringId: number, client: string): Promise<void> {
+    const { error } = await adminClient().rpc("record_widget_click", { member_ring_id: ringId, client });
+    if (error) console.error("[redirect] Failed to record widget click:", error.message);
+}
+
 // e.g. https://uoftwebring.com/redirect?nav=prev&id=0. Never change this URL shape: it's on members' sites.
 async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
     const home = new URL("/", request.url);
@@ -87,6 +103,16 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
             // After the response: counting a visit must never slow the redirect down
             event.waitUntil(recordHop(from, destination.ringId));
         }
+
+        // A click from the member's own site proves their widget works, even if their site renders
+        // it with JavaScript where the HTML check can't see it
+        const referral = {
+            referer: request.headers.get("referer"),
+            fetchMode: request.headers.get("sec-fetch-mode"),
+            fetchSite: request.headers.get("sec-fetch-site"),
+        };
+        const client = source && isOwnSiteReferral(referral, source.domain) ? clientHash(request) : null;
+        if (client && source) event.waitUntil(recordWidgetClick(source.ringId, client));
     }
     return NextResponse.redirect(new URL(destination.domain));
 }

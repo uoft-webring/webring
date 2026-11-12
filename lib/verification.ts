@@ -2,6 +2,7 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { resolveTxt } from "node:dns/promises";
 import { serverEnv } from "@/lib/env";
+import { SITE_ORIGIN } from "@/lib/site";
 import { safeFetch } from "@/lib/url-safety";
 
 /**
@@ -15,7 +16,9 @@ export const TXT_RECORD_NAME = "uoft-webring";
 
 /** Deterministic per member, but only we can generate it, so it can't be spoofed. */
 export function txtRecordValue(ringId: number): string {
-    return createHmac("sha256", serverEnv().DOMAIN_VALIDATION_SECRET_KEY).update(String(ringId)).digest("base64url");
+    return createHmac("sha256", serverEnv().DOMAIN_VALIDATION_SECRET_KEY)
+        .update(String(ringId))
+        .digest("base64url");
 }
 
 export async function hasVerificationRecord(domain: string, ringId: number): Promise<boolean> {
@@ -44,7 +47,18 @@ const ATTRIBUTE = /(?<![^\s"'>/=])([^\s"'>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^
 // Starts of text a browser never parses as tags: a <meta> inside these isn't a real meta element
 const INERT_START = /<!--|<(script|style|textarea|title|template|noscript|xmp)\b/gi;
 // Any other element ends the head, as it does in a browser
-const HEAD_ELEMENTS = new Set(["html", "head", "meta", "link", "base", "title", "style", "script", "noscript", "template"]);
+const HEAD_ELEMENTS = new Set([
+    "html",
+    "head",
+    "meta",
+    "link",
+    "base",
+    "title",
+    "style",
+    "script",
+    "noscript",
+    "template",
+]);
 // A head is never this big; it bounds the work on a hostile page
 const MAX_SCAN = 256 * 1024;
 
@@ -76,7 +90,9 @@ function withoutInert(html: string): string {
 function* headMetaTags(html: string): Generator<Map<string, string>> {
     const cleaned = withoutInert(html.slice(0, MAX_SCAN));
     const headEnd = cleaned.search(/<\/head\s*>/i);
-    for (const [, tagName, rawAttributes] of (headEnd === -1 ? cleaned : cleaned.slice(0, headEnd)).matchAll(TAG)) {
+    for (const [, tagName, rawAttributes] of (headEnd === -1 ? cleaned : cleaned.slice(0, headEnd)).matchAll(
+        TAG
+    )) {
         const name = tagName.toLowerCase();
         if (!HEAD_ELEMENTS.has(name)) return;
         if (name !== "meta") continue;
@@ -93,7 +109,10 @@ function* headMetaTags(html: string): Generator<Map<string, string>> {
 /** Whether `html`'s head has `<meta name="uoft-webring" content="…">` with `value`, attributes in any order. */
 export function hasVerificationMetaTag(html: string, value: string): boolean {
     for (const attributes of headMetaTags(html)) {
-        if (attributes.get("name")?.toLowerCase() === TXT_RECORD_NAME && attributes.get("content") === value) {
+        if (
+            attributes.get("name")?.toLowerCase() === TXT_RECORD_NAME &&
+            attributes.get("content") === value
+        ) {
             return true;
         }
     }
@@ -117,7 +136,11 @@ export async function hasVerificationMeta(domain: string, ringId: number): Promi
         return false;
     }
     // The tag belongs in <head>, so the first 1MB is plenty
-    const response = await safeFetch(homepage.toString(), { method: "GET", timeoutMs: 8000, maxBytes: 1024 * 1024 });
+    const response = await safeFetch(homepage.toString(), {
+        method: "GET",
+        timeoutMs: 8000,
+        maxBytes: 1024 * 1024,
+    });
     if (!response?.ok || !response.contentType.toLowerCase().startsWith("text/html")) return false;
     // Redirects are fine within the site (http→https, www), but an open redirect elsewhere must not
     // let someone verify a domain by pointing it at a page they control
@@ -143,23 +166,55 @@ export async function isUrlReachable(url: string): Promise<boolean> {
 // The lookbehind keeps look-alike hosts out (evil-uoftwebring.com, notuoftwebring.com)
 const WIDGET_LINK = /(?<![\w.-])(?:www\.)?uoftwebring\.com\/redirect\?([^"'\s<>`]*)/gi;
 
-/** Whether `html` links to both the previous and next member from `ringId`. */
-export function hasRingWidget(html: string, ringId: number): boolean {
-    const found = new Set<string>();
+export type RingWidgetResult = "found" | "partial" | "wrong_id" | "missing" | "js_rendered" | "unreachable";
+
+// Empty mount points of client-rendered apps (CRA, Vite, Next/Nuxt/Svelte SPA shells). Linear: no
+// part can match the same characters as another.
+const APP_SHELL =
+    /<div\s+id=["'](?:root|app|__next|__nuxt|svelte)["'][^<>]*>\s*<\/div>|enable javascript to run this app/i;
+
+// `href="/redirect?..."`: only valid on uoftwebring.com itself (elsewhere it's that site's own path)
+const RELATIVE_WIDGET_LINK = /href=["']\/redirect\?([^"'\s<>`]*)/gi;
+
+/**
+ * What the member's homepage HTML says about their widget. `onRingSite` accepts relative links,
+ * which only point at us when the page is uoftwebring.com itself.
+ */
+export function analyzeRingWidget(
+    html: string,
+    ringId: number,
+    onRingSite = false
+): Exclude<RingWidgetResult, "unreachable"> {
+    const own = new Set<string>();
+    let otherId = false;
     // A commented-out widget, or one written by a script, isn't a working widget
-    for (const match of withoutInert(html).matchAll(WIDGET_LINK)) {
+    const live = withoutInert(html);
+    const matches = [
+        ...live.matchAll(WIDGET_LINK),
+        ...(onRingSite ? live.matchAll(RELATIVE_WIDGET_LINK) : []),
+    ];
+    for (const match of matches) {
         const params = new URLSearchParams(match[1].replaceAll("&amp;", "&"));
         const nav = params.get("nav");
-        if ((nav === "prev" || nav === "next") && params.get("id") === String(ringId)) found.add(nav);
+        if (nav !== "prev" && nav !== "next") continue;
+        if (params.get("id") === String(ringId)) own.add(nav);
+        else otherId = true;
     }
-    return found.has("prev") && found.has("next");
+    if (own.size === 2) return "found";
+    if (own.size === 1) return "partial";
+    if (otherId) return "wrong_id";
+    return APP_SHELL.test(html) ? "js_rendered" : "missing";
 }
 
-export type WidgetCheck = "found" | "missing" | "unreachable";
+/** Whether `html` links to both the previous and next member from `ringId`. */
+export function hasRingWidget(html: string, ringId: number): boolean {
+    return analyzeRingWidget(html, ringId) === "found";
+}
 
-export async function checkRingWidget(domain: string, ringId: number): Promise<WidgetCheck> {
+export async function checkRingWidget(domain: string, ringId: number): Promise<RingWidgetResult> {
     // The widget belongs in the static HTML; scanning past the first 2MB isn't worth it
     const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 2 * 1024 * 1024 });
     if (!response || !response.ok) return "unreachable";
-    return hasRingWidget(response.body.toString("utf8"), ringId) ? "found" : "missing";
+    const onRingSite = new URL(response.url).hostname.replace(/^www\./, "") === new URL(SITE_ORIGIN).hostname;
+    return analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite);
 }

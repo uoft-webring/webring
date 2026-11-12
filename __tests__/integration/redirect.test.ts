@@ -270,3 +270,29 @@ describe("/redirect without an id (the footer links)", () => {
         expect((await visit("?nav=prev")).location).toBe(`${CAROL}/`);
     });
 });
+
+// The verifier and random-hop changes share the source lookup: credit the real member in both.
+describe("/redirect widget verification", () => {
+    it.each(["next", "prev", "random"])("credits a visitor's %s click from their own site", async (nav) => {
+        await Promise.all((await visit(`?nav=${nav}&id=1`, { headers: {
+            referer: `${ALICE}/portfolio`,
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "203.0.113.1",
+        } })).waits);
+        expect(ring.rpc).toHaveBeenCalledWith("record_widget_click", {
+            member_ring_id: 1,
+            client: expect.any(String),
+        });
+    });
+
+    it("doesn't verify a malformed source id", async () => {
+        await Promise.all((await visit("?nav=random&id=1abc", { headers: {
+            referer: ALICE,
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "203.0.113.1",
+        } })).waits);
+        expect(ring.rpc).not.toHaveBeenCalledWith("record_widget_click", expect.anything());
+    });
+});

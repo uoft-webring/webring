@@ -1,0 +1,34 @@
+name: Ring link checks
+
+# Re-checks members' ring widgets weekly. A connected site only goes back to review after two failed
+# checks in a row and no clicks from it in 30 days (the server decides; see lib/ring-link.ts).
+on:
+    schedule:
+        - cron: "0 15 * * 0" # Sundays, 10–11am Toronto
+    workflow_dispatch:
+        inputs:
+            mode:
+                description: "dry-run only counts who is due; check re-checks them"
+                type: choice
+                options: [check, dry-run]
+                default: check
+
+permissions: {}
+
+concurrency:
+    group: ring-checks
+    cancel-in-progress: false
+
+jobs:
+    check:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Call the ring checks endpoint
+              env:
+                  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+                  MODE: ${{ inputs.mode || 'check' }}
+              # The response holds counts only: this log is public
+              run: |
+                  curl --fail-with-body -sS -X POST \
+                    -H "Authorization: Bearer $CRON_SECRET" \
+                    "https://uoftwebring.com/api/cron/ring-checks?mode=$MODE"

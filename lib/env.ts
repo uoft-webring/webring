@@ -11,6 +11,10 @@ const serverEnvSchema = z.object({
     NEXT_PUBLIC_HOME_DOMAIN: z.url(),
     DOMAIN_VALIDATION_SECRET_KEY: z.string().min(1),
     REVALIDATION_SECRET_TOKEN: optionalString,
+    // Shared with the GitHub Actions that call /api/cron/*
+    CRON_SECRET: optionalString,
+    // Comma-separated emails allowed to use /admin/ring (the ring review queue)
+    ADMIN_EMAILS: optionalString,
     AWS_REGION: z.string().min(1),
     AWS_ACCESS_KEY_ID: z.string().min(1),
     AWS_SECRET_ACCESS_KEY: z.string().min(1),
