@@ -1,5 +1,5 @@
 import { NextRequest, type NextFetchEvent } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Outer boundary only: the service-role client that proxy.ts builds for ring reads and record_ring_hop.
 const ring = vi.hoisted(() => ({
@@ -216,19 +216,33 @@ describe("/redirect visit recording", () => {
 });
 
 describe("/redirect surprise me (nav=random)", () => {
-    it("sends the visitor to a member other than the one they came from", async () => {
-        for (let i = 0; i < 10; i++) {
-            const { location } = await visit("?nav=random&id=2");
-            expect([ALICE, CAROL]).toContain(location?.replace(/\/$/, ""));
-        }
+    afterEach(() => vi.restoreAllMocks());
+
+    it("never returns the source member, and can reach every other one", async () => {
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random&id=2")).location).toBe(`${ALICE}/`);
+        vi.spyOn(Math, "random").mockReturnValue(0.99);
+        expect((await visit("?nav=random&id=2")).location).toBe(`${CAROL}/`);
     });
 
-    it("counts the hop from the source member", async () => {
-        const { waits } = await visit("?nav=random&id=1");
-        await Promise.all(waits);
-        expect(ring.rpc).toHaveBeenCalledWith(
-            "record_ring_hop",
-            expect.objectContaining({ from_ring_id: 1 })
-        );
+    it("can land on member 0 from the footer link, which has no id", async () => {
+        setRing([member(0, ALICE), member(1, BOB), member(2, CAROL)]);
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random")).location).toBe(`${ALICE}/`);
+    });
+
+    it("credits the hop to the source member, and to no member without an id", async () => {
+        const expectCredit = async (search: string, from: number | null) => {
+            ring.rpc.mockClear();
+            await Promise.all((await visit(search)).waits);
+            expect(ring.rpc).toHaveBeenCalledWith(
+                "record_ring_hop",
+                expect.objectContaining({ from_ring_id: from })
+            );
+        };
+        await expectCredit("?nav=random&id=1", 1);
+        setRing([member(0, ALICE), member(1, BOB)]);
+        await expectCredit("?nav=random", null);
+        await expectCredit("?nav=next", null);
     });
 });

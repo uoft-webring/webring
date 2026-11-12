@@ -2,7 +2,7 @@ import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
-import { findRingDestination, pickRandomMember, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, ringMembers, type RingDirection } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -63,16 +63,16 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     // A broken widget link should still land on a member: unknown nav means next, unknown id means the start
     const navParam = request.nextUrl.searchParams.get("nav")?.toLowerCase();
     // random: the "Surprise me" link
-    const nav = navParam === "prev" || navParam === "random" ? navParam : "next";
+    const nav: RingDirection = navParam === "prev" || navParam === "random" ? navParam : "next";
     const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
     // Lenient for routing ("1abc" still lands on a neighbour), strict for crediting stats
     const parsed = Number.parseInt(rawId, 10);
-    const id = Number.isNaN(parsed) ? 0 : parsed;
+    // null, not 0: ring ids start at 0, so a fallback 0 would pose as member 0 (and Surprise me would skip them)
+    const id = Number.isNaN(parsed) ? null : parsed;
     const exactId = /^\d{1,9}$/.test(rawId);
 
     const members = await loadRing();
-    const destination =
-        nav === "random" ? pickRandomMember(members, id) : findRingDestination(members, id, nav);
+    const destination = findRingDestination(members, id, nav);
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {

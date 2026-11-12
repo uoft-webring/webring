@@ -13,30 +13,35 @@ export function isLinkableDomain(domain: string): boolean {
     }
 }
 
+export type RingDirection = "prev" | "next" | "random";
+
 /**
- * Member to send a visitor to from member `ringId`, wrapping around at both ends.
- * `ringId` need not belong to a ring member (e.g. the footer links use 0).
+ * Member to send a visitor to from member `ringId`: the neighbour (wrapping around at both ends), or
+ * for "random" ("Surprise me") any member but the source. `ringId` need not belong to a ring member;
+ * null means there is no source (a missing or garbage id): prev/next then start from 0.
  */
 export function findRingDestination(
     members: PublicProfile[],
-    ringId: number,
-    direction: "next" | "prev"
-): PublicProfile | null {
-    if (members.length === 0) return null;
-    // `members` is sorted by ringId ascending
-    if (direction === "next") {
-        return members.find((member) => member.ringId > ringId) ?? members[0];
-    }
-    return members.findLast((member) => member.ringId < ringId) ?? members[members.length - 1];
-}
-
-/** A random member other than `ringId` ("Surprise me"); the only member if there's just one. */
-export function pickRandomMember(
-    members: PublicProfile[],
-    ringId: number,
+    ringId: number | null,
+    direction: RingDirection,
     random: () => number = Math.random
 ): PublicProfile | null {
-    const others = members.filter((member) => member.ringId !== ringId);
-    const pool = others.length > 0 ? others : members;
-    return pool[Math.floor(random() * pool.length)] ?? null;
+    if (members.length === 0) return null;
+    if (direction === "random") return pickOther(members, ringId, random);
+    const from = ringId ?? 0;
+    // `members` is sorted by ringId ascending
+    if (direction === "next") {
+        return members.find((member) => member.ringId > from) ?? members[0];
+    }
+    return members.findLast((member) => member.ringId < from) ?? members[members.length - 1];
+}
+
+/** Uniform pick that skips the source without copying the ring: draw from n - 1 slots, shift past it. */
+function pickOther(members: PublicProfile[], ringId: number | null, random: () => number): PublicProfile {
+    const source = ringId === null ? -1 : members.findIndex((member) => member.ringId === ringId);
+    const slots = source === -1 ? members.length : members.length - 1;
+    // The source is the only member: send them back rather than nowhere
+    if (slots === 0) return members[0];
+    const pick = Math.min(Math.floor(random() * slots), slots - 1);
+    return members[source !== -1 && pick >= source ? pick + 1 : pick];
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findRingDestination, pickRandomMember, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 function member(ringId: number, domain = `https://site${ringId}.dev`): PublicProfile {
@@ -61,21 +61,30 @@ describe("ringMembers", () => {
     });
 });
 
-describe("pickRandomMember", () => {
-    it("never sends a visitor back to the site they came from", () => {
-        for (const roll of [0, 0.34, 0.5, 0.99]) {
-            expect(pickRandomMember(ring, 3, () => roll)?.ringId).not.toBe(3);
-        }
+describe("findRingDestination: random (Surprise me)", () => {
+    const pick = (ringId: number | null, roll: number) =>
+        findRingDestination(ring, ringId, "random", () => roll)?.ringId;
+
+    it("never sends a visitor back to the member they came from, but reaches every other one", () => {
+        expect(pick(3, 0)).toBe(0);
+        expect(pick(3, 0.99)).toBe(7);
+        expect(pick(0, 0)).toBe(3);
+        expect(pick(0, 0.99)).toBe(7);
     });
 
-    it("can land on any other member", () => {
-        expect(pickRandomMember(ring, 3, () => 0)?.ringId).toBe(0);
-        expect(pickRandomMember(ring, 3, () => 0.99)?.ringId).toBe(7);
-        expect(pickRandomMember(ring, -1, () => 0.99)?.ringId).toBe(7);
+    it("can pick member 0 when there is no source (footer link, missing or garbage id)", () => {
+        expect(pick(null, 0)).toBe(0);
+        expect(pick(null, 0.5)).toBe(3);
+        expect(pick(null, 0.99)).toBe(7);
+    });
+
+    it("treats an id outside the ring as no member to skip", () => {
+        expect(pick(5, 0)).toBe(0);
+        expect(pick(5, 0.99)).toBe(7);
     });
 
     it("returns the only member of a one-member ring, and null for an empty ring", () => {
-        expect(pickRandomMember([member(4)], 4)?.ringId).toBe(4);
-        expect(pickRandomMember([], 0)).toBeNull();
+        expect(findRingDestination([member(4)], 4, "random")?.ringId).toBe(4);
+        expect(findRingDestination([], null, "random")).toBeNull();
     });
 });
