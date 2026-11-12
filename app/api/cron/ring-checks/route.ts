@@ -7,7 +7,7 @@ import type { RingStatus } from "@/lib/profiles/types";
 import { ok, fail, type Result } from "@/lib/result";
 import { statusAfterRecheck } from "@/lib/ring-link";
 import { createAdminClient } from "@/lib/supabase/server";
-import { checkRingWidget } from "@/lib/verification";
+import { probeRingWidget } from "@/lib/verification";
 
 export const maxDuration = 300;
 
@@ -18,9 +18,9 @@ const CONCURRENCY = 5;
 type DueMember = { id: string; ring_id: number; domain: string; status: RingStatus };
 
 // Counts only: Actions logs on a public repo are public
-type RecheckRun = { mode: "check" | "dry-run"; due: number; found: number; movedToReview: number; reconnected: number; failed: number };
+type RecheckRun = { mode: "check" | "dry-run"; due: number; found: number; unreachable: number; movedToReview: number; reconnected: number; failed: number };
 
-/** Weekly re-check of members' widgets. Called by .github/workflows/ring-checks.yml. */
+/** Re-checks members' widgets and site health: weekly, and daily for sites that are down. Called by .github/workflows/ring-checks.yml. */
 export async function POST(request: NextRequest): Promise<NextResponse<Result<RecheckRun>>> {
     const authError = cronAuthError(request);
     if (authError) return authError;
@@ -33,13 +33,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
         return NextResponse.json(fail("Could not load members."), { status: 500 });
     }
     const due = data as DueMember[];
-    const run: RecheckRun = { mode, due: due.length, found: 0, movedToReview: 0, reconnected: 0, failed: 0 };
+    const run: RecheckRun = { mode, due: due.length, found: 0, unreachable: 0, movedToReview: 0, reconnected: 0, failed: 0 };
     if (mode === "dry-run") return NextResponse.json(ok(run));
 
     const recheck = async (member: DueMember) => {
-        const result = await checkRingWidget(member.domain, member.ring_id);
+        const probe = await probeRingWidget(member.domain, member.ring_id);
+        const { result } = probe;
         if (result === "found") run.found++;
-        const state = await recordRingCheck(member.id, result);
+        if (result === "unreachable") run.unreachable++;
+        const state = await recordRingCheck(member.id, result, probe);
         if (!state) {
             run.failed++;
             return;

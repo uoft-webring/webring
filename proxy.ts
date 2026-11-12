@@ -4,7 +4,12 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
 import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
 import { clientIpFrom } from "@/lib/client-ip";
-import { findRingDestination, isOwnSiteReferral, ringMembers } from "@/lib/profiles/ring";
+import {
+    DOWN_AFTER_FAILED_CHECKS,
+    findRingDestination,
+    isOwnSiteReferral,
+    ringMembers,
+} from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -23,14 +28,16 @@ function adminClient() {
     });
 }
 
+type RingRow = PublicProfileRow & { ring_link_state: { consecutive_unreachable: number } | null };
+
 async function loadRing(): Promise<PublicProfile[]> {
     if (ringCache && ringCache.expires > Date.now()) return ringCache.members;
 
     const { data, error } = await adminClient()
         .from("profile")
-        .select(PUBLIC_PROFILE_COLUMNS)
+        .select(`${PUBLIC_PROFILE_COLUMNS}, ring_link_state(consecutive_unreachable)`)
         .order("ring_id", { ascending: true })
-        .returns<PublicProfileRow[]>();
+        .returns<RingRow[]>();
 
     if (error) {
         console.error("[redirect] Failed to load ring:", error.message);
@@ -39,7 +46,11 @@ async function loadRing(): Promise<PublicProfile[]> {
         ringCache = { members, expires: Date.now() + RING_ERROR_BACKOFF_MS };
         return members;
     }
-    const members = ringMembers(data.map(toPublicProfile));
+    const isUp = (row: RingRow) =>
+        (row.ring_link_state?.consecutive_unreachable ?? 0) < DOWN_AFTER_FAILED_CHECKS;
+    const up = ringMembers(data.filter(isUp).map(toPublicProfile));
+    // Every site down at once means the checker broke, not the sites: keep the whole ring
+    const members = up.length > 0 ? up : ringMembers(data.map(toPublicProfile));
     ringCache = { members, expires: Date.now() + RING_TTL_MS };
     return members;
 }
@@ -92,7 +103,6 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {
-        // Only credit real members as the source, so made-up ids can't create stats rows
         // Only credit real members as the source, so made-up ids can't create stats rows
         const source = exactId ? members.find((member) => member.ringId === id) : undefined;
         const from = source ? id : null;

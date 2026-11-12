@@ -47,3 +47,6 @@ export function findRingDestination(
     }
     return members.findLast((member) => member.ringId < ringId) ?? members[members.length - 1];
 }
+
+/** A site that fails to load on this many checks in a row is skipped by /redirect until it loads again. */
+export const DOWN_AFTER_FAILED_CHECKS = 2;

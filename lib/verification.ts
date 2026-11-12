@@ -212,9 +212,23 @@ export function hasRingWidget(html: string, ringId: number): boolean {
 }
 
 export async function checkRingWidget(domain: string, ringId: number): Promise<RingWidgetResult> {
+    return (await probeRingWidget(domain, ringId)).result;
+}
+
+/** A widget check plus how the site answered, for link-health stats. */
+export type RingProbe = { result: RingWidgetResult; httpStatus: number | null; latencyMs: number };
+
+export async function probeRingWidget(domain: string, ringId: number): Promise<RingProbe> {
+    const started = performance.now();
     // The widget belongs in the static HTML; scanning past the first 2MB isn't worth it
     const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 2 * 1024 * 1024 });
-    if (!response || !response.ok) return "unreachable";
+    const latencyMs = Math.round(performance.now() - started);
+    const httpStatus = response?.status ?? null;
+    if (!response || !response.ok) return { result: "unreachable", httpStatus, latencyMs };
     const onRingSite = new URL(response.url).hostname.replace(/^www\./, "") === new URL(SITE_ORIGIN).hostname;
-    return analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite);
+    return {
+        result: analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite),
+        httpStatus,
+        latencyMs,
+    };
 }

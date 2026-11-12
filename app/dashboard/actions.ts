@@ -20,7 +20,7 @@ import { pageContentSchema, profileInputSchema, type PageContent } from "@/lib/v
 import { recordRingCheck } from "@/lib/profiles/ring-link-state";
 import { ringCheckMessage, statusAfterCheck } from "@/lib/ring-link";
 import {
-    checkRingWidget,
+    probeRingWidget,
     hasDomainOwnershipProof,
     isUrlReachable,
     type RingWidgetResult,
@@ -154,9 +154,10 @@ export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
     }
     if (!(await consumeRateLimit(SITE_CHECK_LIMIT, profile.id))) return fail(TOO_MANY_SITE_CHECKS);
 
-    const result = await checkRingWidget(profile.domain, profile.ringId);
+    const probe = await probeRingWidget(profile.domain, profile.ringId);
+    const { result } = probe;
     const status = statusAfterCheck(result, profile.ringStatus);
-    await recordRingCheck(profile.id, result);
+    await recordRingCheck(profile.id, result, probe);
 
     if (status !== profile.ringStatus) {
         // Matching the checked domain stops a concurrent domain change from inheriting this result

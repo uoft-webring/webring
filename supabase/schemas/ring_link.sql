@@ -4,7 +4,19 @@ create table public.ring_link_state (
     last_checked_at timestamptz,
     last_result text check (last_result in ('found', 'partial', 'wrong_id', 'missing', 'js_rendered', 'unreachable')),
     consecutive_failures integer not null default 0,
-    last_click_verified_at timestamptz
+    last_click_verified_at timestamptz,
+    last_http_status integer,
+    last_latency_ms integer,
+    consecutive_unreachable integer not null default 0
+);
+
+create table public.ring_check_log (
+    profile_id uuid not null references public.profile (id) on delete cascade,
+    checked_at timestamptz not null default now(),
+    result text not null check (result in ('found', 'partial', 'wrong_id', 'missing', 'js_rendered', 'unreachable')),
+    http_status integer,
+    latency_ms integer,
+    primary key (profile_id, checked_at)
 );
 
 create table public.ring_click_evidence (
@@ -17,8 +29,10 @@ create table public.ring_click_evidence (
 
 alter table public.ring_link_state enable row level security;
 alter table public.ring_click_evidence enable row level security;
+alter table public.ring_check_log enable row level security;
 revoke all on table public.ring_link_state from anon, authenticated;
 revoke all on table public.ring_click_evidence from anon, authenticated;
+revoke all on table public.ring_check_log from anon, authenticated;
 
 -- Called by /redirect (after the response) when a visitor arrives from the member's own site.
 -- Two distinct clients within 30 days mark the member connected: one forged request isn't enough.
@@ -63,17 +77,33 @@ $$;
 
 -- Records an HTML check of a member's widget. Returns the failure streak and last click confirmation
 -- so the weekly job can decide whether a connected member really lost their widget.
-create function public.record_ring_check(member uuid, result text)
+create function public.record_ring_check(member uuid, result text, status_code integer default null, elapsed_ms integer default null)
 returns table (consecutive_failures integer, last_click_verified_at timestamptz)
 language sql
 set search_path = ''
 as $$
-    insert into public.ring_link_state as s (profile_id, last_checked_at, last_result, consecutive_failures)
-    values (member, now(), result, case when result = 'found' then 0 else 1 end)
+    with logged as (
+        insert into public.ring_check_log (profile_id, result, http_status, latency_ms)
+        values (member, record_ring_check.result, status_code, elapsed_ms)
+    ), pruned as (
+        delete from public.ring_check_log l
+        where l.profile_id = member and l.checked_at < now() - interval '90 days'
+    )
+    insert into public.ring_link_state as s
+        (profile_id, last_checked_at, last_result, consecutive_failures, last_http_status, last_latency_ms, consecutive_unreachable)
+    values (
+        member, now(), record_ring_check.result,
+        case when record_ring_check.result = 'found' then 0 else 1 end,
+        status_code, elapsed_ms,
+        case when record_ring_check.result = 'unreachable' then 1 else 0 end
+    )
     on conflict (profile_id) do update set
         last_checked_at = now(),
         last_result = excluded.last_result,
-        consecutive_failures = case when excluded.last_result = 'found' then 0 else s.consecutive_failures + 1 end
+        consecutive_failures = case when excluded.last_result = 'found' then 0 else s.consecutive_failures + 1 end,
+        last_http_status = excluded.last_http_status,
+        last_latency_ms = excluded.last_latency_ms,
+        consecutive_unreachable = case when excluded.last_result = 'unreachable' then s.consecutive_unreachable + 1 else 0 end
     returning s.consecutive_failures, s.last_click_verified_at;
 $$;
 
@@ -87,15 +117,16 @@ as $$
     select p.id, p.ring_id, p.domain, p.validated_user_component
     from public.profile p
     left join public.ring_link_state s on s.profile_id = p.id
-    where p.validated_user_component in ('connected', 'pending')
-      and p.domain ~ '^https?://'
-      and (s.last_checked_at is null or s.last_checked_at < now() - interval '6 days')
+    where p.domain ~ '^https?://'
+      and (s.last_checked_at is null
+           or s.last_checked_at < now() - interval '6 days'
+           or (s.consecutive_unreachable > 0 and s.last_checked_at < now() - interval '20 hours'))
     order by s.last_checked_at nulls first, p.ring_id
     limit max_count;
 $$;
 
-revoke execute on function public.record_ring_check(uuid, text) from public, anon, authenticated;
-grant execute on function public.record_ring_check(uuid, text) to service_role;
+revoke execute on function public.record_ring_check(uuid, text, integer, integer) from public, anon, authenticated;
+grant execute on function public.record_ring_check(uuid, text, integer, integer) to service_role;
 revoke execute on function public.ring_checks_due(integer) from public, anon, authenticated;
 grant execute on function public.ring_checks_due(integer) to service_role;
 revoke execute on function public.record_widget_click(integer, text) from public, anon, authenticated;

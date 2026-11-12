@@ -214,3 +214,25 @@ describe("/redirect visit recording", () => {
         expect(outcome.status).toBe("rejected");
     });
 });
+
+describe("/redirect link health", () => {
+    it("skips a site that failed its last two checks, and keeps one that failed once", async () => {
+        setRing([
+            member(1, ALICE),
+            { ...member(2, BOB), ring_link_state: { consecutive_unreachable: 2 } },
+            { ...member(3, CAROL), ring_link_state: { consecutive_unreachable: 1 } },
+        ]);
+        expect((await visit("?nav=next&id=1")).location).toBe(`${CAROL}/`);
+        expect((await visit("?nav=prev&id=3")).location).toBe(`${ALICE}/`);
+    });
+
+    it("keeps the whole ring when every site looks down (the checker is the likelier fault)", async () => {
+        setRing(
+            [1, 2, 3].map((id) => ({
+                ...member(id, [ALICE, BOB, CAROL][id - 1]),
+                ring_link_state: { consecutive_unreachable: 5 },
+            }))
+        );
+        expect((await visit("?nav=next&id=1")).location).toBe(`${BOB}/`);
+    });
+});

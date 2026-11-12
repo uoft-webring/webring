@@ -1,6 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { RingWidgetResult } from "@/lib/verification";
+import type { RingProbe, RingWidgetResult } from "@/lib/verification";
 
 export type RingLinkState = {
     lastCheckedAt: Date | null;
@@ -29,13 +29,19 @@ export async function getRingLinkState(profileId: string): Promise<RingLinkState
     };
 }
 
-/** Records an HTML check; returns the failure streak and last click confirmation. */
+/** Records an HTML check (with response details if known); returns the failure streak and last click confirmation. */
 export async function recordRingCheck(
     profileId: string,
-    result: RingWidgetResult
+    result: RingWidgetResult,
+    response?: Pick<RingProbe, "httpStatus" | "latencyMs">
 ): Promise<{ consecutiveFailures: number; lastClickVerifiedAt: Date | null } | null> {
     const { data, error } = await createAdminClient()
-        .rpc("record_ring_check", { member: profileId, result })
+        .rpc("record_ring_check", {
+            member: profileId,
+            result,
+            status_code: response?.httpStatus ?? null,
+            elapsed_ms: response?.latencyMs ?? null,
+        })
         .single<{ consecutive_failures: number; last_click_verified_at: string | null }>();
     if (error) {
         console.error("[ring] Failed to record check:", error.message);
