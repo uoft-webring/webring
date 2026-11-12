@@ -8,14 +8,16 @@ alter table public.ring_link_state
     add column consecutive_unreachable integer not null default 0;
 
 create table public.ring_check_log (
+    -- Surrogate key: now() is per transaction, so two checks in one transaction share a timestamp
+    id bigint generated always as identity primary key,
     profile_id uuid not null references public.profile (id) on delete cascade,
     checked_at timestamptz not null default now(),
     result text not null check (result in ('found', 'partial', 'wrong_id', 'missing', 'js_rendered', 'unreachable')),
     -- null when no HTTP response came back (DNS failure, timeout, blocked address)
     http_status integer,
-    latency_ms integer,
-    primary key (profile_id, checked_at)
+    latency_ms integer
 );
+create index ring_check_log_profile_checked on public.ring_check_log (profile_id, checked_at);
 comment on table public.ring_check_log is 'Every ring site check, kept 90 days, for uptime and latency stats';
 
 alter table public.ring_check_log enable row level security;
