@@ -34,7 +34,7 @@ export default async function SignInPage() {
 
     return (
         <div className="bg-background flex min-h-screen flex-col">
-            <Navbar authAction="signup" />
+            <Navbar authAction="signup" crossPromo={false} />
             <CardForm cardTitle="Welcome back!">
                 <SigninForm />
             </CardForm>

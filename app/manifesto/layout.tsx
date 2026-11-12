@@ -3,7 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { getViewerProfile } from "@/lib/auth";
 
 export const metadata: Metadata = {
-    title: "Manifesto - UofT Webring",
+    title: "Manifesto",
     description: "Explore the UofT Webring community manifesto.",
     keywords: ["UofT Webring", "Manifesto", "University of Toronto", "Student Profiles"],
     openGraph: {

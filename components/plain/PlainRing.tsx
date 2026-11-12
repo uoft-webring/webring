@@ -38,6 +38,19 @@ function SearchBox({
     );
 }
 
+function SiteLink({ member }: { member: PlainMember }): React.JSX.Element {
+    return (
+        <a
+            href={member.domain}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-[family-name:var(--font-plain-mono)] text-[15px] text-[#006a8a] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]"
+        >
+            {member.label}
+        </a>
+    );
+}
+
 /**
  * Table + graph share one search. The table is server-rendered with every member, so the page
  * works without JavaScript; search only narrows it down.
@@ -66,12 +79,14 @@ export function PlainRing({
                     onChange={setQuery}
                     className="mt-10 lg:hidden"
                 />
-                <table className="mt-10 w-full table-fixed border-collapse lg:mt-16">
+                {/* Phones: two columns, with the URL under the name. A third column left ~130px for URLs,
+                    so most domains broke mid-word. */}
+                <table className="mt-10 w-full border-collapse sm:table-fixed lg:mt-16">
                     <caption className="sr-only">Sites in the UofT Webring, in ring order</caption>
                     <colgroup>
-                        <col className="w-[46%]" />
-                        <col className="w-[16%]" />
-                        <col />
+                        <col className="sm:w-[46%]" />
+                        <col className="sm:w-[16%]" />
+                        <col className="hidden sm:table-column" />
                     </colgroup>
                     <thead>
                         <tr className="text-left text-2xl text-[#1E3765] italic">
@@ -81,7 +96,7 @@ export function PlainRing({
                             <th scope="col" className="pr-4 pb-6 text-right font-normal tracking-wide">
                                 Year
                             </th>
-                            <th scope="col" className="pb-6 font-normal tracking-wide">
+                            <th scope="col" className="hidden pb-6 font-normal tracking-wide sm:table-cell">
                                 URL
                             </th>
                         </tr>
@@ -91,26 +106,24 @@ export function PlainRing({
                             <tr key={member.ringId} className="align-baseline">
                                 <td className="py-1.5 pr-3 text-lg break-words [font-variant:small-caps]">
                                     {member.name}
+                                    <span className="block py-0.5 [overflow-wrap:anywhere] [font-variant:normal] sm:hidden">
+                                        <SiteLink member={member} />
+                                    </span>
                                 </td>
                                 <td className="py-1.5 pr-4 text-right text-base tabular-nums">
                                     {member.year ?? ""}
                                 </td>
-                                <td className="py-1.5 break-all">
-                                    <a
-                                        href={member.domain}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="font-[family-name:var(--font-plain-mono)] text-[15px] text-[#006a8a] underline decoration-1 underline-offset-[3px] hover:text-[#1E3765]"
-                                    >
-                                        {member.label}
-                                    </a>
+                                <td className="hidden py-1.5 break-all sm:table-cell">
+                                    <SiteLink member={member} />
                                 </td>
                             </tr>
                         ))}
                         {visible.length === 0 && (
                             <tr>
                                 <td colSpan={3} className="py-6 text-[#4a5a78] italic">
-                                    {normalized ? `No sites match “${query.trim()}”.` : "No sites in the ring yet."}
+                                    {normalized
+                                        ? `No sites match “${query.trim()}”.`
+                                        : "No sites in the ring yet."}
                                 </td>
                             </tr>
                         )}

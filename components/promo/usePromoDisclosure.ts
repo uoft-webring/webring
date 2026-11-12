@@ -104,5 +104,3 @@ export function usePromoDisclosure(): PromoDisclosure {
     };
 }
 
-export const UOFTINDEX_URL =
-    "https://uoftindex.com/?utm_source=uoftwebring&utm_medium=banner&utm_campaign=cross_promo";

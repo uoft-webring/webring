@@ -9,7 +9,7 @@ import {
     type PublicProfileRow,
 } from "@/lib/profiles/mapper";
 import { clientIpFrom } from "@/lib/client-ip";
-import { findRingDestination, isOwnSiteReferral, linkableMembers, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, isOwnSiteReferral, linkableMembers, ringMembers, type RingDirection } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -96,21 +96,24 @@ async function recordWidgetClick(ringId: number, client: string): Promise<void> 
 async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): Promise<NextResponse> {
     const home = new URL("/", request.url);
     // A broken widget link should still land on a member: unknown nav means next, unknown id means the start
-    const nav = request.nextUrl.searchParams.get("nav")?.toLowerCase() === "prev" ? "prev" : "next";
+    const navParam = request.nextUrl.searchParams.get("nav")?.toLowerCase();
+    // random: the "Surprise me" link
+    const nav: RingDirection = navParam === "prev" || navParam === "random" ? navParam : "next";
     const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
-    // Lenient for routing ("1abc" still lands on a neighbour), strict for crediting stats
     const parsed = Number.parseInt(rawId, 10);
-    const id = Number.isNaN(parsed) ? 0 : parsed;
-    const exactId = /^\d{1,9}$/.test(rawId);
 
     const { members, sources } = await loadRing();
-    const destination = findRingDestination(members, id, nav);
+    // The one place that decides the source: an exact id of a real member. It's credited for the hop and
+    // skipped by Surprise me; made-up or malformed ids ("0abc", "-0") are no one
+    const source = /^\d{1,9}$/.test(rawId) ? sources.find((member) => member.ringId === parsed) : undefined;
+    // prev/next stay lenient ("1abc" still lands on a neighbour). null, never a fallback 0: ring ids start
+    // at 0, so 0 would pose as member 0
+    const from = nav === "random" ? (source?.ringId ?? null) : Number.isNaN(parsed) ? null : parsed;
+    const destination = findRingDestination(members, from, nav);
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {
-        // Only credit real members as the source, so made-up ids can't create stats rows
-        const source = exactId ? sources.find((member) => member.ringId === id) : undefined;
-        const from = source ? id : null;
+        const from = source?.ringId ?? null;
         // A one-member ring sends visitors back to the same site: not a hop between members
         if (from !== destination.ringId) {
             // After the response: counting a visit must never slow the redirect down
@@ -125,7 +128,7 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
             fetchSite: request.headers.get("sec-fetch-site"),
         };
         const client = source && isOwnSiteReferral(referral, source.domain) ? clientHash(request) : null;
-        if (client) event.waitUntil(recordWidgetClick(id, client));
+        if (client && source) event.waitUntil(recordWidgetClick(source.ringId, client));
     }
     return NextResponse.redirect(new URL(destination.domain));
 }
