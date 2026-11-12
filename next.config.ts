@@ -41,6 +41,13 @@ const nextConfig: NextConfig = {
                 source: "/:all*(svg|jpg|png|woff2|avif)",
                 headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
             },
+            {
+                // Loaded on every page view of every member site. Not immutable: the file changes in place
+                source: "/embed.js",
+                headers: [
+                    { key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
+                ],
+            },
         ];
     },
     images: {

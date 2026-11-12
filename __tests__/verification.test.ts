@@ -139,19 +139,44 @@ describe("hasVerificationMetaTag", () => {
 
 
 describe("one-line embed widget detection", () => {
+    const tag = (attrs: string) => `<script ${attrs}></script>`;
+    const ours = `src="https://uoftwebring.com/embed.js"`;
+
     it("counts every snippet we hand out, including the script tag", () => {
         for (const snippet of widgetSnippets(12, "SVG", "White")) expect(hasRingWidget(snippet.code, 12)).toBe(true);
     });
 
-    it("reads the id regardless of attribute order and quoting", () => {
-        const html = `<script async data-id=7 src="//www.uoftwebring.com/embed.js"></script>`;
-        expect(analyzeRingWidget(html, 7)).toBe("found");
+    it("reads src and data-id like a browser: any order, quoting, spacing around =", () => {
+        expect(analyzeRingWidget(tag(`async data-id=7 src="//www.uoftwebring.com/embed.js"`), 7)).toBe("found");
+        expect(analyzeRingWidget(tag(`src = "https://uoftwebring.com/embed.js" data-id = '7'`), 7)).toBe("found");
+        // The widget renders id=07 links, which /redirect reads as 7
+        expect(analyzeRingWidget(tag(`${ours} data-id="07"`), 7)).toBe("found");
     });
 
-    it("flags another member's id, and ignores comments and look-alike hosts", () => {
-        const tag = (src: string, id: number) => `<script src="${src}" data-id="${id}"></script>`;
-        expect(analyzeRingWidget(tag("https://uoftwebring.com/embed.js", 8), 7)).toBe("wrong_id");
-        expect(analyzeRingWidget(`<!-- ${tag("https://uoftwebring.com/embed.js", 7)} -->`, 7)).toBe("missing");
-        expect(analyzeRingWidget(tag("https://evil-uoftwebring.com/embed.js", 7), 7)).toBe("missing");
+    it("uses embed.js's id rule: another valid id is wrong_id, an id it won't render is nothing", () => {
+        expect(analyzeRingWidget(tag(`${ours} data-id="8"`), 7)).toBe("wrong_id");
+        expect(analyzeRingWidget(tag(`${ours} data-id="7 "`), 7)).toBe("missing");
+        expect(analyzeRingWidget(tag(`${ours} data-id="7x"`), 7)).toBe("missing");
+        expect(analyzeRingWidget(tag(`${ours} data-id="7" type="module"`), 7)).toBe("missing");
+    });
+
+    it("ignores tags that never run, and look-alike sources", () => {
+        const live = tag(`${ours} data-id="7"`);
+        for (const html of [
+            `<!-- ${live} -->`,
+            `<noscript>${live}</noscript>`,
+            `<template>${live}</template>`,
+            `<textarea>${live}</textarea>`,
+            `<script>var s = '${live.replace("</script>", "")}';</script>`,
+            tag(`data-src="https://uoftwebring.com/embed.js" data-id="7"`),
+            tag(`src="https://evil-uoftwebring.com/embed.js" data-id="7"`),
+            tag(`src="/embed.js" data-id="7"`),
+        ]) {
+            expect(analyzeRingWidget(html, 7)).toBe("missing");
+        }
+    });
+
+    it("isn't fooled by a comment opener inside another script's string", () => {
+        expect(analyzeRingWidget(`<script>var s = "<!--";</script>${tag(`${ours} data-id="7"`)}`, 7)).toBe("found");
     });
 });

@@ -41,7 +41,7 @@ export function widgetSnippets(ringId: number, format: LogoFormat, color: LogoCo
         },
         {
             label: "One line",
-            code: `<script src="${SITE_ORIGIN}/embed.js" data-id="${ringId}" data-color="${color.toLowerCase()}" async></script>`,
+            code: `<script src="${SITE_ORIGIN}/embed.js" data-id="${ringId}" data-color="${color.toLowerCase()}" data-format="${format.toLowerCase()}" async></script>`,
         },
     ];
 }

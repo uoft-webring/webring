@@ -42,6 +42,8 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
 // match the same characters (that backtracks catastrophically on hostile input).
 // Opening tags, with quoted attribute values consumed whole so a `<meta` inside one isn't a tag
 const TAG = /<([a-zA-Z][^\s/<>]*)((?:[^<>"']|"[^"]*"|'[^']*')*)>/g;
+// TAG anchored at a given index, to read the opening tag of a raw-text element
+const TAG_AT = new RegExp(TAG.source, "y");
 // Attribute names per the HTML tokenizer, starting at a boundary: up to whitespace, quotes, `>`, `/` or `=`
 const ATTRIBUTE = /(?<![^\s"'>/=])([^\s"'>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
 // Starts of text a browser never parses as tags: a <meta> inside these isn't a real meta element
@@ -70,13 +72,22 @@ function indexOfIgnoreCase(haystack: string, needle: string, from: number): numb
     return pattern.exec(haystack)?.index ?? -1;
 }
 
-/** `html` without comments and raw-text elements, in one forward pass. An unclosed one runs to the end. */
-function withoutInert(html: string): string {
+/**
+ * `html` without comments and raw-text elements, in one forward pass. An unclosed one runs to the end.
+ * `onScript` gets the raw attributes of each live <script> opening tag (not ones inside comments,
+ * <noscript>, <template> etc., which never run).
+ */
+function withoutInert(html: string, onScript?: (rawAttributes: string) => void): string {
     let kept = "";
     let position = 0;
     INERT_START.lastIndex = 0;
     for (let match = INERT_START.exec(html); match; match = INERT_START.exec(html)) {
         kept += html.slice(position, match.index);
+        if (onScript && match[1]?.toLowerCase() === "script") {
+            TAG_AT.lastIndex = match.index;
+            const open = TAG_AT.exec(html);
+            if (open) onScript(open[2]);
+        }
         const closer = match[1] ? `</${match[1].toLowerCase()}` : "-->";
         const closeAt = indexOfIgnoreCase(html, closer, INERT_START.lastIndex);
         if (closeAt === -1) return kept;
@@ -84,6 +95,35 @@ function withoutInert(html: string): string {
         INERT_START.lastIndex = position;
     }
     return kept + html.slice(position);
+}
+
+/** A tag's attributes as a browser reads them: names lowercased, values as written, first duplicate wins. */
+function parseAttributes(rawAttributes: string): Map<string, string> {
+    const attributes = new Map<string, string>();
+    for (const match of rawAttributes.matchAll(ATTRIBUTE)) {
+        const key = match[1].toLowerCase();
+        if (!attributes.has(key)) attributes.set(key, match[2] ?? match[3] ?? match[4]);
+    }
+    return attributes;
+}
+
+/**
+ * The ring id a live one-line widget tag (public/embed.js) renders links for, or null if it isn't one.
+ * Same rules as embed.js: the whole data-id must be digits, and module scripts have no currentScript.
+ */
+function embedWidgetId(rawAttributes: string): number | null {
+    const attributes = parseAttributes(rawAttributes);
+    const id = attributes.get("data-id") ?? "";
+    if (!/^\d{1,9}$/.test(id) || attributes.get("type")?.trim().toLowerCase() === "module") return null;
+    try {
+        // A relative src resolves against the member's own site, never ours
+        const src = new URL(attributes.get("src")?.trim() ?? "", "https://member-site.invalid");
+        const host = src.hostname.replace(/^www\./, "");
+        const ours = src.protocol.startsWith("http") && host === new URL(SITE_ORIGIN).hostname;
+        return ours && src.pathname === "/embed.js" ? Number(id) : null;
+    } catch {
+        return null;
+    }
 }
 
 /** Attributes of each <meta> in the document's real head, in order. */
@@ -96,13 +136,7 @@ function* headMetaTags(html: string): Generator<Map<string, string>> {
         const name = tagName.toLowerCase();
         if (!HEAD_ELEMENTS.has(name)) return;
         if (name !== "meta") continue;
-        const attributes = new Map<string, string>();
-        for (const match of rawAttributes.matchAll(ATTRIBUTE)) {
-            const key = match[1].toLowerCase();
-            // Browsers keep the first of duplicate attributes
-            if (!attributes.has(key)) attributes.set(key, (match[2] ?? match[3] ?? match[4]).trim());
-        }
-        yield attributes;
+        yield new Map([...parseAttributes(rawAttributes)].map(([key, value]) => [key, value.trim()]));
     }
 }
 
@@ -174,10 +208,6 @@ const APP_SHELL =
     /<div\s+id=["'](?:root|app|__next|__nuxt|svelte)["'][^<>]*>\s*<\/div>|enable javascript to run this app/i;
 
 // `href="/redirect?..."`: only valid on uoftwebring.com itself (elsewhere it's that site's own path)
-// The one-line widget (public/embed.js): its links only exist after it runs, so the tag itself counts
-const EMBED_SCRIPT = /<script\b[^>]*\bsrc=["']?(?:https?:)?\/\/(?:www\.)?uoftwebring\.com\/embed\.js[^>]*>/gi;
-const EMBED_ID = /\bdata-id=["']?(\d+)/i;
-
 const RELATIVE_WIDGET_LINK = /href=["']\/redirect\?([^"'\s<>`]*)/gi;
 
 /**
@@ -192,7 +222,11 @@ export function analyzeRingWidget(
     const own = new Set<string>();
     let otherId = false;
     // A commented-out widget, or one written by a script, isn't a working widget
-    const live = withoutInert(html);
+    const embedIds: number[] = [];
+    const live = withoutInert(html, (rawAttributes) => {
+        const id = embedWidgetId(rawAttributes);
+        if (id !== null) embedIds.push(id);
+    });
     const matches = [
         ...live.matchAll(WIDGET_LINK),
         ...(onRingSite ? live.matchAll(RELATIVE_WIDGET_LINK) : []),
@@ -204,12 +238,9 @@ export function analyzeRingWidget(
         if (params.get("id") === String(ringId)) own.add(nav);
         else otherId = true;
     }
-    // A commented-out tag doesn't run
-    for (const tag of html.replace(/<!--[\s\S]*?-->/g, "").matchAll(EMBED_SCRIPT)) {
-        const id = EMBED_ID.exec(tag[0])?.[1];
-        if (id === String(ringId)) return "found";
-        if (id !== undefined) otherId = true;
-    }
+    // The one-line widget's links only exist once it runs, so its tag counts as both links
+    if (embedIds.includes(ringId)) return "found";
+    if (embedIds.length > 0) otherId = true;
     if (own.size === 2) return "found";
     if (own.size === 1) return "partial";
     if (otherId) return "wrong_id";
