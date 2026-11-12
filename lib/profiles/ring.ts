@@ -18,7 +18,8 @@ export type RingDirection = "prev" | "next" | "random";
 /**
  * Member to send a visitor to from member `ringId`: the neighbour (wrapping around at both ends), or
  * for "random" ("Surprise me") any member but the source. `ringId` need not belong to a ring member;
- * null means there is no source (a missing or garbage id): prev/next then start from 0.
+ * null means there is no source (footer link, missing or garbage id): next lands on the first member,
+ * prev on the last.
  */
 export function findRingDestination(
     members: PublicProfile[],
@@ -28,7 +29,8 @@ export function findRingDestination(
 ): PublicProfile | null {
     if (members.length === 0) return null;
     if (direction === "random") return pickOther(members, ringId, random);
-    const from = ringId ?? 0;
+    // -1 sits before every ring id (they start at 0), so member 0 is reachable
+    const from = ringId ?? -1;
     // `members` is sorted by ringId ascending
     if (direction === "next") {
         return members.find((member) => member.ringId > from) ?? members[0];

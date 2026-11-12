@@ -53,7 +53,10 @@ function isCountableVisit(request: NextRequest): boolean {
 }
 
 async function recordHop(fromRingId: number | null, toRingId: number): Promise<void> {
-    const { error } = await adminClient().rpc("record_ring_hop", { from_ring_id: fromRingId, to_ring_id: toRingId });
+    const { error } = await adminClient().rpc("record_ring_hop", {
+        from_ring_id: fromRingId,
+        to_ring_id: toRingId,
+    });
     if (error) console.error("[redirect] Failed to record hop:", error.message);
 }
 
@@ -65,19 +68,20 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     // random: the "Surprise me" link
     const nav: RingDirection = navParam === "prev" || navParam === "random" ? navParam : "next";
     const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
-    // Lenient for routing ("1abc" still lands on a neighbour), strict for crediting stats
     const parsed = Number.parseInt(rawId, 10);
-    // null, not 0: ring ids start at 0, so a fallback 0 would pose as member 0 (and Surprise me would skip them)
-    const id = Number.isNaN(parsed) ? null : parsed;
-    const exactId = /^\d{1,9}$/.test(rawId);
 
     const members = await loadRing();
-    const destination = findRingDestination(members, id, nav);
+    // The one place that decides the source: an exact id of a real member. It's credited for the hop and
+    // skipped by Surprise me; made-up or malformed ids ("0abc", "-0") are no one
+    const source = /^\d{1,9}$/.test(rawId) ? members.find((member) => member.ringId === parsed) : undefined;
+    // prev/next stay lenient ("1abc" still lands on a neighbour). null, never a fallback 0: ring ids start
+    // at 0, so 0 would pose as member 0
+    const from = nav === "random" ? (source?.ringId ?? null) : Number.isNaN(parsed) ? null : parsed;
+    const destination = findRingDestination(members, from, nav);
     if (!destination) return NextResponse.redirect(home);
 
     if (isCountableVisit(request)) {
-        // Only credit real members as the source, so made-up ids can't create stats rows
-        const from = exactId && members.some((member) => member.ringId === id) ? id : null;
+        const from = source?.ringId ?? null;
         // A one-member ring sends visitors back to the same site: not a hop between members
         if (from !== destination.ringId) {
             // After the response: counting a visit must never slow the redirect down
@@ -102,7 +106,9 @@ async function refreshSession(request: NextRequest): Promise<NextResponse> {
             setAll(cookiesToSet, headers) {
                 cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
                 response = NextResponse.next({ request });
-                cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+                cookiesToSet.forEach(({ name, value, options }) =>
+                    response.cookies.set(name, value, options)
+                );
                 Object.entries(headers).forEach(([key, value]) => response.headers.set(key, value));
             },
         },

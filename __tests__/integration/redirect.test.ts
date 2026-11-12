@@ -231,18 +231,42 @@ describe("/redirect surprise me (nav=random)", () => {
         expect((await visit("?nav=random")).location).toBe(`${ALICE}/`);
     });
 
-    it("credits the hop to the source member, and to no member without an id", async () => {
-        const expectCredit = async (search: string, from: number | null) => {
-            ring.rpc.mockClear();
+    it("credits the hop to the source member", async () => {
+        await Promise.all((await visit("?nav=random&id=1")).waits);
+        expect(ring.rpc).toHaveBeenCalledWith(
+            "record_ring_hop",
+            expect.objectContaining({ from_ring_id: 1 })
+        );
+    });
+
+    // One visit per test: proxy.ts caches the ring per module, and modules reset only between tests
+    it.each(["?nav=random", "?nav=next", "?nav=random&id=0abc", "?nav=random&id=-0"])(
+        "credits %s to no member, even when member 0 exists",
+        async (search) => {
+            setRing([member(0, ALICE), member(1, BOB)]);
             await Promise.all((await visit(search)).waits);
             expect(ring.rpc).toHaveBeenCalledWith(
                 "record_ring_hop",
-                expect.objectContaining({ from_ring_id: from })
+                expect.objectContaining({ from_ring_id: null })
             );
-        };
-        await expectCredit("?nav=random&id=1", 1);
+        }
+    );
+
+    it("lets a malformed id reach member 0 (it's no source, so nobody is skipped)", async () => {
         setRing([member(0, ALICE), member(1, BOB)]);
-        await expectCredit("?nav=random", null);
-        await expectCredit("?nav=next", null);
+        vi.spyOn(Math, "random").mockReturnValue(0);
+        expect((await visit("?nav=random&id=0abc")).location).toBe(`${ALICE}/`);
+    });
+});
+
+describe("/redirect without an id (the footer links)", () => {
+    beforeEach(() => setRing([member(0, ALICE), member(1, BOB), member(2, CAROL)]));
+
+    it("next lands on member 0, the first in the ring", async () => {
+        expect((await visit("?nav=next")).location).toBe(`${ALICE}/`);
+    });
+
+    it("prev lands on the last member", async () => {
+        expect((await visit("?nav=prev")).location).toBe(`${CAROL}/`);
     });
 });

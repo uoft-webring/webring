@@ -72,6 +72,11 @@ describe("findRingDestination: random (Surprise me)", () => {
         expect(pick(0, 0.99)).toBe(7);
     });
 
+    it("starts prev/next before member 0 when there is no source", () => {
+        expect(findRingDestination(ring, null, "next")?.ringId).toBe(0);
+        expect(findRingDestination(ring, null, "prev")?.ringId).toBe(7);
+    });
+
     it("can pick member 0 when there is no source (footer link, missing or garbage id)", () => {
         expect(pick(null, 0)).toBe(0);
         expect(pick(null, 0.5)).toBe(3);
