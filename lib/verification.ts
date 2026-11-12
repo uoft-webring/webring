@@ -174,6 +174,10 @@ const APP_SHELL =
     /<div\s+id=["'](?:root|app|__next|__nuxt|svelte)["'][^<>]*>\s*<\/div>|enable javascript to run this app/i;
 
 // `href="/redirect?..."`: only valid on uoftwebring.com itself (elsewhere it's that site's own path)
+// The one-line widget (public/embed.js): its links only exist after it runs, so the tag itself counts
+const EMBED_SCRIPT = /<script\b[^>]*\bsrc=["']?(?:https?:)?\/\/(?:www\.)?uoftwebring\.com\/embed\.js[^>]*>/gi;
+const EMBED_ID = /\bdata-id=["']?(\d+)/i;
+
 const RELATIVE_WIDGET_LINK = /href=["']\/redirect\?([^"'\s<>`]*)/gi;
 
 /**
@@ -199,6 +203,12 @@ export function analyzeRingWidget(
         if (nav !== "prev" && nav !== "next") continue;
         if (params.get("id") === String(ringId)) own.add(nav);
         else otherId = true;
+    }
+    // A commented-out tag doesn't run
+    for (const tag of html.replace(/<!--[\s\S]*?-->/g, "").matchAll(EMBED_SCRIPT)) {
+        const id = EMBED_ID.exec(tag[0])?.[1];
+        if (id === String(ringId)) return "found";
+        if (id !== undefined) otherId = true;
     }
     if (own.size === 2) return "found";
     if (own.size === 1) return "partial";

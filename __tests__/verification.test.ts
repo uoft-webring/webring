@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/env", () => ({ serverEnv: () => ({ DOMAIN_VALIDATION_SECRET_KEY: "test-secret" }) }));
 
 import { widgetSnippets } from "@/lib/join-snippets";
-import { hasRingWidget, hasVerificationMetaTag, txtRecordValue } from "@/lib/verification";
+import { analyzeRingWidget, hasRingWidget, hasVerificationMetaTag, txtRecordValue } from "@/lib/verification";
 
 describe("hasRingWidget", () => {
     it("detects the snippet we hand out", () => {
@@ -137,3 +137,21 @@ describe("hasVerificationMetaTag", () => {
     });
 });
 
+
+describe("one-line embed widget detection", () => {
+    it("counts every snippet we hand out, including the script tag", () => {
+        for (const snippet of widgetSnippets(12, "SVG", "White")) expect(hasRingWidget(snippet.code, 12)).toBe(true);
+    });
+
+    it("reads the id regardless of attribute order and quoting", () => {
+        const html = `<script async data-id=7 src="//www.uoftwebring.com/embed.js"></script>`;
+        expect(analyzeRingWidget(html, 7)).toBe("found");
+    });
+
+    it("flags another member's id, and ignores comments and look-alike hosts", () => {
+        const tag = (src: string, id: number) => `<script src="${src}" data-id="${id}"></script>`;
+        expect(analyzeRingWidget(tag("https://uoftwebring.com/embed.js", 8), 7)).toBe("wrong_id");
+        expect(analyzeRingWidget(`<!-- ${tag("https://uoftwebring.com/embed.js", 7)} -->`, 7)).toBe("missing");
+        expect(analyzeRingWidget(tag("https://evil-uoftwebring.com/embed.js", 7), 7)).toBe("missing");
+    });
+});
