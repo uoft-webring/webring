@@ -5,7 +5,7 @@ import type { PublicProfile } from "./types";
  * the ring checks). Every front door (/redirect, /, /plain, previews) uses this, so they agree.
  */
 export function ringMembers(profiles: PublicProfile[]): PublicProfile[] {
-    const linkable = profiles.filter((profile) => isLinkableDomain(profile.domain));
+    const linkable = linkableMembers(profiles);
     const up = linkable.filter((profile) => !profile.siteDown);
     // Over half the ring down at once means the checker broke (egress, DNS), not the sites: ignore it
     return up.length * 2 >= linkable.length ? up : linkable;
@@ -56,3 +56,12 @@ export function findRingDestination(
 
 /** A site that's down (no answer, 5xx, 404/410) on this many checks in a row leaves the ring until it's back. */
 export const DOWN_AFTER_FAILED_CHECKS = 2;
+
+export function isSiteDown(consecutiveDown: number): boolean {
+    return consecutiveDown >= DOWN_AFTER_FAILED_CHECKS;
+}
+
+/** Members with a site to link to, down or not: who can be a hop's source. */
+export function linkableMembers(profiles: PublicProfile[]): PublicProfile[] {
+    return profiles.filter((profile) => isLinkableDomain(profile.domain));
+}

@@ -72,7 +72,7 @@ begin
 
     insert into public.ring_link_state as s (profile_id, last_click_verified_at)
     values (member, now())
-    on conflict (profile_id) do update set last_click_verified_at = now();
+    on conflict (profile_id) do update set last_click_verified_at = now(), consecutive_down = 0;
 
     update public.profile p
     set validated_user_component = 'connected'
@@ -85,7 +85,7 @@ $$;
 -- Records an HTML check of a member's widget. Returns the failure streak and last click confirmation
 -- so the weekly job can decide whether a connected member really lost their widget.
 create function public.record_ring_check(member uuid, result text, status_code integer default null, elapsed_ms integer default null)
-returns table (consecutive_failures integer, last_click_verified_at timestamptz)
+returns table (consecutive_failures integer, last_click_verified_at timestamptz, consecutive_down integer)
 language sql
 set search_path = ''
 as $$
@@ -117,25 +117,24 @@ as $$
         last_latency_ms = excluded.last_latency_ms,
         -- excluded.consecutive_down is 1 exactly when this check counts as down
         consecutive_down = case when excluded.consecutive_down = 1 then s.consecutive_down + 1 else 0 end
-    returning s.consecutive_failures, s.last_click_verified_at;
+    returning s.consecutive_failures, s.last_click_verified_at, s.consecutive_down;
 $$;
 
 -- Members due a weekly re-check: in (or waiting for) the ring, not checked in the last 6 days.
 create function public.ring_checks_due(max_count integer)
-returns table (id uuid, ring_id integer, domain text, status public.validation_state)
+returns table (id uuid, ring_id integer, domain text, status public.validation_state, consecutive_down integer)
 language sql
 stable
 set search_path = ''
 as $$
-    select p.id, p.ring_id, p.domain, p.validated_user_component
+    select p.id, p.ring_id, p.domain, p.validated_user_component, coalesce(s.consecutive_down, 0)
     from public.profile p
     left join public.ring_link_state s on s.profile_id = p.id
     where p.domain ~ '^https?://'
       and (s.last_checked_at is null
            or s.last_checked_at < now() - interval '6 days'
-           or (s.consecutive_down > 0 and s.last_checked_at < now() - interval '20 hours'))
-    -- Down sites first, so a busy week can't delay the re-check that brings them back
-    order by coalesce(s.consecutive_down, 0) > 0 desc, s.last_checked_at nulls first, p.ring_id
+           or (s.consecutive_down between 1 and 6 and s.last_checked_at < now() - interval '20 hours'))
+    order by coalesce(s.consecutive_down, 0) between 1 and 6 desc, s.last_checked_at nulls first, p.ring_id
     limit max_count;
 $$;
 

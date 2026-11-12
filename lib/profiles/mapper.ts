@@ -1,6 +1,6 @@
 import type { OwnProfile, PublicProfile, RingStatus } from "./types";
 import type { ProfileInput } from "@/lib/validation";
-import { DOWN_AFTER_FAILED_CHECKS } from "./ring";
+import { isSiteDown } from "./ring";
 
 /** Columns that may be read for public pages. `email` is deliberately absent. */
 export const PUBLIC_PROFILE_COLUMNS =
@@ -47,7 +47,11 @@ export function toPublicProfile(row: PublicProfileRow): PublicProfile {
         graduationYear: row.graduation_year,
         program: row.program,
         openToWork: row.open_to_work ?? false,
-        siteDown: (row.ring_link_state?.consecutive_down ?? 0) >= DOWN_AFTER_FAILED_CHECKS,
+        // undefined, not false, when the read didn't embed health: "unknown" must not look like "up"
+        siteDown:
+            row.ring_link_state === undefined
+                ? undefined
+                : isSiteDown(row.ring_link_state?.consecutive_down ?? 0),
     };
 }
 

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { requireOwnProfile } from "@/lib/auth";
 import { highlightMarkup } from "@/lib/highlight";
 import { LOGO_COLORS, LOGO_FORMATS, widgetSnippets, type LogoColor, type Snippet } from "@/lib/join-snippets";
+import { isSiteDown } from "@/lib/profiles/ring";
 import { getRingLinkState } from "@/lib/profiles/ring-link-state";
 import { ringCheckMessage } from "@/lib/ring-link";
 
@@ -28,6 +29,7 @@ function allSnippets(ringId: number): Record<string, Snippet[]> {
 export default async function JoinPage() {
     const profile = await requireOwnProfile();
     const linkState = await getRingLinkState(profile.id);
+    const siteDown = isSiteDown(linkState?.consecutiveDown ?? 0);
 
     return (
         <section className="flex flex-col gap-6">
@@ -56,7 +58,15 @@ export default async function JoinPage() {
                         </p>
                     )
                 )}
-                {profile.ringStatus !== "connected" && <RingLinkCheck hasDomain={Boolean(profile.domain)} />}
+                {siteDown && (
+                    <p className="text-muted-foreground text-sm">
+                        Your site didn&apos;t load on our last checks, so it&apos;s out of the ring for now.
+                        Once it&apos;s back up, check it here to rejoin right away.
+                    </p>
+                )}
+                {(profile.ringStatus !== "connected" || siteDown) && (
+                    <RingLinkCheck hasDomain={Boolean(profile.domain)} />
+                )}
             </StatusCard>
 
             {profile.ringStatus !== "disconnected" && (

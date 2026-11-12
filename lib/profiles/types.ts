@@ -16,7 +16,7 @@ export type PublicProfile = {
     program: string | null;
     /** Looking for co-op / internship roles. */
     openToWork: boolean;
-    /** Down on the last ring checks (see ringMembers); only set by reads that include ring health. */
+    /** Down on the last ring checks (see ringMembers). Undefined when the read didn't include ring health. */
     siteDown?: boolean;
 };
 

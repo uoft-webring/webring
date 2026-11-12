@@ -56,16 +56,19 @@ grant select on table public.profile to authenticated;
 grant update (name, domain, tagline, image_key, github_url, tags, graduation_year, program, slug, open_to_work, about, projects, experience, links, accent)
     on table public.profile to authenticated;
 
--- A new domain needs to be re-verified and re-linked
+-- A new domain needs to be re-verified and re-linked, and the old site's outages don't count against it.
+-- Security definer: members change their own domain, but ring_link_state is closed to them.
 create function public.reset_profile_verification()
 returns trigger
 language plpgsql
+security definer
 set search_path = ''
 as $$
 begin
     if new.domain is distinct from old.domain then
         new.is_verified := false;
         new.validated_user_component := 'disconnected';
+        update public.ring_link_state s set consecutive_down = 0 where s.profile_id = new.id;
     end if;
     return new;
 end;

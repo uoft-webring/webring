@@ -9,7 +9,7 @@ import {
     type PublicProfileRow,
 } from "@/lib/profiles/mapper";
 import { clientIpFrom } from "@/lib/client-ip";
-import { findRingDestination, isLinkableDomain, isOwnSiteReferral, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, isOwnSiteReferral, linkableMembers, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -20,8 +20,9 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const RING_TTL_MS = 60_000;
 // During a DB outage, retry at most this often instead of paying a failing query on every click
 const RING_ERROR_BACKOFF_MS = 5_000;
-// `members` is the ring (down sites left out); `sources` also keeps down sites, because a click from a
-// member's site still credits them (and proves the site is up) even while the checker thinks it's down
+// `members` is the ring (down sites left out); `sources` keeps down sites too: a click from a member's site
+// still credits them while the checker thinks it's down (and two visitors' clicks reset the down streak,
+// see record_widget_click)
 type Ring = { members: PublicProfile[]; sources: PublicProfile[] };
 let ringCache: (Ring & { expires: number }) | undefined;
 
@@ -53,7 +54,7 @@ async function loadRing(): Promise<Ring> {
     const profiles = data.map(toPublicProfile);
     ringCache = {
         members: ringMembers(profiles),
-        sources: profiles.filter((profile) => isLinkableDomain(profile.domain)),
+        sources: linkableMembers(profiles),
         expires: Date.now() + RING_TTL_MS,
     };
     return ringCache;

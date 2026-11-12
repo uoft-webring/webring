@@ -61,9 +61,16 @@ describe("statusAfterCheck", () => {
 });
 
 describe("statusAfterRecheck", () => {
-    it("never moves a member on an outage: that's the health streak's job", () => {
-        expect(statusAfterRecheck("connected", "unreachable", 5, null)).toBe("connected");
-        expect(statusAfterRecheck("pending", "unreachable", 5, null)).toBe("pending");
+    it("keeps a member through a short outage: leaving the ring is the health streak's job", () => {
+        expect(statusAfterRecheck("connected", "unreachable", 5, null, new Date(), 6)).toBe("connected");
+        expect(statusAfterRecheck("pending", "unreachable", 5, null, new Date(), 9)).toBe("pending");
+    });
+
+    it("sends a connected member to review after about a week down, unless visitors still click through", () => {
+        const now = new Date("2026-11-12T12:00:00Z");
+        expect(statusAfterRecheck("connected", "unreachable", 0, null, now, 7)).toBe("pending");
+        const clickedYesterday = new Date("2026-11-11T12:00:00Z");
+        expect(statusAfterRecheck("connected", "unreachable", 0, clickedYesterday, now, 7)).toBe("connected");
     });
 
     const now = new Date("2026-10-23T12:00:00Z");
