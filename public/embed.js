@@ -1,7 +1,12 @@
 // UofT Webring widget, one line on a member's site:
-//   <script src="https://uoftwebring.com/embed.js" data-id="YOUR_RING_ID" async></script>
-// Renders previous / surprise me / next links where the tag sits. They're plain /redirect links,
-// so clicks are counted, and verify the widget, exactly like the copy-paste HTML snippet.
+//   <script src="https://uoftwebring.com/embed.js" data-id="YOUR_RING_ID" data-color="blue"
+//       data-format="svg" async></script>
+// data-color is blue (default), black or white; data-format is svg (default) or png.
+// Renders previous / home / random / next links. They're plain /redirect links, so clicks are
+// counted, and verify the widget, exactly like the copy-paste HTML snippet.
+// Where it renders: inside the first element with a data-uoft-webring attribute if the page has one
+// (e.g. <span data-uoft-webring></span>), otherwise just before the script tag, or at the end of
+// <body> when the tag ends up in <head> (React 19 hoists async scripts there).
 (function () {
     var me = document.currentScript;
     if (!me) return;
@@ -14,12 +19,10 @@
     var logo =
         { black: "ring_logo_black", white: "ring_logo_white" }[me.getAttribute("data-color")] || "ring_logo";
     var format = me.getAttribute("data-format") === "png" ? "png" : "svg";
-    var parent = me.parentNode;
-    // React 19 hoists <script async src> into <head> (so do members who paste it there): nothing in
-    // <head> renders, so show the widget at the end of <body> instead
-    var inHead = !parent || parent === document.head;
 
     var host = document.createElement("span");
+    // Marks a filled mount point, so a second copy of the tag doesn't render the widget twice
+    host.setAttribute("data-uoft-webring-widget", "");
     // Shadow DOM keeps the member's CSS out of the widget and ours out of their page
     var root = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
     var style = document.createElement("style");
@@ -52,10 +55,21 @@
     root.appendChild(nav);
 
     function mount() {
-        if (inHead) document.body.appendChild(host);
-        else parent.insertBefore(host, me);
+        // A mount point lets members on React/Next place the widget themselves: it lives inside their
+        // tree, so it also goes away on client-side navigation instead of sticking to every page
+        var spot = document.querySelector("[data-uoft-webring]");
+        if (spot) {
+            if (!spot.querySelector("[data-uoft-webring-widget]")) spot.appendChild(host);
+            return;
+        }
+        var parent = me.parentNode;
+        // React 19 hoists <script async src> into <head> (so do members who paste it there): nothing in
+        // <head> renders, so show the widget at the end of <body> instead
+        if (parent && parent !== document.head) parent.insertBefore(host, me);
+        else document.body.appendChild(host);
     }
-    // An async script in <head> can run before <body> exists
-    if (inHead && !document.body) document.addEventListener("DOMContentLoaded", mount);
+    // While the page is still parsing, the mount point may not exist yet and <body> holds only what's
+    // been parsed so far (an async script can run then, e.g. from cache), so wait for the whole document
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
     else mount();
 })();

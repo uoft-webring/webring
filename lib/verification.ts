@@ -44,10 +44,12 @@ export async function hasVerificationRecord(domain: string, ringId: number): Pro
 const TAG = /<([a-zA-Z][^\s/<>]*)((?:[^<>"']|"[^"]*"|'[^']*')*)>/g;
 // TAG anchored at a given index, to read the opening tag of a raw-text element
 const TAG_AT = new RegExp(TAG.source, "y");
-// Attribute names per the HTML tokenizer, starting at a boundary: up to whitespace, quotes, `>`, `/` or `=`
-const ATTRIBUTE = /(?<![^\s"'>/=])([^\s"'>/=]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/g;
-// Starts of text a browser never parses as tags: a <meta> inside these isn't a real meta element
-const INERT_START = /<!--|<(script|style|textarea|title|template|noscript|xmp)\b/gi;
+// Attribute names per the HTML tokenizer, starting at a boundary: up to whitespace, quotes, `>`, `/` or `=`.
+// The value is optional: boolean attributes such as `nomodule` have none
+const ATTRIBUTE = /(?<![^\s"'>/=])([^\s"'>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+)))?/g;
+// Starts of text a browser never parses as tags: a <meta> inside these isn't a real meta element.
+// The tag name ends where the tokenizer ends it (not at `\b`), so `<script-loader>` is a custom element
+const INERT_START = /<!--|<(script|style|textarea|title|template|noscript|xmp)(?![^\s/>])/gi;
 // Any other element ends the head, as it does in a browser
 const HEAD_ELEMENTS = new Set([
     "html",
@@ -63,6 +65,7 @@ const HEAD_ELEMENTS = new Set([
 ]);
 // A head is never this big; it bounds the work on a hostile page
 const MAX_SCAN = 256 * 1024;
+const SITE_URL = new URL(SITE_ORIGIN);
 
 // Case-insensitive indexOf. Searching a lowercased copy would drift: some characters (e.g. "İ")
 // change length when lowercased, so its indices don't line up with the original
@@ -83,14 +86,17 @@ function withoutInert(html: string, onScript?: (rawAttributes: string) => void):
     INERT_START.lastIndex = 0;
     for (let match = INERT_START.exec(html); match; match = INERT_START.exec(html)) {
         kept += html.slice(position, match.index);
-        if (onScript && match[1]?.toLowerCase() === "script") {
-            TAG_AT.lastIndex = match.index;
-            const open = TAG_AT.exec(html);
-            if (open) onScript(open[2]);
-        }
         const closer = match[1] ? `</${match[1].toLowerCase()}` : "-->";
         const closeAt = indexOfIgnoreCase(html, closer, INERT_START.lastIndex);
+        // A script left open at the end of the page never runs
         if (closeAt === -1) return kept;
+        if (onScript && match[1]?.toLowerCase() === "script") {
+            // Only up to the closer, so an unclosed quote can't send the tag scan past this element. The
+            // slices never overlap, so the whole pass stays linear on a hostile 2MB page
+            TAG_AT.lastIndex = 0;
+            const open = TAG_AT.exec(html.slice(match.index, closeAt));
+            if (open) onScript(open[2]);
+        }
         position = match[1] ? html.indexOf(">", closeAt) + 1 || html.length : closeAt + closer.length;
         INERT_START.lastIndex = position;
     }
@@ -102,24 +108,57 @@ function parseAttributes(rawAttributes: string): Map<string, string> {
     const attributes = new Map<string, string>();
     for (const match of rawAttributes.matchAll(ATTRIBUTE)) {
         const key = match[1].toLowerCase();
-        if (!attributes.has(key)) attributes.set(key, match[2] ?? match[3] ?? match[4]);
+        if (!attributes.has(key)) attributes.set(key, match[2] ?? match[3] ?? match[4] ?? "");
     }
     return attributes;
 }
 
+// The HTML spec's JavaScript MIME types: any other type (text/plain from cookie-consent tools,
+// text/partytown, module, …) means the browser doesn't run the tag as a classic script
+const JAVASCRIPT_TYPES = new Set([
+    "application/ecmascript",
+    "application/javascript",
+    "application/x-ecmascript",
+    "application/x-javascript",
+    "text/ecmascript",
+    "text/javascript",
+    "text/javascript1.0",
+    "text/javascript1.1",
+    "text/javascript1.2",
+    "text/javascript1.3",
+    "text/javascript1.4",
+    "text/javascript1.5",
+    "text/jscript",
+    "text/livescript",
+    "text/x-ecmascript",
+    "text/x-javascript",
+]);
+
+/** Whether a browser runs the tag as a classic script, the only kind with a document.currentScript. */
+function runsAsClassicScript(attributes: Map<string, string>): boolean {
+    // Browsers with module support skip nomodule scripts
+    if (attributes.has("nomodule")) return false;
+    const type = attributes.get("type");
+    const language = attributes.get("language");
+    // Per the spec, a legacy language attribute counts only when there's no type attribute
+    const kind = type !== undefined ? type.trim() : language ? `text/${language}` : "";
+    return kind === "" || JAVASCRIPT_TYPES.has(kind.toLowerCase());
+}
+
 /**
  * The ring id a live one-line widget tag (public/embed.js) renders links for, or null if it isn't one.
- * Same rules as embed.js: the whole data-id must be digits, and module scripts have no currentScript.
+ * Same rules as embed.js: the whole data-id must be digits, and it must run as a classic script.
  */
 function embedWidgetId(rawAttributes: string): number | null {
     const attributes = parseAttributes(rawAttributes);
     const id = attributes.get("data-id") ?? "";
-    if (!/^\d{1,9}$/.test(id) || attributes.get("type")?.trim().toLowerCase() === "module") return null;
+    if (!/^\d{1,9}$/.test(id) || !runsAsClassicScript(attributes)) return null;
     try {
         // A relative src resolves against the member's own site, never ours
         const src = new URL(attributes.get("src")?.trim() ?? "", "https://member-site.invalid");
-        const host = src.hostname.replace(/^www\./, "");
-        const ours = src.protocol.startsWith("http") && host === new URL(SITE_ORIGIN).hostname;
+        // Our exact origin: http:// is blocked as mixed content on https sites, and nothing serves other ports
+        const ours =
+            src.protocol === SITE_URL.protocol && src.port === SITE_URL.port && sameSite(src, SITE_URL);
         return ours && src.pathname === "/embed.js" ? Number(id) : null;
     } catch {
         return null;
@@ -256,6 +295,6 @@ export async function checkRingWidget(domain: string, ringId: number): Promise<R
     // The widget belongs in the static HTML; scanning past the first 2MB isn't worth it
     const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 2 * 1024 * 1024 });
     if (!response || !response.ok) return "unreachable";
-    const onRingSite = new URL(response.url).hostname.replace(/^www\./, "") === new URL(SITE_ORIGIN).hostname;
+    const onRingSite = sameSite(new URL(response.url), SITE_URL);
     return analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite);
 }

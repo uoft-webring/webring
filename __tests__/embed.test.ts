@@ -13,22 +13,37 @@ type FakeNode = {
     shadow?: FakeNode;
 };
 
-type Run = { where: "before-script" | "body" | "waiting" | null; host?: FakeNode; ready: () => void };
+type Where = "before-script" | "body" | "mount" | "waiting" | null;
+type Run = { where: Where; host?: FakeNode; ready: () => void };
+type Options = {
+    place?: "body" | "head";
+    /** document.readyState when the script runs */
+    loading?: boolean;
+    /** The page has a [data-uoft-webring] element; "filled" already holds a widget */
+    mount?: "empty" | "filled";
+};
 
 /** Runs public/embed.js against a minimal DOM (with Shadow DOM, like real browsers). */
-function run(attrs: Record<string, string>, place: "body" | "head" | "head-before-body" = "body"): Run {
+function run(attrs: Record<string, string>, { place = "body", loading = false, mount }: Options = {}): Run {
     const node = (tag: string): FakeNode & Record<string, unknown> => {
         const n: FakeNode & Record<string, unknown> = { tag, attrs: {}, children: [], textContent: "" };
         n.setAttribute = (key: string, value: string) => void (n.attrs[key] = value);
         n.getAttribute = (key: string) => n.attrs[key] ?? null;
         n.appendChild = (child: FakeNode) => void n.children.push(child);
         n.attachShadow = () => (n.shadow = node("#shadow-root"));
+        n.querySelector = (selector: string) =>
+            n.children.find((child) => `[${Object.keys(child.attrs)[0]}]` === selector) ?? null;
         return n;
     };
     const result: Run = { where: null, ready: () => {} };
     const head = node("head");
     const body = node("body");
     body.appendChild = (child: FakeNode) => void ((result.where = "body"), (result.host = child));
+    const spot = node("span");
+    spot.attrs["data-uoft-webring"] = "";
+    if (mount === "filled")
+        spot.children.push(node("span"), { ...node("span"), attrs: { "data-uoft-webring-widget": "" } });
+    spot.appendChild = (child: FakeNode) => void ((result.where = "mount"), (result.host = child));
     const script = node("script");
     Object.assign(script.attrs, attrs);
     script.src = "https://uoftwebring.com/embed.js";
@@ -40,11 +55,14 @@ function run(attrs: Record<string, string>, place: "body" | "head" | "head-befor
         currentScript: script,
         createElement: node,
         head,
-        body: place === "head-before-body" ? null : body,
-        addEventListener: (_event: string, listener: () => void) => {
+        body,
+        readyState: loading ? "loading" : "complete",
+        querySelector: (selector: string) => (mount && selector === "[data-uoft-webring]" ? spot : null),
+        addEventListener: (event: string, listener: () => void) => {
+            expect(event).toBe("DOMContentLoaded");
             result.where = "waiting";
             result.ready = () => {
-                document.body = body;
+                document.readyState = "interactive";
                 listener();
             };
         },
@@ -84,16 +102,33 @@ describe("public/embed.js", () => {
     });
 
     it("renders at the end of <body> when the tag sits in <head> (React 19 hoists it there)", () => {
-        const { where, host } = run({ "data-id": "3" }, "head");
+        const { where, host } = run({ "data-id": "3" }, { place: "head" });
         expect(where).toBe("body");
         expect(links(host)[0]).toBe("https://uoftwebring.com/redirect?nav=prev&id=3");
     });
 
-    it("waits for <body> when it runs from <head> before the body exists", () => {
-        const result = run({ "data-id": "3" }, "head-before-body");
-        expect(result.where).toBe("waiting");
-        result.ready();
-        expect(result.where).toBe("body");
+    it("waits for the whole document while the page is still parsing, wherever the tag sits", () => {
+        for (const place of ["head", "body"] as const) {
+            const result = run({ "data-id": "3" }, { place, loading: true });
+            expect(result.where).toBe("waiting");
+            result.ready();
+            expect(result.where).toBe(place === "head" ? "body" : "before-script");
+        }
+    });
+
+    it("renders into a [data-uoft-webring] mount point when the page has one", () => {
+        for (const place of ["head", "body"] as const) {
+            const { where, host } = run({ "data-id": "4" }, { place, mount: "empty" });
+            expect(where).toBe("mount");
+            expect(links(host)[3]).toBe("https://uoftwebring.com/redirect?nav=next&id=4");
+        }
+        const late = run({ "data-id": "4" }, { place: "head", loading: true, mount: "empty" });
+        late.ready();
+        expect(late.where).toBe("mount");
+    });
+
+    it("doesn't render twice into a mount point that already has the widget", () => {
+        expect(run({ "data-id": "4" }, { mount: "filled" }).where).toBeNull();
     });
 
     it("uses the chosen logo colour and format, falling back to blue SVG", () => {
