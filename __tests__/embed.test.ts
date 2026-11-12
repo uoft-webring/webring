@@ -71,13 +71,14 @@ describe("public/embed.js", () => {
     });
 
     it("renders nothing for a missing or malformed id", () => {
-        for (const attrs of [
+        const malformed: Record<string, string>[] = [
             {},
             { "data-id": "abc" },
             { "data-id": "-1" },
             { "data-id": "1.5" },
             { "data-id": "7 " },
-        ]) {
+        ];
+        for (const attrs of malformed) {
             expect(run(attrs).where).toBeNull();
         }
     });
