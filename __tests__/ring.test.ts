@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findRingDestination, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, isSiteDown, linkableMembers, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 function member(ringId: number, domain = `https://site${ringId}.dev`): PublicProfile {
@@ -66,6 +66,16 @@ describe("ringMembers: link health", () => {
 
     it("leaves out sites that are down", () => {
         expect(ringMembers([member(0), down(1), member(2)]).map((m) => m.ringId)).toEqual([0, 2]);
+    });
+
+    it("keeps down sites in linkableMembers, which credits hops, but not in the ring", () => {
+        const profiles = [member(0), down(1), member(2, ""), member(3)];
+        expect(linkableMembers(profiles).map((m) => m.ringId)).toEqual([0, 1, 3]);
+        expect(ringMembers(profiles).map((m) => m.ringId)).toEqual([0, 3]);
+    });
+
+    it("counts a site down from the second down check", () => {
+        expect([0, 1, 2, 9].map(isSiteDown)).toEqual([false, false, true, true]);
     });
 
     it("ignores health when over half the ring looks down", () => {

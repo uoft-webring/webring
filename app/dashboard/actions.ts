@@ -159,10 +159,22 @@ export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
 
     const probe = await probeRingWidget(profile.domain, profile.ringId);
     const { result } = probe;
-    const status = statusAfterCheck(result, profile.ringStatus);
     const state = await recordRingCheck(profile.id, result, probe);
     // Back up (or newly down): / and /plain read health through the profiles cache
     if (state && isSiteDown(state.consecutiveDown) !== wasDown) updateTag(PROFILES_TAG);
+
+    if (profile.ringStatus === "connected") {
+        if (!state) return fail("Could not save the check. Please try again.");
+        // A click-confirmed widget can work without appearing in the fetched HTML.
+        return ok({
+            status: "connected",
+            result,
+            message: state.consecutiveDown === 0
+                ? "Your site is back up. You're in the ring again."
+                : ringCheckMessage("unreachable", profile.ringId),
+        });
+    }
+    const status = statusAfterCheck(result, profile.ringStatus);
 
     if (status !== profile.ringStatus) {
         // Matching the checked domain stops a concurrent domain change from inheriting this result
