@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/u/[slug]">): Prom
 
     const url = profileUrl(profile.slug);
     return {
-        title: `${profile.name} - UofT Webring`,
+        title: profile.name,
         description: profile.tagline || undefined,
         openGraph: {
             title: profile.name,
@@ -183,7 +183,11 @@ export default async function ProfilePage({ params }: PageProps<"/u/[slug]">) {
                                                     href={topicPath("tags", tagName)}
                                                     className="hover:opacity-80"
                                                 >
-                                                    <SkillTag tagName={tagName} size="mini" className="text-sm" />
+                                                    <SkillTag
+                                                        tagName={tagName}
+                                                        size="mini"
+                                                        className="text-sm"
+                                                    />
                                                 </Link>
                                             ) : (
                                                 <SkillTag tagName={tagName} size="mini" className="text-sm" />

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { cn } from "@/lib/cn";
 import { previewVersion } from "@/lib/site";
+import { uoftIndexUrl } from "@/lib/uoftindex";
 
 describe("cn", () => {
     it("merges class names", () => {
@@ -29,5 +30,21 @@ describe("previewVersion", () => {
         expect(previewVersion("https://jane.dev")).toBe(previewVersion("https://jane.dev"));
         expect(previewVersion("https://jane.dev")).not.toBe(previewVersion("https://jane.dev/"));
         expect(previewVersion("https://jane.dev")).toMatch(/^[0-9a-z]+$/);
+    });
+});
+
+describe("uoftIndexUrl", () => {
+    it("tags each placement separately under one campaign", () => {
+        const url = new URL(uoftIndexUrl("navbar"));
+        expect(url.origin).toBe("https://uoftindex.com");
+        expect(url.searchParams.get("utm_source")).toBe("uoftwebring");
+        expect(url.searchParams.get("utm_medium")).toBe("navbar");
+        expect(url.searchParams.get("utm_campaign")).toBe("cross_promo");
+    });
+
+    it("keeps the banner link the promo always used", () => {
+        expect(uoftIndexUrl("banner")).toBe(
+            "https://uoftindex.com/?utm_source=uoftwebring&utm_medium=banner&utm_campaign=cross_promo"
+        );
     });
 });

@@ -20,10 +20,11 @@ function layout(members: PlainMember[]): Node[] {
         const random = seededRandom(member.ringId * 7919 + 17);
         const angle = index * step - Math.PI / 2 + (random() - 0.5) * step * 0.7;
         const radius = 0.72 + random() * 0.32;
+        // Rounded: Node and the browser can differ in the last digit of sin/cos, which broke hydration
         return {
             ...member,
-            x: CENTER_X + Math.cos(angle) * 340 * radius,
-            y: CENTER_Y + Math.sin(angle) * 290 * radius,
+            x: Math.round((CENTER_X + Math.cos(angle) * 340 * radius) * 100) / 100,
+            y: Math.round((CENTER_Y + Math.sin(angle) * 290 * radius) * 100) / 100,
         };
     });
 }

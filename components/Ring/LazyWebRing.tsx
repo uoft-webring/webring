@@ -1,14 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Component, type ReactNode } from "react";
 import type { PublicProfile } from "@/lib/profiles/types";
 import { usePrefersReducedMotion } from "../usePrefersReducedMotion";
+import { SCENE_HEIGHT_CLASS } from "./ringUtils";
 
 const WebRing = dynamic(() => import("./WebRing").then((mod) => mod.WebRing), {
     ssr: false,
     loading: () => (
-        <div className="flex h-[max(12rem,calc(100svh-36rem))] w-full items-center justify-center">
+        <div className={`flex ${SCENE_HEIGHT_CLASS} w-full items-center justify-center`}>
             <p className="text-muted-foreground">Loading 3D scene...</p>
         </div>
     ),
@@ -36,11 +38,14 @@ class WebGLErrorBoundary extends Component<{ children: ReactNode }, { failure: F
     render() {
         if (this.state.failure) {
             return (
-                <div className="flex h-[max(12rem,calc(100svh-36rem))] w-full items-center justify-center">
-                    <p className="text-muted-foreground">
+                <div className={`flex ${SCENE_HEIGHT_CLASS} w-full items-center justify-center px-4`}>
+                    <p className="text-muted-foreground text-center">
                         {this.state.failure === "webgl"
                             ? "3D scene unavailable — WebGL is not supported in this browser."
-                            : "3D scene unavailable — it couldn't load. Refresh the page to try again."}
+                            : "3D scene unavailable — it couldn't load. Refresh the page to try again."}{" "}
+                        <Link href="/plain" className="text-primary hover:underline">
+                            See the plain version
+                        </Link>
                     </p>
                 </div>
             );

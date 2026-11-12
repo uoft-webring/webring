@@ -60,3 +60,36 @@ describe("ringMembers", () => {
         expect(ringMembers(profiles).map((profile) => profile.ringId)).toEqual([1]);
     });
 });
+
+describe("findRingDestination: random (Surprise me)", () => {
+    const pick = (ringId: number | null, roll: number) =>
+        findRingDestination(ring, ringId, "random", () => roll)?.ringId;
+
+    it("never sends a visitor back to the member they came from, but reaches every other one", () => {
+        expect(pick(3, 0)).toBe(0);
+        expect(pick(3, 0.99)).toBe(7);
+        expect(pick(0, 0)).toBe(3);
+        expect(pick(0, 0.99)).toBe(7);
+    });
+
+    it("starts prev/next before member 0 when there is no source", () => {
+        expect(findRingDestination(ring, null, "next")?.ringId).toBe(0);
+        expect(findRingDestination(ring, null, "prev")?.ringId).toBe(7);
+    });
+
+    it("can pick member 0 when there is no source (footer link, missing or garbage id)", () => {
+        expect(pick(null, 0)).toBe(0);
+        expect(pick(null, 0.5)).toBe(3);
+        expect(pick(null, 0.99)).toBe(7);
+    });
+
+    it("treats an id outside the ring as no member to skip", () => {
+        expect(pick(5, 0)).toBe(0);
+        expect(pick(5, 0.99)).toBe(7);
+    });
+
+    it("returns the only member of a one-member ring, and null for an empty ring", () => {
+        expect(findRingDestination([member(4)], 4, "random")?.ringId).toBe(4);
+        expect(findRingDestination([], null, "random")).toBeNull();
+    });
+});
