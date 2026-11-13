@@ -51,10 +51,14 @@ function field(name: string): MergeField | undefined {
     return Object.hasOwn(MERGE_FIELDS, name) ? MERGE_FIELDS[name as MergeFieldName] : undefined;
 }
 
-/** Merge fields in `template` that don't exist, e.g. a typo like {{frist_name}}. */
+// Looser than FIELD on purpose: {{First_Name}} or {{first-name}} would otherwise slip past
+// the check and go out to every member as literal text.
+const ANY_FIELD = /\{\{\s*([^{}]*?)\s*\}\}/g;
+
+/** Merge fields in `template` that don't exist, e.g. a typo like {{frist_name}} or {{First_Name}}. */
 export function unknownMergeFields(template: string): string[] {
     const unknown = new Set<string>();
-    for (const [, name] of template.matchAll(FIELD)) if (!field(name)) unknown.add(name);
+    for (const [, name] of template.matchAll(ANY_FIELD)) if (!field(name)) unknown.add(name);
     return [...unknown];
 }
 

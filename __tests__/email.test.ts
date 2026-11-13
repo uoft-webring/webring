@@ -50,6 +50,10 @@ describe("renderEmail", () => {
     it("flags unknown merge fields", () => {
         expect(unknownMergeFields("{{frist_name}} {{name}} {{ site }}")).toEqual(["frist_name"]);
     });
+
+    it("flags merge fields with the wrong case, hyphens or digits", () => {
+        expect(unknownMergeFields("{{First_Name}} {{first-name}} {{name2}} {{}}")).toEqual(["First_Name", "first-name", "name2", ""]);
+    });
 });
 
 const member: AudienceMember = {
