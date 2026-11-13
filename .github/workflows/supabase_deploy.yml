@@ -25,4 +25,5 @@ jobs:
           version: 3.1.0
 
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
-      - run: supabase db push
+      # v3 targets the local stack unless told otherwise
+      - run: supabase db push --remote
