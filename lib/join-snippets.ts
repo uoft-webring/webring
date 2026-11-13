@@ -39,5 +39,9 @@ export function widgetSnippets(ringId: number, format: LogoFormat, color: LogoCo
     <a href="${next}" aria-label="Next site in UofT Webring">→</a>
 </div>`,
         },
+        {
+            label: "One line",
+            code: `<script src="${SITE_ORIGIN}/embed.js" data-id="${ringId}" data-color="${color.toLowerCase()}" data-format="${format.toLowerCase()}" async></script>`,
+        },
     ];
 }
