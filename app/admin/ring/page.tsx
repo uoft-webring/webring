@@ -6,6 +6,7 @@ import { RING_CHECK_SUMMARY } from "@/lib/ring-link";
 import { displayDomain, profilePath } from "@/lib/site";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { RingWidgetResult } from "@/lib/verification";
+import { AdminNav } from "../AdminNav";
 import { ReviewButtons } from "./ReviewButtons";
 
 export const metadata: Metadata = { title: "Ring review", robots: { index: false } };
@@ -39,6 +40,7 @@ export default async function RingReviewPage() {
         <div className="bg-background flex min-h-screen flex-col">
             <Navbar user={admin} />
             <main className="mx-auto w-full max-w-4xl px-6 pb-16">
+                <AdminNav current="/admin/ring" />
                 <h1 className="mb-2">Ring review</h1>
                 <p className="text-muted-foreground mb-8">
                     Sites waiting for a person to check their ring widget. Approve once you&apos;ve seen working

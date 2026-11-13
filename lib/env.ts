@@ -19,6 +19,17 @@ const serverEnvSchema = z.object({
     AWS_ACCESS_KEY_ID: z.string().min(1),
     AWS_SECRET_ACCESS_KEY: z.string().min(1),
     AWS_S3_BUCKET_NAME: z.string().min(1),
+    // Admin email (/admin/email). Unset EMAIL_TRANSPORT turns sending off; the page says so.
+    // ses: Amazon SES with the AWS keys above. mailpit: the local Supabase stack's Mailpit (dev only).
+    EMAIL_TRANSPORT: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["ses", "mailpit"]).optional()),
+    // e.g. `UofT Webring <hello@uoftwebring.com>`; the domain must be verified in SES
+    EMAIL_FROM: optionalString,
+    EMAIL_REPLY_TO: optionalString,
+    // CASL asks commercial email to carry a mailing address; shown in the footer when set
+    EMAIL_POSTAL_ADDRESS: optionalString,
+    // SES can live in another region than the S3 bucket
+    AWS_SES_REGION: optionalString,
+    MAILPIT_URL: optionalString,
     VERCEL_ENV: z.enum(["production", "preview", "development"]).optional(),
     VERCEL_URL: z.string().optional(),
 });
