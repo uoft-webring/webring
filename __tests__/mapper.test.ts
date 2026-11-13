@@ -18,6 +18,13 @@ const row: PublicProfileRow = {
 };
 
 describe("toPublicProfile", () => {
+    it("marks a site down only after two down checks, and leaves it unknown when health wasn't read", () => {
+        expect(toPublicProfile({ ...row, ring_link_state: { consecutive_down: 2 } }).siteDown).toBe(true);
+        expect(toPublicProfile({ ...row, ring_link_state: { consecutive_down: 1 } }).siteDown).toBe(false);
+        expect(toPublicProfile({ ...row, ring_link_state: null }).siteDown).toBe(false);
+        expect(toPublicProfile(row).siteDown).toBeUndefined();
+    });
+
     it("normalises nullable columns so components never null-check", () => {
         expect(toPublicProfile(row)).toEqual({
             ringId: 3,

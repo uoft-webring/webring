@@ -4,7 +4,12 @@ import { unstable_cache } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { fail, ok, type Result } from "@/lib/result";
-import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "./mapper";
+import {
+    PUBLIC_PROFILE_COLUMNS,
+    RING_HEALTH_COLUMNS,
+    toPublicProfile,
+    type PublicProfileRow,
+} from "./mapper";
 import type { PublicProfile } from "./types";
 
 export const PROFILES_TAG = "profiles";
@@ -15,7 +20,7 @@ const loadPublicProfiles = unstable_cache(
     async (): Promise<PublicProfile[]> => {
         const { data, error } = await createAdminClient()
             .from("profile")
-            .select(PUBLIC_PROFILE_COLUMNS)
+            .select(`${PUBLIC_PROFILE_COLUMNS}, ${RING_HEALTH_COLUMNS}`)
             .order("ring_id", { ascending: true })
             .returns<PublicProfileRow[]>();
 
@@ -23,7 +28,7 @@ const loadPublicProfiles = unstable_cache(
         if (error) throw new Error(error.message);
         return data.map(toPublicProfile);
     },
-    ["public-profiles-v1"],
+    ["public-profiles-v2"],
     { revalidate: 300, tags: [PROFILES_TAG] }
 );
 

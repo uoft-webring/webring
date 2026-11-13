@@ -21,7 +21,8 @@ jobs:
       
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: CLI v3 dropped config.toml sections this repo still uses ([inbucket]), so `latest` broke db push
+          version: 2.122.0
 
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push

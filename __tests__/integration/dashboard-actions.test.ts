@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { updatePageContent, updateProfile } from "@/app/dashboard/actions";
+import { checkRingLink, updatePageContent, updateProfile } from "@/app/dashboard/actions";
 import { PROFILES_TAG } from "@/lib/profiles/queries";
 import type { ProfileInput } from "@/lib/validation";
 import { updateTag } from "next/cache";
+import { probeRingWidget } from "@/lib/verification";
 
 type Row = Record<string, unknown>;
 
@@ -11,6 +12,10 @@ const db = vi.hoisted(() => ({
     user: null as { sub: string; email: string } | null,
     profile: null as Record<string, unknown> | null,
     writeError: null as { code?: string; message: string } | null,
+    linkState: null as Record<string, unknown> | null,
+    // What record_ring_check returns
+    recorded: null as Record<string, unknown> | null,
+    rpcs: [] as string[],
     updates: [] as Array<{
         table: string;
         values: Record<string, unknown>;
@@ -21,6 +26,11 @@ const db = vi.hoisted(() => ({
 vi.mock("next/cache", () => ({
     updateTag: vi.fn(),
     unstable_cache: <T>(fn: T): T => fn,
+}));
+
+vi.mock("@/lib/verification", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("@/lib/verification")>()),
+    probeRingWidget: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -50,7 +60,7 @@ vi.mock("@/lib/supabase/server", () => {
                 return { data: { ...db.profile, ...pending }, error: null };
             },
             async maybeSingle() {
-                return { data: db.profile, error: null };
+                return { data: table === "ring_link_state" ? db.linkState : db.profile, error: null };
             },
         };
         return builder;
@@ -58,6 +68,12 @@ vi.mock("@/lib/supabase/server", () => {
 
     const client = {
         from: query,
+        rpc(name: string) {
+            db.rpcs.push(name);
+            const data = name === "consume_rate_limit" ? true : db.recorded;
+            const result = { data, error: null };
+            return { ...result, single: async () => result, then: (resolve: (value: typeof result) => void) => resolve(result) };
+        },
         auth: {
             getClaims: async () =>
                 db.user
@@ -127,6 +143,9 @@ beforeEach(() => {
     db.profile = ownRow();
     db.writeError = null;
     db.updates = [];
+    db.linkState = null;
+    db.recorded = null;
+    db.rpcs = [];
 });
 
 describe("updatePageContent", () => {
@@ -274,5 +293,68 @@ describe("updateProfile", () => {
         expect(result).toEqual({ data: null, error: "Could not save your profile." });
         expect(JSON.stringify(result)).not.toContain("10.0.3.4");
         expect(updateTag).not.toHaveBeenCalled();
+    });
+});
+
+describe("checkRingLink", () => {
+    const recorded = (previousDown: number, consecutiveDown: number) => ({
+        consecutive_failures: 0,
+        last_click_verified_at: null,
+        consecutive_down: consecutiveDown,
+        down_since: consecutiveDown > 0 ? "2026-11-01T00:00:00Z" : null,
+        previous_down: previousDown,
+    });
+
+    beforeEach(() => {
+        db.profile = ownRow({ validated_user_component: "connected" });
+    });
+
+    it("doesn't fetch a connected member's site while it's up", async () => {
+        db.linkState = { consecutive_down: 0 };
+        const result = await checkRingLink();
+        expect(result.data?.message).toBe("Your site is already linked.");
+        expect(probeRingWidget).not.toHaveBeenCalled();
+        expect(db.rpcs).toEqual([]);
+    });
+
+    it("re-checks a connected site that's down, and refreshes the ring when it's back", async () => {
+        db.linkState = { consecutive_down: 3 };
+        db.recorded = recorded(3, 0);
+        vi.mocked(probeRingWidget).mockResolvedValue({ result: "js_rendered", httpStatus: 200, latencyMs: 40 });
+
+        const result = await checkRingLink();
+
+        expect(result).toEqual({
+            data: { status: "connected", result: "js_rendered", message: "Your site is back up. You're in the ring again." },
+            error: null,
+        });
+        expect(db.rpcs).toEqual(["consume_rate_limit", "record_ring_check"]);
+        expect(updateTag).toHaveBeenCalledWith(PROFILES_TAG);
+        // Health only: a click-confirmed widget isn't demoted by the HTML check
+        expect(db.updates).toEqual([]);
+    });
+
+    it("says so when a connected site is still down, without touching the cache", async () => {
+        db.linkState = { consecutive_down: 3 };
+        db.recorded = recorded(3, 4);
+        vi.mocked(probeRingWidget).mockResolvedValue({ result: "unreachable", httpStatus: 503, latencyMs: 40 });
+
+        const result = await checkRingLink();
+
+        expect(result.data?.message).toBe("We couldn't load your homepage. Check that it's live, then try again.");
+        expect(updateTag).not.toHaveBeenCalled();
+        expect(db.updates).toEqual([]);
+    });
+
+    it("refreshes the ring when an unlinked member's site comes back, even if their status stays", async () => {
+        db.profile = ownRow({ validated_user_component: "pending" });
+        db.linkState = { consecutive_down: 2 };
+        db.recorded = recorded(2, 0);
+        vi.mocked(probeRingWidget).mockResolvedValue({ result: "js_rendered", httpStatus: 200, latencyMs: 40 });
+
+        const result = await checkRingLink();
+
+        expect(result.data?.status).toBe("pending");
+        expect(updateTag).toHaveBeenCalledWith(PROFILES_TAG);
     });
 });

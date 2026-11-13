@@ -2,9 +2,14 @@ import { createHmac } from "node:crypto";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
-import { PUBLIC_PROFILE_COLUMNS, toPublicProfile, type PublicProfileRow } from "@/lib/profiles/mapper";
+import {
+    PUBLIC_PROFILE_COLUMNS,
+    RING_HEALTH_COLUMNS,
+    toPublicProfile,
+    type PublicProfileRow,
+} from "@/lib/profiles/mapper";
 import { clientIpFrom } from "@/lib/client-ip";
-import { findRingDestination, isOwnSiteReferral, ringMembers, type RingDirection } from "@/lib/profiles/ring";
+import { findRingDestination, isOwnSiteReferral, linkableMembers, ringMembers, type RingDirection } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -15,7 +20,11 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const RING_TTL_MS = 60_000;
 // During a DB outage, retry at most this often instead of paying a failing query on every click
 const RING_ERROR_BACKOFF_MS = 5_000;
-let ringCache: { members: PublicProfile[]; expires: number } | undefined;
+// `members` is the ring (down sites left out); `sources` keeps down sites too: a click from a member's site
+// still credits them while the checker thinks it's down (and two visitors' clicks reset the down streak,
+// see record_widget_click)
+type Ring = { members: PublicProfile[]; sources: PublicProfile[] };
+let ringCache: (Ring & { expires: number }) | undefined;
 
 function adminClient() {
     return createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
@@ -23,25 +32,32 @@ function adminClient() {
     });
 }
 
-async function loadRing(): Promise<PublicProfile[]> {
-    if (ringCache && ringCache.expires > Date.now()) return ringCache.members;
+async function loadRing(): Promise<Ring> {
+    if (ringCache && ringCache.expires > Date.now()) return ringCache;
 
     const { data, error } = await adminClient()
         .from("profile")
-        .select(PUBLIC_PROFILE_COLUMNS)
+        .select(`${PUBLIC_PROFILE_COLUMNS}, ${RING_HEALTH_COLUMNS}`)
         .order("ring_id", { ascending: true })
         .returns<PublicProfileRow[]>();
 
     if (error) {
         console.error("[redirect] Failed to load ring:", error.message);
         // Serve stale data rather than dropping visitors on the home page
-        const members = ringCache?.members ?? [];
-        ringCache = { members, expires: Date.now() + RING_ERROR_BACKOFF_MS };
-        return members;
+        ringCache = {
+            members: ringCache?.members ?? [],
+            sources: ringCache?.sources ?? [],
+            expires: Date.now() + RING_ERROR_BACKOFF_MS,
+        };
+        return ringCache;
     }
-    const members = ringMembers(data.map(toPublicProfile));
-    ringCache = { members, expires: Date.now() + RING_TTL_MS };
-    return members;
+    const profiles = data.map(toPublicProfile);
+    ringCache = {
+        members: ringMembers(profiles),
+        sources: linkableMembers(profiles),
+        expires: Date.now() + RING_TTL_MS,
+    };
+    return ringCache;
 }
 
 // Crawlers and link unfurlers follow widget links too; they'd swamp the members' stats
@@ -86,10 +102,10 @@ async function handleRingRedirect(request: NextRequest, event: NextFetchEvent): 
     const rawId = request.nextUrl.searchParams.get("id")?.trim() ?? "";
     const parsed = Number.parseInt(rawId, 10);
 
-    const members = await loadRing();
+    const { members, sources } = await loadRing();
     // The one place that decides the source: an exact id of a real member. It's credited for the hop and
     // skipped by Surprise me; made-up or malformed ids ("0abc", "-0") are no one
-    const source = /^\d{1,9}$/.test(rawId) ? members.find((member) => member.ringId === parsed) : undefined;
+    const source = /^\d{1,9}$/.test(rawId) ? sources.find((member) => member.ringId === parsed) : undefined;
     // prev/next stay lenient ("1abc" still lands on a neighbour). null, never a fallback 0: ring ids start
     // at 0, so 0 would pose as member 0
     const from = nav === "random" ? (source?.ringId ?? null) : Number.isNaN(parsed) ? null : parsed;

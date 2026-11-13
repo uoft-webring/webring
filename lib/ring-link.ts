@@ -4,6 +4,12 @@ import type { RingWidgetResult } from "@/lib/verification";
 /** How long a click from the member's own site counts as proof their widget works. */
 export const CLICK_PROOF_DAYS = 30;
 
+/**
+ * Down checks in a row that send a connected member to review: the weekly check plus six daily re-checks
+ * (ring_checks_due), so about a week down. Shorter outages only take the site out of the ring.
+ */
+export const LONG_OUTAGE_CHECKS = 7;
+
 /** What each check result means for the member, and what to do about it. */
 export function ringCheckMessage(result: RingWidgetResult, ringId: number): string {
     switch (result) {
@@ -42,20 +48,23 @@ export function statusAfterCheck(result: RingWidgetResult, current: RingStatus):
 }
 
 /**
- * Status after a weekly re-check. A connected member is only moved back to review after two
- * failed checks in a row and no recent clicks from their site: JavaScript-rendered sites always
- * "fail" the HTML check, and sites go down for a day.
+ * Status after a re-check. A connected member is only moved back to review after two failed widget
+ * checks in a row and no recent clicks from their site (JavaScript-rendered sites always "fail" the
+ * HTML check), or after LONG_OUTAGE_CHECKS down checks in a row (shorter outages just leave the ring).
  */
 export function statusAfterRecheck(
     current: RingStatus,
     result: RingWidgetResult,
     consecutiveFailures: number,
     lastClickVerifiedAt: Date | null,
-    now: Date = new Date()
+    now: Date = new Date(),
+    consecutiveDown = 0
 ): RingStatus {
     if (result === "found") return "connected";
     if (current !== "connected") return current;
     const recentClick =
         lastClickVerifiedAt !== null && now.getTime() - lastClickVerifiedAt.getTime() < CLICK_PROOF_DAYS * 86_400_000;
-    return consecutiveFailures >= 2 && !recentClick ? "pending" : "connected";
+    if (recentClick) return "connected";
+    if (result === "unreachable") return consecutiveDown >= LONG_OUTAGE_CHECKS ? "pending" : "connected";
+    return consecutiveFailures >= 2 ? "pending" : "connected";
 }

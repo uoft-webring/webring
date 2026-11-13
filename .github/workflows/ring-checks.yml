@@ -1,10 +1,10 @@
 name: Ring link checks
 
-# Re-checks members' ring widgets weekly. A connected site only goes back to review after two failed
+# Re-checks members' ring widgets weekly, and sites that are down daily (down sites are skipped by /redirect). A connected site only goes back to review after two failed
 # checks in a row and no clicks from it in 30 days (the server decides; see lib/ring-link.ts).
 on:
     schedule:
-        - cron: "0 15 * * 0" # Sundays, 10–11am Toronto
+        - cron: "0 15 * * *" # Daily, 10–11am Toronto; each site is only re-checked when due
     workflow_dispatch:
         inputs:
             mode:

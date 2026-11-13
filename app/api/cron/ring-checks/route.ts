@@ -2,12 +2,13 @@ import { revalidateTag } from "next/cache";
 import { NextResponse, type NextRequest } from "next/server";
 import { cronAuthError } from "@/lib/cron";
 import { PROFILES_TAG } from "@/lib/profiles/queries";
+import { isSiteDown } from "@/lib/profiles/ring";
 import { recordRingCheck } from "@/lib/profiles/ring-link-state";
 import type { RingStatus } from "@/lib/profiles/types";
 import { ok, fail, type Result } from "@/lib/result";
 import { statusAfterRecheck } from "@/lib/ring-link";
 import { createAdminClient } from "@/lib/supabase/server";
-import { checkRingWidget } from "@/lib/verification";
+import { probeRingWidget } from "@/lib/verification";
 
 export const maxDuration = 300;
 
@@ -15,12 +16,12 @@ export const maxDuration = 300;
 const BATCH_SIZE = 40;
 const CONCURRENCY = 5;
 
-type DueMember = { id: string; ring_id: number; domain: string; status: RingStatus };
+type DueMember = { id: string; ring_id: number; domain: string; status: RingStatus; consecutive_down: number };
 
 // Counts only: Actions logs on a public repo are public
-type RecheckRun = { mode: "check" | "dry-run"; due: number; found: number; movedToReview: number; reconnected: number; failed: number };
+type RecheckRun = { mode: "check" | "dry-run"; due: number; found: number; down: number; movedToReview: number; reconnected: number; failed: number };
 
-/** Weekly re-check of members' widgets. Called by .github/workflows/ring-checks.yml. */
+/** Re-checks members' widgets and site health: weekly, and daily for sites that are down. Called by .github/workflows/ring-checks.yml. */
 export async function POST(request: NextRequest): Promise<NextResponse<Result<RecheckRun>>> {
     const authError = cronAuthError(request);
     if (authError) return authError;
@@ -33,18 +34,32 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
         return NextResponse.json(fail("Could not load members."), { status: 500 });
     }
     const due = data as DueMember[];
-    const run: RecheckRun = { mode, due: due.length, found: 0, movedToReview: 0, reconnected: 0, failed: 0 };
+    const run: RecheckRun = { mode, due: due.length, found: 0, down: 0, movedToReview: 0, reconnected: 0, failed: 0 };
     if (mode === "dry-run") return NextResponse.json(ok(run));
+    let healthChanged = false;
 
     const recheck = async (member: DueMember) => {
-        const result = await checkRingWidget(member.domain, member.ring_id);
+        const probe = await probeRingWidget(member.domain, member.ring_id);
+        const { result } = probe;
         if (result === "found") run.found++;
-        const state = await recordRingCheck(member.id, result);
+        const state = await recordRingCheck(member.id, result, probe);
         if (!state) {
             run.failed++;
             return;
         }
-        const next = statusAfterRecheck(member.status, result, state.consecutiveFailures, state.lastClickVerifiedAt);
+        // Counted like the down streak: a 401/403/429 is bot protection, not an outage
+        if (state.consecutiveDown > 0) run.down++;
+        if (isSiteDown(state.consecutiveDown) !== isSiteDown(member.consecutive_down)) healthChanged = true;
+        // Others get a health check only: never reverse an admin's rejection or connect an unreviewed site
+        if (member.status !== "connected" && member.status !== "pending") return;
+        const next = statusAfterRecheck(
+            member.status,
+            result,
+            state.consecutiveFailures,
+            state.lastClickVerifiedAt,
+            new Date(),
+            state.consecutiveDown
+        );
         if (next === member.status) return;
         const { error: updateError } = await admin
             .from("profile")
@@ -62,6 +77,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Result<Re
     for (let i = 0; i < due.length; i += CONCURRENCY) {
         await Promise.all(due.slice(i, i + CONCURRENCY).map(recheck));
     }
-    if (run.movedToReview + run.reconnected > 0) revalidateTag(PROFILES_TAG, { expire: 0 });
+    // A site leaving or rejoining the ring changes / and /plain too (ringMembers reads health)
+    if (run.movedToReview + run.reconnected > 0 || healthChanged) revalidateTag(PROFILES_TAG, { expire: 0 });
     return NextResponse.json(ok(run));
 }

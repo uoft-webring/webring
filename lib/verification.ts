@@ -291,10 +291,26 @@ export function hasRingWidget(html: string, ringId: number): boolean {
     return analyzeRingWidget(html, ringId) === "found";
 }
 
-export async function checkRingWidget(domain: string, ringId: number): Promise<RingWidgetResult> {
+/** A widget check plus how the site answered, for link-health stats. */
+export type RingProbe = { result: RingWidgetResult; httpStatus: number | null; latencyMs: number };
+
+export async function probeRingWidget(domain: string, ringId: number): Promise<RingProbe> {
+    const started = performance.now();
     // The widget belongs in the static HTML; scanning past the first 2MB isn't worth it
-    const response = await safeFetch(domain, { method: "GET", timeoutMs: 8000, maxBytes: 2 * 1024 * 1024 });
-    if (!response || !response.ok) return "unreachable";
+    // 8 hops like isUrlReachable: http → https → www → /en/ is a working site, and a null status counts as down
+    const response = await safeFetch(domain, {
+        method: "GET",
+        timeoutMs: 8000,
+        maxRedirects: 8,
+        maxBytes: 2 * 1024 * 1024,
+    });
+    const latencyMs = Math.round(performance.now() - started);
+    const httpStatus = response?.status ?? null;
+    if (!response || !response.ok) return { result: "unreachable", httpStatus, latencyMs };
     const onRingSite = sameSite(new URL(response.url), SITE_URL);
-    return analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite);
+    return {
+        result: analyzeRingWidget(response.body.toString("utf8"), ringId, onRingSite),
+        httpStatus,
+        latencyMs,
+    };
 }

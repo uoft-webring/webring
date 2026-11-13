@@ -1,9 +1,13 @@
 import type { OwnProfile, PublicProfile, RingStatus } from "./types";
 import type { ProfileInput } from "@/lib/validation";
+import { isSiteDown } from "./ring";
 
 /** Columns that may be read for public pages. `email` is deliberately absent. */
 export const PUBLIC_PROFILE_COLUMNS =
     "ring_id, slug, name, tagline, domain, github_url, image_key, is_verified, validated_user_component, tags, graduation_year, program, open_to_work";
+
+/** Embed for server reads (service role only: ring_link_state is closed to anon and authenticated). */
+export const RING_HEALTH_COLUMNS = "ring_link_state(consecutive_down)";
 
 export const OWN_PROFILE_COLUMNS = `id, email, ${PUBLIC_PROFILE_COLUMNS}`;
 
@@ -21,6 +25,8 @@ export type PublicProfileRow = {
     graduation_year: number | null;
     program: string | null;
     open_to_work: boolean | null;
+    /** Present only when the read embeds RING_HEALTH_COLUMNS. */
+    ring_link_state?: { consecutive_down: number } | null;
 };
 
 export type OwnProfileRow = PublicProfileRow & { id: string; email: string | null };
@@ -41,6 +47,11 @@ export function toPublicProfile(row: PublicProfileRow): PublicProfile {
         graduationYear: row.graduation_year,
         program: row.program,
         openToWork: row.open_to_work ?? false,
+        // undefined, not false, when the read didn't embed health: "unknown" must not look like "up"
+        siteDown:
+            row.ring_link_state === undefined
+                ? undefined
+                : isSiteDown(row.ring_link_state?.consecutive_down ?? 0),
     };
 }
 

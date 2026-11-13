@@ -17,10 +17,11 @@ import { AVATAR_UPLOAD_LIMIT, consumeRateLimit, SITE_CHECK_LIMIT } from "@/lib/r
 import { createAvatarUploadUrl, deleteAvatar, isOwnedAvatarKey, MAX_AVATAR_BYTES } from "@/lib/s3";
 import { createAdminClient, createClient } from "@/lib/supabase/server";
 import { pageContentSchema, profileInputSchema, type PageContent } from "@/lib/validation";
-import { recordRingCheck } from "@/lib/profiles/ring-link-state";
+import { isSiteDown } from "@/lib/profiles/ring";
+import { getRingLinkState, recordRingCheck } from "@/lib/profiles/ring-link-state";
 import { ringCheckMessage, statusAfterCheck } from "@/lib/ring-link";
 import {
-    checkRingWidget,
+    probeRingWidget,
     hasDomainOwnershipProof,
     isUrlReachable,
     type RingWidgetResult,
@@ -149,14 +150,31 @@ export async function checkRingLink(): Promise<Result<RingLinkCheck>> {
     const { data: profile, error: profileError } = await currentProfile();
     if (profileError !== null) return fail(profileError);
     if (!profile.domain) return fail("Add your portfolio link before joining the ring.");
-    if (profile.ringStatus === "connected") {
+    const wasDown = isSiteDown((await getRingLinkState(profile.id))?.consecutiveDown ?? 0);
+    // A connected member only needs a check when their site is out of the ring for being down
+    if (profile.ringStatus === "connected" && !wasDown) {
         return ok({ status: "connected", result: "found", message: "Your site is already linked." });
     }
     if (!(await consumeRateLimit(SITE_CHECK_LIMIT, profile.id))) return fail(TOO_MANY_SITE_CHECKS);
 
-    const result = await checkRingWidget(profile.domain, profile.ringId);
+    const probe = await probeRingWidget(profile.domain, profile.ringId);
+    const { result } = probe;
+    const state = await recordRingCheck(profile.id, result, probe);
+    // Back up (or newly down): / and /plain read health through the profiles cache
+    if (state && isSiteDown(state.consecutiveDown) !== wasDown) updateTag(PROFILES_TAG);
+
+    if (profile.ringStatus === "connected") {
+        if (!state) return fail("Could not save the check. Please try again.");
+        // A click-confirmed widget can work without appearing in the fetched HTML.
+        return ok({
+            status: "connected",
+            result,
+            message: state.consecutiveDown === 0
+                ? "Your site is back up. You're in the ring again."
+                : ringCheckMessage("unreachable", profile.ringId),
+        });
+    }
     const status = statusAfterCheck(result, profile.ringStatus);
-    await recordRingCheck(profile.id, result);
 
     if (status !== profile.ringStatus) {
         // Matching the checked domain stops a concurrent domain change from inheriting this result

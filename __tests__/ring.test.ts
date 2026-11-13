@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findRingDestination, ringMembers } from "@/lib/profiles/ring";
+import { findRingDestination, isSiteDown, linkableMembers, ringMembers } from "@/lib/profiles/ring";
 import type { PublicProfile } from "@/lib/profiles/types";
 
 function member(ringId: number, domain = `https://site${ringId}.dev`): PublicProfile {
@@ -58,6 +58,29 @@ describe("ringMembers", () => {
     it("drops members without a linkable http(s) site", () => {
         const profiles = [member(1), member(2, ""), member(3, "javascript:alert(1)"), member(4, "not a url")];
         expect(ringMembers(profiles).map((profile) => profile.ringId)).toEqual([1]);
+    });
+});
+
+describe("ringMembers: link health", () => {
+    const down = (ringId: number) => ({ ...member(ringId), siteDown: true });
+
+    it("leaves out sites that are down", () => {
+        expect(ringMembers([member(0), down(1), member(2)]).map((m) => m.ringId)).toEqual([0, 2]);
+    });
+
+    it("keeps down sites in linkableMembers, which credits hops, but not in the ring", () => {
+        const profiles = [member(0), down(1), member(2, ""), member(3)];
+        expect(linkableMembers(profiles).map((m) => m.ringId)).toEqual([0, 1, 3]);
+        expect(ringMembers(profiles).map((m) => m.ringId)).toEqual([0, 3]);
+    });
+
+    it("counts a site down from the second down check", () => {
+        expect([0, 1, 2, 9].map(isSiteDown)).toEqual([false, false, true, true]);
+    });
+
+    it("ignores health when over half the ring looks down", () => {
+        expect(ringMembers([member(0), down(1), down(2)]).map((m) => m.ringId)).toEqual([0, 1, 2]);
+        expect(ringMembers([down(0), member(1)]).map((m) => m.ringId)).toEqual([1]);
     });
 });
 
